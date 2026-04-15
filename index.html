@@ -1,0 +1,1925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Eclipse 2026 · Flynn Family · Northern Spain</title>
+
+  <!-- ArcGIS JS API 4.28 (light; we override for eclipse) -->
+  <link id="esri-theme" rel="stylesheet" href="https://js.arcgis.com/4.28/esri/themes/light/main.css"/>
+  <script src="https://js.arcgis.com/4.28/"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Josefin+Sans:wght@300;400;500;600&family=Caveat:wght@500;600;700&family=Fredoka:wght@400;500;600&display=swap" rel="stylesheet"/>
+
+  <style>
+    /* ═══ THEME VARS ═══════════════════════════════════ */
+    body {
+      /* DAY theme (default) — warm parchment / Spanish sun */
+      --bg-1: #FBF2D8;
+      --bg-2: #F2DFB2;
+      --panel: #FFF8E4;
+      --panel-2: #F7E7C0;
+      --card: #FFFFFF;
+      --text: #2E1F14;
+      --text-hi: #1A1008;
+      --muted: #8F6F4D;
+      --border: rgba(200,85,61,0.28);
+      --border-hi: rgba(200,85,61,0.6);
+      --terra: #C8553D;
+      --sangria: #A8283A;
+      --saffron: #E8A13A;
+      --gold: #C8902A;
+      --gold-hi: #E8B93A;
+      --azulejo: #2E5B7E;
+      --azul-hi: #5590B5;
+      --olive: #6F8233;
+      --sand: #EFE0C3;
+      --corona: #E89B16;
+      --corona-hi: #FFD27A;
+      --umbra: #07060A;
+      --polaroid: #FFFDF4;
+      --shadow-sm: 0 2px 6px rgba(90,40,10,0.12);
+      --shadow-md: 0 6px 18px rgba(90,40,10,0.18);
+      --shadow-lg: 0 14px 32px rgba(90,40,10,0.22);
+      transition: background-color 0.7s ease, color 0.7s ease;
+    }
+
+    body[data-theme="eclipse"] {
+      --bg-1: #0A0711;
+      --bg-2: #14081E;
+      --panel: #14101A;
+      --panel-2: #1C1624;
+      --card: #221A2A;
+      --text: #F2E8D4;
+      --text-hi: #FFF1C7;
+      --muted: #9C8A72;
+      --border: rgba(255,210,122,0.25);
+      --border-hi: rgba(255,210,122,0.6);
+      --terra: #D4684E;
+      --sangria: #C03A4A;
+      --saffron: #FFC863;
+      --gold: #FFD27A;
+      --gold-hi: #FFE9B8;
+      --corona: #FFC04A;
+      --corona-hi: #FFFBE0;
+      --polaroid: #E8DCC0;
+      --shadow-sm: 0 2px 6px rgba(0,0,0,0.5);
+      --shadow-md: 0 6px 18px rgba(0,0,0,0.6);
+      --shadow-lg: 0 14px 32px rgba(0,0,0,0.7);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+
+    body {
+      font-family: 'Josefin Sans', sans-serif;
+      background:
+        radial-gradient(1200px 700px at 85% -10%, rgba(200,85,61,0.18), transparent 60%),
+        radial-gradient(900px 600px at -10% 110%, rgba(46,91,126,0.14), transparent 55%),
+        linear-gradient(180deg, var(--bg-1), var(--bg-2));
+      color: var(--text);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    body[data-theme="eclipse"] {
+      background:
+        radial-gradient(900px 600px at 50% 30%, rgba(255,210,122,0.13), transparent 65%),
+        radial-gradient(1400px 900px at 70% 110%, rgba(40,18,60,0.5), transparent 60%),
+        linear-gradient(180deg, var(--bg-1), var(--bg-2));
+    }
+
+    /* subtle tile-dot texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 1px 1px, rgba(200,85,61,0.06) 1px, transparent 1.5px);
+      background-size: 28px 28px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body[data-theme="eclipse"]::before {
+      background-image:
+        radial-gradient(circle at 1px 1px, rgba(255,210,122,0.05) 1px, transparent 1.5px);
+    }
+
+    /* ═══ HEADER ═══════════════════════════════════════ */
+    header {
+      background:
+        linear-gradient(90deg, rgba(200,85,61,0.10) 0%, rgba(232,161,58,0.05) 40%, rgba(46,91,126,0.08) 100%),
+        linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+      border-bottom: 2px solid var(--terra);
+      padding: 0 1.75rem;
+      height: 74px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 10;
+      box-shadow: var(--shadow-md);
+    }
+    body[data-theme="eclipse"] header {
+      border-bottom-color: var(--corona);
+      box-shadow: 0 2px 30px rgba(255,192,74,0.18), var(--shadow-md);
+    }
+
+    /* little tile accent row on header */
+    header::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; bottom: -2px;
+      height: 2px;
+      background: repeating-linear-gradient(90deg,
+        var(--terra) 0 12px,
+        var(--saffron) 12px 24px,
+        var(--azulejo) 24px 36px);
+      opacity: 0.5;
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .header-flag {
+      width: 28px; height: 20px;
+      border-radius: 2px;
+      overflow: hidden;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.2), 0 2px 6px rgba(0,0,0,0.2);
+      background: linear-gradient(to bottom,
+          #C8102E 0%, #C8102E 25%,
+          #FABD00 25%, #FABD00 75%,
+          #C8102E 75%, #C8102E 100%);
+      flex-shrink: 0;
+    }
+
+    .header-title h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 1.75rem;
+      letter-spacing: 0.01em;
+      color: var(--text-hi);
+      line-height: 1;
+    }
+    .header-title h1 em {
+      font-style: italic;
+      font-weight: 400;
+      color: var(--terra);
+    }
+    body[data-theme="eclipse"] .header-title h1 em { color: var(--corona-hi); }
+
+    .subline {
+      font-family: 'Caveat', cursive;
+      font-size: 1.2rem;
+      color: var(--sangria);
+      letter-spacing: 0.01em;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    body[data-theme="eclipse"] .subline { color: var(--corona-hi); }
+
+    .sun-icon {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #FFE58A 0%, #F4A628 70%, #D4891E 100%);
+      box-shadow:
+        0 0 0 1.5px #D4891E,
+        0 0 12px 2px rgba(244,166,40,0.6);
+      position: relative;
+    }
+    .sun-icon::after {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 1.5px dashed rgba(244,166,40,0.55);
+      animation: spin 16s linear infinite;
+    }
+    body[data-theme="eclipse"] .sun-icon {
+      background: #050408;
+      box-shadow:
+        0 0 0 1.5px var(--corona),
+        0 0 18px 4px rgba(255,210,122,0.7),
+        0 0 32px 10px rgba(255,210,122,0.3);
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .header-meta {
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    .badge {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 0.38rem 0.75rem;
+      border: 1.5px solid var(--border);
+      color: var(--muted);
+      border-radius: 100px;
+      background: var(--card);
+      white-space: nowrap;
+      box-shadow: var(--shadow-sm);
+    }
+    .badge.active {
+      border-color: var(--terra);
+      color: var(--terra);
+      background: rgba(200,85,61,0.08);
+    }
+    .badge.countdown {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      text-transform: none;
+      padding: 0.3rem 0.9rem;
+      border-color: var(--sangria);
+      color: var(--sangria);
+      background: linear-gradient(90deg, rgba(168,40,58,0.08), rgba(232,161,58,0.08));
+    }
+    .badge.countdown b {
+      font-weight: 700;
+      color: var(--sangria);
+      margin-right: 0.2rem;
+    }
+    .badge.eclipse {
+      border-color: var(--corona);
+      color: #6a4400;
+      background:
+        radial-gradient(circle at 20% 50%, rgba(255,210,122,0.5), rgba(0,0,0,0) 60%),
+        rgba(255,245,210,0.8);
+      box-shadow: 0 0 0 1px rgba(255,192,74,0.35), 0 0 18px rgba(255,192,74,0.35);
+    }
+    .badge.eclipse b { color: var(--sangria); }
+    body[data-theme="eclipse"] .badge.eclipse {
+      background:
+        radial-gradient(circle at 20% 50%, rgba(255,210,122,0.35), rgba(0,0,0,0) 60%),
+        rgba(7,6,10,0.7);
+      color: var(--corona-hi);
+      box-shadow: 0 0 0 1px rgba(255,210,122,0.35), 0 0 22px rgba(255,210,122,0.45);
+    }
+
+    /* ═══ LAYOUT ═══════════════════════════════════════ */
+    .layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ═══ SIDEBAR ══════════════════════════════════════ */
+    .sidebar {
+      width: 380px;
+      flex-shrink: 0;
+      background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: inset -12px 0 24px -18px rgba(90,40,10,0.25);
+    }
+    .sidebar::-webkit-scrollbar { width: 6px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb {
+      background: var(--border); border-radius: 4px;
+    }
+
+    .sidebar-header {
+      padding: 1.1rem 1.4rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--panel);
+      z-index: 3;
+      backdrop-filter: blur(6px);
+    }
+    .sidebar-header .eyebrow {
+      font-size: 0.58rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.35rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .sidebar-header .eyebrow::before,
+    .sidebar-header .eyebrow::after {
+      content: '';
+      height: 1px;
+      background: var(--border);
+    }
+    .sidebar-header .eyebrow::before { width: 12px; }
+    .sidebar-header .eyebrow::after { flex: 1; }
+
+    .sidebar-header h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 500;
+      font-size: 1.4rem;
+      color: var(--text-hi);
+      line-height: 1.2;
+      font-style: italic;
+    }
+    .sidebar-header .handwritten {
+      font-family: 'Caveat', cursive;
+      font-size: 1.05rem;
+      color: var(--terra);
+      margin-top: 0.3rem;
+    }
+
+    /* ── CAST / POLAROIDS ── */
+    .cast {
+      padding: 0.95rem 1.25rem 0.8rem;
+      border-bottom: 1px solid var(--border);
+      background:
+        repeating-linear-gradient(45deg,
+          transparent 0 10px,
+          rgba(200,85,61,0.015) 10px 20px);
+    }
+    .cast-eyebrow {
+      font-size: 0.58rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.6rem;
+      text-align: center;
+    }
+    .polaroids {
+      display: flex;
+      justify-content: center;
+      gap: 0.25rem;
+    }
+    .polaroid {
+      --tilt: 0deg;
+      background: var(--polaroid);
+      padding: 5px 5px 18px;
+      border-radius: 1px;
+      box-shadow:
+        0 2px 4px rgba(0,0,0,0.15),
+        0 6px 16px rgba(0,0,0,0.18),
+        inset 0 0 0 1px rgba(0,0,0,0.04);
+      transform: rotate(var(--tilt));
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s, z-index 0s 0.25s;
+      position: relative;
+      flex: 1 1 0;
+      max-width: 100px;
+      cursor: pointer;
+    }
+    .polaroid:hover {
+      transform: rotate(0deg) translateY(-4px) scale(1.1);
+      box-shadow:
+        0 6px 10px rgba(0,0,0,0.2),
+        0 18px 34px rgba(0,0,0,0.28),
+        0 0 0 1px rgba(200,85,61,0.35);
+      z-index: 3;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s, z-index 0s;
+    }
+    .polaroid-img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background-size: cover;
+      background-position: center;
+      background-color: #2A2018;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
+    }
+    .polaroid figcaption {
+      font-family: 'Caveat', cursive;
+      font-size: 0.9rem;
+      color: #3A2A1E;
+      text-align: center;
+      margin-top: 3px;
+      line-height: 1;
+    }
+    .polaroid:nth-child(2)::before {
+      content: '';
+      position: absolute;
+      top: -8px; left: 50%;
+      transform: translateX(-50%) rotate(-3deg);
+      width: 34px; height: 14px;
+      background: rgba(239,224,195,0.6);
+      border-left: 1px dashed rgba(0,0,0,0.08);
+      border-right: 1px dashed rgba(0,0,0,0.08);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      pointer-events: none;
+    }
+    .cast-note {
+      font-family: 'Caveat', cursive;
+      font-size: 1rem;
+      color: var(--terra);
+      text-align: center;
+      margin-top: 0.45rem;
+    }
+
+    /* ── TIMELINE ── */
+    .timeline { padding: 0.4rem 0 1rem; flex: 1; }
+
+    .stop {
+      display: flex;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .stop:hover { background: rgba(232,161,58,0.08); }
+    .stop.active {
+      background: linear-gradient(90deg, rgba(200,85,61,0.13), rgba(232,161,58,0.08) 60%, transparent);
+    }
+    body[data-theme="eclipse"] .stop.active {
+      background: linear-gradient(90deg, rgba(255,192,74,0.14), rgba(168,40,58,0.08) 60%, transparent);
+    }
+
+    .stop-line {
+      width: 46px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 1.35rem;
+    }
+
+    .stop-num {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: var(--card);
+      border: 2px solid var(--terra);
+      color: var(--terra);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+      transition: all 0.25s;
+      box-shadow: 0 0 0 3px var(--panel), var(--shadow-sm);
+    }
+    .stop:hover .stop-num,
+    .stop.active .stop-num {
+      background: var(--terra);
+      color: #FFFDF4;
+      transform: scale(1.12) rotate(-4deg);
+      box-shadow: 0 0 0 3px var(--panel), 0 0 14px rgba(200,85,61,0.5);
+    }
+    .stop[data-kind="return"] .stop-num {
+      border-color: var(--azulejo);
+      color: var(--azulejo);
+    }
+    .stop[data-kind="return"]:hover .stop-num,
+    .stop[data-kind="return"].active .stop-num {
+      background: var(--azulejo);
+      color: #FFFDF4;
+      box-shadow: 0 0 0 3px var(--panel), 0 0 14px rgba(46,91,126,0.6);
+    }
+
+    .stop-connector {
+      width: 2px;
+      flex: 1;
+      background: repeating-linear-gradient(180deg,
+        var(--border) 0 6px,
+        transparent 6px 10px);
+      margin-top: 4px;
+      min-height: 18px;
+    }
+
+    .stop-content {
+      padding: 1.1rem 1.25rem 1.1rem 0.35rem;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .stop-dates {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.2rem;
+    }
+
+    .stop-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--text-hi);
+      margin-bottom: 0.15rem;
+      line-height: 1.15;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    .stop-name .flag-dot { font-size: 1rem; line-height: 1; }
+
+    .skyline {
+      height: 18px;
+      width: auto;
+      opacity: 0.75;
+      flex-shrink: 0;
+      color: var(--azulejo);
+      margin-left: auto;
+    }
+    body[data-theme="eclipse"] .skyline { color: var(--corona-hi); }
+
+    .stop-sub {
+      font-size: 0.68rem;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      margin-bottom: 0.55rem;
+      font-style: italic;
+    }
+
+    .stop-tags {
+      display: flex; flex-wrap: wrap; gap: 0.3rem;
+      margin-bottom: 0.55rem;
+    }
+    .tag {
+      font-size: 0.54rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.55rem;
+      border-radius: 100px;
+      white-space: nowrap;
+    }
+    .tag-booked  { background: rgba(111,130,51,0.15); color: #556B20; border: 1px solid rgba(111,130,51,0.4); }
+    .tag-drive   { background: rgba(232,161,58,0.14); color: #7A5010; border: 1px solid rgba(232,161,58,0.45); }
+    .tag-nights  { background: rgba(200,85,61,0.06); color: var(--muted); border: 1px solid var(--border); }
+    .tag-fly     { background: rgba(46,91,126,0.14); color: #1E4868; border: 1px solid rgba(46,91,126,0.4); }
+    .tag-eclipse {
+      background: radial-gradient(circle at 20% 50%, rgba(255,192,74,0.4), rgba(0,0,0,0) 70%), rgba(255,245,210,0.8);
+      color: #6A4400;
+      border: 1px solid var(--corona);
+      box-shadow: 0 0 12px rgba(255,192,74,0.35);
+    }
+    body[data-theme="eclipse"] .tag-booked  { background: rgba(176,200,120,0.15); color: #B8D080; border-color: rgba(176,200,120,0.4); }
+    body[data-theme="eclipse"] .tag-drive   { background: rgba(255,210,122,0.15); color: var(--gold-hi); border-color: rgba(255,210,122,0.45); }
+    body[data-theme="eclipse"] .tag-fly     { background: rgba(122,174,191,0.18); color: #9FD0E0; border-color: rgba(122,174,191,0.45); }
+    body[data-theme="eclipse"] .tag-eclipse {
+      background: radial-gradient(circle at 20% 50%, rgba(255,210,122,0.35), rgba(0,0,0,0) 60%), rgba(7,6,10,0.7);
+      color: var(--corona-hi);
+    }
+
+    .stop-highlights {
+      display: flex; flex-wrap: wrap;
+      gap: 0.35rem 0.7rem;
+      margin-bottom: 0.65rem;
+    }
+    .highlight {
+      font-size: 0.7rem;
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .highlight .h-ico { font-size: 0.9rem; line-height: 1; }
+
+    .stop-links { display: flex; flex-direction: column; gap: 0.25rem; margin-top: 0.2rem; }
+    .stop-link {
+      font-size: 0.64rem;
+      letter-spacing: 0.03em;
+      color: var(--gold);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: color 0.15s;
+    }
+    .stop-link:hover { color: var(--terra); }
+    .stop-link svg {
+      width: 10px; height: 10px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      flex-shrink: 0;
+    }
+
+    /* ═══ MAP ══════════════════════════════════════════ */
+    #map-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    #viewDiv { width: 100%; height: 100%; }
+
+    /* vignette + warm tint over map */
+    #map-container::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse at center, transparent 55%, var(--map-vignette, rgba(200,85,61,0.12)) 100%);
+      z-index: 3;
+      transition: background 0.7s ease;
+    }
+    body[data-theme="eclipse"] #map-container::after {
+      background:
+        radial-gradient(ellipse at 50% 40%, rgba(255,210,122,0.10) 0%, transparent 40%),
+        radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%);
+    }
+
+    /* compass corner */
+    .map-corner {
+      position: absolute;
+      top: 0.8rem;
+      left: 0.8rem;
+      z-index: 5;
+      font-family: 'Caveat', cursive;
+      color: var(--terra);
+      font-size: 1.05rem;
+      pointer-events: none;
+      background: var(--panel);
+      padding: 0.3rem 0.65rem;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+    body[data-theme="eclipse"] .map-corner {
+      color: var(--corona-hi);
+      background: rgba(20,16,26,0.8);
+      border-color: var(--border-hi);
+    }
+    .map-corner .rose {
+      display: inline-block;
+      margin-right: 0.25rem;
+      color: var(--gold);
+      font-size: 1.15rem;
+      transform: translateY(2px);
+    }
+
+    /* Postcard trip summary */
+    .map-overlay {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: var(--panel);
+      backdrop-filter: blur(8px);
+      border: 1.5px solid var(--border-hi);
+      border-radius: 4px;
+      padding: 0.85rem 1rem 0.95rem;
+      z-index: 5;
+      min-width: 200px;
+      box-shadow: var(--shadow-lg);
+      transition: background 0.7s ease, border-color 0.7s ease;
+    }
+    .map-overlay::before {
+      content: '';
+      position: absolute;
+      inset: 4px;
+      border: 1px dashed var(--border);
+      border-radius: 2px;
+      pointer-events: none;
+    }
+    .map-overlay h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: var(--text-hi);
+      margin-bottom: 0.15rem;
+    }
+    .map-overlay .postmark {
+      font-family: 'Caveat', cursive;
+      font-size: 0.9rem;
+      color: var(--terra);
+      margin-bottom: 0.55rem;
+    }
+    body[data-theme="eclipse"] .map-overlay .postmark { color: var(--corona-hi); }
+
+    .stat-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      margin-bottom: 0.22rem;
+    }
+    .stat-label {
+      font-size: 0.6rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .stat-val {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.05rem;
+      color: var(--text-hi);
+      font-weight: 600;
+    }
+    .overlay-divider {
+      border: none;
+      border-top: 1px dashed var(--border);
+      margin: 0.55rem 0;
+    }
+
+    .legend-entry { display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.22rem; }
+    .legend-dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      border: 1.5px solid var(--gold);
+      flex-shrink: 0;
+    }
+    .legend-line {
+      width: 20px; height: 2px;
+      background: repeating-linear-gradient(90deg, var(--gold), var(--gold) 4px, transparent 4px, transparent 7px);
+      flex-shrink: 0;
+    }
+    .legend-plane {
+      width: 20px; height: 2px;
+      background: repeating-linear-gradient(90deg, var(--azulejo), var(--azulejo) 2px, transparent 2px, transparent 5px);
+      flex-shrink: 0;
+    }
+    .legend-label { font-size: 0.6rem; color: var(--muted); letter-spacing: 0.03em; }
+
+    /* popup overrides */
+    .esri-popup__header-title {
+      font-family: 'Cormorant Garamond', serif !important;
+      font-size: 1.15rem !important;
+      font-style: italic;
+    }
+
+    /* Esri UI tuning */
+    .esri-ui-top-right { margin-top: 0.5rem !important; margin-right: 14.5rem !important; }
+
+    /* ═══ DAY SLIDER ═══════════════════════════════════ */
+    .day-slider {
+      position: absolute;
+      left: 1.25rem;
+      right: 1.25rem;
+      bottom: 1rem;
+      z-index: 6;
+      background: var(--panel);
+      backdrop-filter: blur(10px);
+      border: 1.5px solid var(--border-hi);
+      border-radius: 6px;
+      padding: 0.75rem 1rem 0.6rem;
+      box-shadow: var(--shadow-lg);
+      transition: background 0.7s ease, border-color 0.7s ease;
+    }
+    body[data-theme="eclipse"] .day-slider {
+      box-shadow: 0 0 30px rgba(255,210,122,0.18), var(--shadow-lg);
+    }
+
+    .day-slider-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .day-info {
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .day-chip {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: #FFFDF4;
+      background: var(--terra);
+      padding: 0.28rem 0.65rem;
+      border-radius: 100px;
+      letter-spacing: 0.05em;
+    }
+    body[data-theme="eclipse"] .day-chip {
+      background: var(--corona);
+      color: #3A1F00;
+    }
+    .day-date {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: var(--text-hi);
+    }
+    .day-desc {
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.03em;
+    }
+    .day-emoji { font-size: 1.1rem; line-height: 1; }
+
+    .day-controls { display: flex; gap: 0.3rem; }
+    .day-btn {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      color: var(--terra);
+      cursor: pointer;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      font-family: 'Fredoka', sans-serif;
+    }
+    .day-btn:hover {
+      background: var(--terra);
+      color: #FFFDF4;
+      border-color: var(--terra);
+      transform: scale(1.08);
+    }
+    .day-btn.playing {
+      background: var(--saffron);
+      color: #FFFDF4;
+      border-color: var(--saffron);
+    }
+
+    .day-range-wrap {
+      position: relative;
+      height: 30px;
+      display: flex;
+      align-items: center;
+    }
+
+    .day-range {
+      width: 100%;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 8px;
+      background: linear-gradient(90deg,
+        var(--azulejo) 0%, var(--azul-hi) 7%,
+        var(--saffron) 14%, var(--saffron) 28%,
+        #0A0711 30%, #2A1A4A 35%, #0A0711 40%,
+        var(--terra) 45%, var(--terra) 85%,
+        var(--azulejo) 92%, var(--azulejo) 100%);
+      border-radius: 4px;
+      outline: none;
+      cursor: pointer;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.25);
+    }
+    .day-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #FFE58A 0%, #E8A13A 70%, #A8283A 100%);
+      border: 2px solid #FFFDF4;
+      cursor: grab;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.2);
+      transition: transform 0.15s;
+    }
+    .day-range::-webkit-slider-thumb:hover { transform: scale(1.15); }
+    .day-range::-moz-range-thumb {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #FFE58A 0%, #E8A13A 70%, #A8283A 100%);
+      border: 2px solid #FFFDF4;
+      cursor: grab;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .day-ticks {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.2rem;
+      padding: 0 10px;
+      font-size: 0.55rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+    .day-ticks span { flex: 1; text-align: center; position: relative; }
+    .day-ticks .eclipse-tick {
+      color: var(--sangria);
+      font-weight: 700;
+    }
+    body[data-theme="eclipse"] .day-ticks .eclipse-tick { color: var(--corona-hi); }
+
+    /* Animated vehicle overlay layer (DOM-based, aligned to map) */
+    .vehicle-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 4;
+      overflow: hidden;
+    }
+    .vehicle {
+      position: absolute;
+      transform-origin: 50% 50%;
+      transition: opacity 0.4s ease;
+      font-size: 22px;
+      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.35));
+      will-change: left, top, transform;
+    }
+    .vehicle.hidden { opacity: 0; }
+
+    /* Responsive */
+    @media (max-width: 920px) {
+      .layout { flex-direction: column; }
+      .sidebar { width: 100%; max-height: 42vh; border-right: none; border-bottom: 1px solid var(--border); }
+      #map-container { flex: 1; min-height: 58vh; }
+      .map-overlay { display: none; }
+      .day-slider { left: 0.5rem; right: 0.5rem; bottom: 0.5rem; padding: 0.5rem 0.6rem; }
+      .esri-ui-top-right { margin-right: 0.75rem !important; }
+    }
+  </style>
+</head>
+<body data-theme="day">
+
+<!-- ═══ HEADER ═══════════════════════════════════════════ -->
+<header>
+  <div class="header-title">
+    <div class="header-flag"></div>
+    <h1>Eclipse 2026 <em>· Flynns in España</em></h1>
+    <span class="subline"><span class="sun-icon" aria-hidden="true"></span> ¡chasing totality!</span>
+  </div>
+  <div class="header-meta">
+    <div class="badge countdown eclipse" id="countdown"><b>T-???</b> to totality</div>
+    <div class="badge active">5 Stops</div>
+    <div class="badge">13 Nights</div>
+    <div class="badge">~480 mi</div>
+  </div>
+</header>
+
+<!-- ═══ MAIN LAYOUT ══════════════════════════════════════ -->
+<div class="layout">
+
+  <!-- ── SIDEBAR ───────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <p class="eyebrow">Total Solar Eclipse · Aug 12, 2026</p>
+      <h2>The Green Coast &amp; the Path of Totality</h2>
+      <p class="handwritten">Basque · Cantabria · Galicia · Asturias · Picos</p>
+    </div>
+
+    <!-- Cast of Characters -->
+    <div class="cast">
+      <p class="cast-eyebrow">The Crew</p>
+      <div class="polaroids">
+        <figure class="polaroid" style="--tilt:-4deg">
+          <div class="polaroid-img" style="background-image:url('flynn_fam.JPG');background-position:center 30%"></div>
+          <figcaption>the flynns</figcaption>
+        </figure>
+        <figure class="polaroid" style="--tilt:3deg">
+          <div class="polaroid-img" style="background-image:url('smith_fam.jpg')"></div>
+          <figcaption>the smiths</figcaption>
+        </figure>
+        <figure class="polaroid" style="--tilt:-2deg">
+          <div class="polaroid-img" style="background-image:url('nanu.jpg')"></div>
+          <figcaption>nanu ♡</figcaption>
+        </figure>
+      </div>
+      <p class="cast-note">three families · one eclipse</p>
+    </div>
+
+    <!-- Timeline (cartoon skylines inlined) -->
+    <div class="timeline">
+
+      <!-- STOP 1: BILBAO ARRIVAL -->
+      <div class="stop active" data-stop="0" onclick="focusStop(0)">
+        <div class="stop-line"><div class="stop-num">1</div><div class="stop-connector"></div></div>
+        <div class="stop-content">
+          <div class="stop-dates">Aug 8 · Sat</div>
+          <div class="stop-name">
+            <span class="flag-dot">🇪🇸</span> Bilbao
+            <!-- Guggenheim-ish skyline -->
+            <svg class="skyline" viewBox="0 0 58 18" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round">
+              <path d="M1 17 Q5 11 10 13 Q15 6 22 11 Q27 5 33 10 Q40 7 46 12 Q52 8 57 13 L57 17 Z" fill="currentColor" fill-opacity="0.18"/>
+              <path d="M18 13 L18 7 M38 12 L38 6"/>
+              <circle cx="52" cy="5" r="1.3" fill="currentColor"/>
+            </svg>
+          </div>
+          <div class="stop-sub">Basque Country · BIO arrival</div>
+          <div class="stop-tags">
+            <span class="tag tag-fly">✈ Arrival</span>
+            <span class="tag tag-nights">1 night</span>
+            <span class="tag tag-booked">✓ Booked</span>
+          </div>
+          <div class="stop-highlights">
+            <span class="highlight"><span class="h-ico">🏛️</span>Guggenheim</span>
+            <span class="highlight"><span class="h-ico">🍷</span>Pintxos crawl</span>
+            <span class="highlight"><span class="h-ico">🌉</span>Casco Viejo</span>
+          </div>
+          <div class="stop-links">
+            <a class="stop-link" href="https://www.batimontsuites.com/" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+              Batimontsuites · night of 8/8
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- STOP 2: HORNEDO -->
+      <div class="stop" data-stop="1" onclick="focusStop(1)">
+        <div class="stop-line"><div class="stop-num">2</div><div class="stop-connector"></div></div>
+        <div class="stop-content">
+          <div class="stop-dates">Aug 9 – 13 · 4 nights</div>
+          <div class="stop-name">
+            <span class="flag-dot">🌊</span> Hornedo
+            <!-- Beach + sun + palm -->
+            <svg class="skyline" viewBox="0 0 58 18" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="8" cy="6" r="2.5" fill="currentColor" fill-opacity="0.35"/>
+              <path d="M26 15 Q28 10 30 15 M30 15 Q32 8 34 15" />
+              <path d="M42 15 L42 8 M42 8 Q39 6 37 8 M42 8 Q45 6 47 8" />
+              <path d="M0 15 Q10 13 20 15 T40 15 T58 15" fill="currentColor" fill-opacity="0.18"/>
+            </svg>
+          </div>
+          <div class="stop-sub">Cantabria · inside the path of totality</div>
+          <div class="stop-tags">
+            <span class="tag tag-drive">↗ 1 hr</span>
+            <span class="tag tag-nights">4 nights</span>
+            <span class="tag tag-eclipse">☀ Eclipse Aug 12</span>
+            <span class="tag tag-booked">✓ Booked</span>
+          </div>
+          <div class="stop-highlights">
+            <span class="highlight"><span class="h-ico">🌒</span>Totality ~20:30 local</span>
+            <span class="highlight"><span class="h-ico">🏖️</span>Beaches</span>
+            <span class="highlight"><span class="h-ico">🏰</span>Santillana del Mar</span>
+            <span class="highlight"><span class="h-ico">🎨</span>Altamira caves</span>
+          </div>
+          <div class="stop-links">
+            <a class="stop-link" href="https://www.airbnb.com/l/83UxgIHH" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+              Airbnb · 83UxgIHH
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- STOP 3: SANTIAGO -->
+      <div class="stop" data-stop="2" onclick="focusStop(2)">
+        <div class="stop-line"><div class="stop-num">3</div><div class="stop-connector"></div></div>
+        <div class="stop-content">
+          <div class="stop-dates">Aug 13 – 15 · 2 nights</div>
+          <div class="stop-name">
+            <span class="flag-dot">⛪</span> Santiago
+            <!-- Cathedral twin-tower silhouette -->
+            <svg class="skyline" viewBox="0 0 58 18" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round">
+              <path d="M4 17 L4 9 L6 7 L8 9 L8 17 Z" fill="currentColor" fill-opacity="0.15"/>
+              <path d="M6 7 L6 4"/>
+              <path d="M18 17 L18 6 L20 3 L22 6 L22 17 Z" fill="currentColor" fill-opacity="0.2"/>
+              <path d="M20 3 L20 1.5"/>
+              <path d="M32 17 L32 6 L34 3 L36 6 L36 17 Z" fill="currentColor" fill-opacity="0.2"/>
+              <path d="M34 3 L34 1.5"/>
+              <path d="M46 17 L46 9 L48 7 L50 9 L50 17 Z" fill="currentColor" fill-opacity="0.15"/>
+              <circle cx="27" cy="9" r="2.5" fill="currentColor" fill-opacity="0.3"/>
+              <path d="M24.5 9 L29.5 9 M27 6.5 L27 11.5"/>
+            </svg>
+          </div>
+          <div class="stop-sub">Galicia · ~5 hr drive</div>
+          <div class="stop-tags">
+            <span class="tag tag-drive">↗ 5 hrs</span>
+            <span class="tag tag-nights">2 nights</span>
+            <span class="tag tag-booked">✓ Booked</span>
+          </div>
+          <div class="stop-highlights">
+            <span class="highlight"><span class="h-ico">⛪</span>The Cathedral</span>
+            <span class="highlight"><span class="h-ico">🥟</span>Empanadas</span>
+            <span class="highlight"><span class="h-ico">🚶</span>Camino finish</span>
+          </div>
+          <div class="stop-links">
+            <a class="stop-link" href="https://www.airbnb.com/l/4yXzSmio" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+              Airbnb · 4yXzSmio
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- STOP 4: OVIEDO / GIJÓN -->
+      <div class="stop" data-stop="3" onclick="focusStop(3)">
+        <div class="stop-line"><div class="stop-num">4</div><div class="stop-connector"></div></div>
+        <div class="stop-content">
+          <div class="stop-dates">Aug 15 – 17 · 2 nights</div>
+          <div class="stop-name">
+            <span class="flag-dot">🍎</span> Oviedo / Gijón
+            <!-- apple + barrel + church -->
+            <svg class="skyline" viewBox="0 0 58 18" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round">
+              <circle cx="6" cy="10" r="3" fill="currentColor" fill-opacity="0.25"/>
+              <path d="M6 7 L6 5 M6 5 Q7 4 8 5"/>
+              <rect x="18" y="9" width="9" height="7" rx="1" fill="currentColor" fill-opacity="0.18"/>
+              <path d="M18 12 L27 12 M22.5 9 L22.5 16"/>
+              <path d="M36 16 L36 7 L39 4 L42 7 L42 16 Z" fill="currentColor" fill-opacity="0.2"/>
+              <path d="M39 4 L39 2"/>
+              <path d="M48 16 L48 10 L54 10 L54 16 Z" fill="currentColor" fill-opacity="0.15"/>
+            </svg>
+          </div>
+          <div class="stop-sub">Asturias · ~3 hr drive</div>
+          <div class="stop-tags">
+            <span class="tag tag-drive">↗ 3 hrs</span>
+            <span class="tag tag-nights">2 nights</span>
+            <span class="tag tag-booked">✓ Booked</span>
+          </div>
+          <div class="stop-highlights">
+            <span class="highlight"><span class="h-ico">🍏</span>Sidra country</span>
+            <span class="highlight"><span class="h-ico">🏖️</span>San Lorenzo</span>
+            <span class="highlight"><span class="h-ico">🧀</span>Cabrales</span>
+          </div>
+          <div class="stop-links">
+            <a class="stop-link" href="https://www.airbnb.com/l/ghFqElI3" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+              Airbnb · ghFqElI3
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- STOP 5: POTES -->
+      <div class="stop" data-stop="4" onclick="focusStop(4)">
+        <div class="stop-line"><div class="stop-num">5</div><div class="stop-connector"></div></div>
+        <div class="stop-content">
+          <div class="stop-dates">Aug 17 – 21 · 4 nights</div>
+          <div class="stop-name">
+            <span class="flag-dot">⛰️</span> Potes
+            <!-- Mountain peaks + cable car -->
+            <svg class="skyline" viewBox="0 0 58 18" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round">
+              <path d="M0 17 L12 4 L22 13 L32 2 L44 12 L58 6 L58 17 Z" fill="currentColor" fill-opacity="0.2"/>
+              <path d="M0 17 L12 4 L22 13 L32 2 L44 12 L58 6"/>
+              <path d="M32 2 L32 5"/>
+              <circle cx="32" cy="1.5" r="0.7" fill="currentColor"/>
+              <line x1="18" y1="8" x2="50" y2="4" stroke-width="0.5"/>
+              <rect x="29" y="7" width="4" height="2.5" rx="0.5" fill="currentColor" fill-opacity="0.5"/>
+            </svg>
+          </div>
+          <div class="stop-sub">Picos de Europa · ~2.5 hrs</div>
+          <div class="stop-tags">
+            <span class="tag tag-drive">↗ 2.5 hrs</span>
+            <span class="tag tag-nights">4 nights</span>
+          </div>
+          <div class="stop-highlights">
+            <span class="highlight"><span class="h-ico">🚠</span>Fuente Dé</span>
+            <span class="highlight"><span class="h-ico">🥾</span>Picos hikes</span>
+            <span class="highlight"><span class="h-ico">🏞️</span>Lagos de Covadonga</span>
+          </div>
+          <div class="stop-links">
+            <a class="stop-link" href="https://www.airbnb.com/l/lrYUsLWP" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+              Airbnb · lrYUsLWP
+            </a>
+            <a class="stop-link" href="https://www.airbnb.com/l/eK3HUfJr" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+              Airbnb · eK3HUfJr
+            </a>
+            <a class="stop-link" href="https://www.airbnb.com/l/kzDpxenf" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+              Airbnb · kzDpxenf
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- STOP 6: BILBAO RETURN -->
+      <div class="stop" data-stop="5" data-kind="return" onclick="focusStop(5)">
+        <div class="stop-line"><div class="stop-num">✈</div></div>
+        <div class="stop-content">
+          <div class="stop-dates">Aug 20 eve – 21 am</div>
+          <div class="stop-name">
+            <span class="flag-dot">🛫</span> Bilbao · Departure
+            <svg class="skyline" viewBox="0 0 58 18" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 16 L54 16"/>
+              <path d="M30 16 Q32 8 42 7 L50 6 L52 5 L46 9 L34 11 Z" fill="currentColor" fill-opacity="0.3"/>
+              <path d="M40 10 L38 13 M43 10 L42 13"/>
+            </svg>
+          </div>
+          <div class="stop-sub">~2.5 hr drive · morning flight home</div>
+          <div class="stop-tags">
+            <span class="tag tag-drive">↗ 2.5 hrs</span>
+            <span class="tag tag-fly">✈ Morning flight</span>
+            <span class="tag tag-booked">✓ Booked</span>
+          </div>
+          <div class="stop-links">
+            <a class="stop-link" href="https://www.ihg.com/hotels/us/en/pay/confirmation?confirmationNumber=24950788" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+              IHG · conf. #24950788
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- ── MAP ───────────────────── -->
+  <div id="map-container">
+    <div id="viewDiv"></div>
+
+    <!-- Vehicle animation overlay -->
+    <div class="vehicle-layer">
+      <div class="vehicle hidden" id="car">🚗</div>
+      <div class="vehicle hidden" id="plane">✈️</div>
+    </div>
+
+    <div class="map-corner"><span class="rose">✦</span>a la costa verde</div>
+
+    <!-- Postcard overlay -->
+    <div class="map-overlay">
+      <h4>Trip at a Glance</h4>
+      <div class="postmark">~ ¡buen viaje! ~</div>
+      <div class="stat-row"><span class="stat-label">Duration</span><span class="stat-val">14 days</span></div>
+      <div class="stat-row"><span class="stat-label">Eclipse</span><span class="stat-val" style="color:var(--sangria);">Aug 12</span></div>
+      <div class="stat-row"><span class="stat-label">Stops</span><span class="stat-val">5 cities</span></div>
+      <div class="stat-row"><span class="stat-label">Drive total</span><span class="stat-val">~14 hrs</span></div>
+      <hr class="overlay-divider"/>
+      <div class="legend-entry"><div class="legend-dot" style="background:var(--terra)"></div><span class="legend-label">Accommodation</span></div>
+      <div class="legend-entry"><div class="legend-dot" style="background:var(--azul-hi);border-color:var(--azulejo)"></div><span class="legend-label">Airport</span></div>
+      <div class="legend-entry"><div class="legend-line"></div><span class="legend-label">Drive route</span></div>
+      <div class="legend-entry"><div class="legend-plane"></div><span class="legend-label">Flight · click for info</span></div>
+      <div class="legend-entry"><div class="legend-dot" style="background:rgba(255,192,74,0.35);border-color:var(--corona);box-shadow:0 0 6px rgba(255,192,74,0.5);"></div><span class="legend-label">Path of totality</span></div>
+    </div>
+
+    <!-- Day slider -->
+    <div class="day-slider">
+      <div class="day-slider-head">
+        <div class="day-info">
+          <span class="day-chip" id="day-chip">Day 1</span>
+          <span class="day-emoji" id="day-emoji">✈</span>
+          <span class="day-date" id="day-date">Sat · Aug 8</span>
+          <span class="day-desc" id="day-desc">Charlotte → Madrid → Bilbao</span>
+        </div>
+        <div class="day-controls">
+          <button class="day-btn" id="day-prev" title="Previous day">‹</button>
+          <button class="day-btn" id="day-play" title="Play">▶</button>
+          <button class="day-btn" id="day-next" title="Next day">›</button>
+        </div>
+      </div>
+      <div class="day-range-wrap">
+        <input type="range" min="1" max="14" value="1" class="day-range" id="day-range" />
+      </div>
+      <div class="day-ticks" id="day-ticks"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ═══ ECLIPSE COUNTDOWN ══════════════════════════════
+  (function() {
+    const eclipse = new Date('2026-08-12T18:30:00Z');
+    const el = document.getElementById('countdown');
+    function tick() {
+      const now = new Date();
+      const msLeft = eclipse - now;
+      const days = Math.ceil(msLeft / (1000*60*60*24));
+      if (days > 1) {
+        el.innerHTML = '<b>T-' + days + '</b> to totality';
+      } else if (days === 1) {
+        el.innerHTML = '<b>T-1</b> · ¡mañana!';
+      } else if (days === 0 && msLeft > 0) {
+        el.innerHTML = '<b>T-' + Math.ceil(msLeft/3600000) + 'h</b> to totality';
+      } else if (msLeft > -3*3600*1000) {
+        el.innerHTML = '<b>☀ Totality</b> happening';
+      } else {
+        el.innerHTML = '<b>Eclipse seen ✓</b>';
+      }
+    }
+    tick();
+    setInterval(tick, 60*1000);
+  })();
+
+  // ═══ DAY DATA ════════════════════════════════════════
+  // stopIdx: 0=Bilbao arrival, 1=Hornedo, 2=Santiago, 3=Oviedo, 4=Potes, 5=Bilbao return
+  const DAYS = [
+    { n:1,  date:"Aug 8",  dow:"Sat", emoji:"✈",  title:"Charlotte → Madrid → Bilbao", mode:"fly-out",  at:0 },
+    { n:2,  date:"Aug 9",  dow:"Sun", emoji:"🚗", title:"Drive to Hornedo",           mode:"drive",    from:0, to:1 },
+    { n:3,  date:"Aug 10", dow:"Mon", emoji:"🏖", title:"Hornedo · beach day",         mode:"stay",     at:1 },
+    { n:4,  date:"Aug 11", dow:"Tue", emoji:"🏰", title:"Altamira & Santillana",       mode:"stay",     at:1 },
+    { n:5,  date:"Aug 12", dow:"Wed", emoji:"🌑", title:"TOTAL SOLAR ECLIPSE",         mode:"eclipse",  at:1 },
+    { n:6,  date:"Aug 13", dow:"Thu", emoji:"🚗", title:"Drive to Santiago",           mode:"drive",    from:1, to:2 },
+    { n:7,  date:"Aug 14", dow:"Fri", emoji:"⛪", title:"Santiago de Compostela",      mode:"stay",     at:2 },
+    { n:8,  date:"Aug 15", dow:"Sat", emoji:"🚗", title:"Drive to Oviedo / Gijón",     mode:"drive",    from:2, to:3 },
+    { n:9,  date:"Aug 16", dow:"Sun", emoji:"🍏", title:"Asturias · sidra country",    mode:"stay",     at:3 },
+    { n:10, date:"Aug 17", dow:"Mon", emoji:"🚗", title:"Drive to Potes",              mode:"drive",    from:3, to:4 },
+    { n:11, date:"Aug 18", dow:"Tue", emoji:"🚠", title:"Fuente Dé · Picos",           mode:"stay",     at:4 },
+    { n:12, date:"Aug 19", dow:"Wed", emoji:"🏞", title:"Lagos de Covadonga",          mode:"stay",     at:4 },
+    { n:13, date:"Aug 20", dow:"Thu", emoji:"🚗", title:"Drive back to Bilbao",        mode:"drive",    from:4, to:5 },
+    { n:14, date:"Aug 21", dow:"Fri", emoji:"🛫", title:"Bilbao → Madrid → Charlotte", mode:"fly-back", at:5 }
+  ];
+
+  // ═══ TICKS ═══════════════════════════════════════════
+  (function() {
+    const wrap = document.getElementById('day-ticks');
+    DAYS.forEach(d => {
+      const el = document.createElement('span');
+      el.textContent = d.date.replace('Aug ', '');
+      if (d.mode === 'eclipse') el.className = 'eclipse-tick';
+      wrap.appendChild(el);
+    });
+  })();
+</script>
+
+<script>
+require([
+  "esri/Map",
+  "esri/views/MapView",
+  "esri/Graphic",
+  "esri/layers/GraphicsLayer",
+  "esri/geometry/Polyline",
+  "esri/geometry/Polygon",
+  "esri/geometry/Point",
+  "esri/symbols/SimpleMarkerSymbol",
+  "esri/symbols/SimpleLineSymbol",
+  "esri/symbols/SimpleFillSymbol",
+  "esri/symbols/TextSymbol",
+  "esri/PopupTemplate"
+], function(Map, MapView, Graphic, GraphicsLayer, Polyline, Polygon, Point,
+            SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, TextSymbol, PopupTemplate) {
+
+  // ── PALETTE (matches day theme defaults) ──
+  const TERRA    = [200, 85, 61];
+  const SANGRIA  = [168, 40, 58];
+  const SAFFRON  = [232, 161, 58];
+  const GOLD     = [200, 144, 42];
+  const AZULEJO  = [46, 91, 126];
+  const AZUL_HI  = [85, 144, 181];
+  const CORONA   = [255, 192, 74];
+  const CREAM    = [255, 253, 244];
+
+  // ── STOPS (kept from before) ──
+  const stops = [
+    { id:0, name:"Bilbao",                sub:"Basque Country",            dates:"Aug 8, 2026",
+      lat:43.2630, lon:-2.9350, nights:1, kind:"arrival",
+      note:"Land at BIO. First night at Batimontsuites. Pintxos for dinner?",
+      link:"https://www.batimontsuites.com/" },
+    { id:1, name:"Hornedo",               sub:"Cantabria",                 dates:"Aug 9 – 13",
+      lat:43.3872, lon:-3.7478, nights:4, kind:"stay",
+      note:"Home base on the Green Coast. Beaches, Santillana del Mar, Altamira caves. Eclipse day!",
+      link:"https://www.airbnb.com/l/83UxgIHH" },
+    { id:2, name:"Santiago de Compostela",sub:"Galicia",                   dates:"Aug 13 – 15",
+      lat:42.8782, lon:-8.5448, nights:2, kind:"stay",
+      note:"End of the Camino. Cathedral, old town, empanadas galegas.",
+      link:"https://www.airbnb.com/l/4yXzSmio" },
+    { id:3, name:"Oviedo / Gijón",        sub:"Asturias",                  dates:"Aug 15 – 17",
+      lat:43.3619, lon:-5.8494, nights:2, kind:"stay",
+      note:"Sidra country. San Lorenzo beach, Cabrales cheese.",
+      link:"https://www.airbnb.com/l/ghFqElI3" },
+    { id:4, name:"Potes",                 sub:"Picos de Europa, Cantabria",dates:"Aug 17 – 21",
+      lat:43.1518, lon:-4.6206, nights:4, kind:"stay",
+      note:"Mountain base. Fuente Dé cable car, Lagos de Covadonga, hikes.",
+      link:"https://www.airbnb.com/l/lrYUsLWP" },
+    { id:5, name:"Bilbao (Return)",       sub:"Basque Country",            dates:"Aug 20 – 21",
+      lat:43.2800, lon:-2.9200, nights:1, kind:"return",
+      note:"Drive back. IHG near airport. Morning flight home.",
+      link:"https://www.ihg.com/hotels/us/en/pay/confirmation?confirmationNumber=24950788" }
+  ];
+
+  const driveRoute = stops.map(s => [s.lon, s.lat]);
+
+  // ── AIRPORTS & FLIGHTS ──
+  const AIRPORTS = {
+    CLT: { code:"CLT", lon:-80.9431, lat:35.2140, name:"Charlotte Douglas Intl", city:"Charlotte, NC" },
+    MAD: { code:"MAD", lon:-3.5626,  lat:40.4719, name:"Madrid-Barajas",         city:"Madrid" },
+    BIO: { code:"BIO", lon:-2.9106,  lat:43.3011, name:"Bilbao Airport",         city:"Bilbao" }
+  };
+
+  const FLIGHTS = [
+    { id:"OUT1", from:"CLT", to:"MAD", date:"Aug 8, 2026",  dir:"out",  leg:"Transatlantic", dur:"~7.5 hrs", note:"Overnight departure from Charlotte" },
+    { id:"OUT2", from:"MAD", to:"BIO", date:"Aug 8, 2026",  dir:"out",  leg:"Connection",    dur:"~1 hr",    note:"Short hop to the north coast" },
+    { id:"RET1", from:"BIO", to:"MAD", date:"Aug 21, 2026", dir:"back", leg:"Connection",    dur:"~1 hr",    note:"Morning flight south" },
+    { id:"RET2", from:"MAD", to:"CLT", date:"Aug 21, 2026", dir:"back", leg:"Transatlantic", dur:"~9 hrs",   note:"Daytime flight home" }
+  ];
+
+  // Great-circle arc between two lon/lat points
+  function gcArc(lon1, lat1, lon2, lat2, steps) {
+    const toRad = Math.PI/180, toDeg = 180/Math.PI;
+    const φ1 = lat1*toRad, λ1 = lon1*toRad;
+    const φ2 = lat2*toRad, λ2 = lon2*toRad;
+    const d = 2*Math.asin(Math.sqrt(
+      Math.pow(Math.sin((φ2-φ1)/2),2) +
+      Math.cos(φ1)*Math.cos(φ2)*Math.pow(Math.sin((λ2-λ1)/2),2)
+    ));
+    const pts = [];
+    for (let i = 0; i <= steps; i++) {
+      const f = i/steps;
+      const A = Math.sin((1-f)*d)/Math.sin(d);
+      const B = Math.sin(f*d)/Math.sin(d);
+      const x = A*Math.cos(φ1)*Math.cos(λ1) + B*Math.cos(φ2)*Math.cos(λ2);
+      const y = A*Math.cos(φ1)*Math.sin(λ1) + B*Math.cos(φ2)*Math.sin(λ2);
+      const z = A*Math.sin(φ1) + B*Math.sin(φ2);
+      const φ = Math.atan2(z, Math.sqrt(x*x+y*y));
+      const λ = Math.atan2(y, x);
+      pts.push([λ*toDeg, φ*toDeg]);
+    }
+    return pts;
+  }
+
+  // ── MAP ──
+  const map = new Map({ basemap: "streets-vector" });
+
+  const view = new MapView({
+    container: "viewDiv",
+    map: map,
+    center: [-5.5, 43.1],
+    zoom: 7,
+    ui: { components: ["zoom"] },
+    constraints: { minZoom: 3, maxZoom: 14 },
+    padding: { right: 30, bottom: 110 }
+  });
+  view.ui.move("zoom", "top-right");
+
+  // Layers (order matters)
+  const flightLayer   = new GraphicsLayer();
+  const eclipseLayer  = new GraphicsLayer();
+  const routeLayer    = new GraphicsLayer();
+  const markerLayer   = new GraphicsLayer();
+  const labelLayer    = new GraphicsLayer();
+  map.addMany([flightLayer, eclipseLayer, routeLayer, markerLayer, labelLayer]);
+
+  // ═══ FLIGHT PATHS ═════════════════════════════════
+  const flightPopup = new PopupTemplate({
+    title: "{title}",
+    content: "{content}"
+  });
+
+  FLIGHTS.forEach(f => {
+    const a = AIRPORTS[f.from], b = AIRPORTS[f.to];
+    const pts = gcArc(a.lon, a.lat, b.lon, b.lat, 64);
+    const isReturn = f.dir === "back";
+
+    // Glow halo
+    flightLayer.add(new Graphic({
+      geometry: new Polyline({ paths:[pts], spatialReference:{ wkid:4326 } }),
+      symbol: new SimpleLineSymbol({
+        color: isReturn ? [85,144,181,0.15] : [46,91,126,0.15],
+        width: 8, style:"solid", cap:"round", join:"round"
+      })
+    }));
+
+    // Main dashed arc
+    flightLayer.add(new Graphic({
+      geometry: new Polyline({ paths:[pts], spatialReference:{ wkid:4326 } }),
+      symbol: new SimpleLineSymbol({
+        color: isReturn ? [85,144,181,0.9] : [46,91,126,0.95],
+        width: isReturn ? 1.8 : 2.2,
+        style: isReturn ? "dash" : "short-dash",
+        cap: "round"
+      }),
+      attributes: {
+        title: '✈ ' + a.code + ' → ' + b.code + '  ·  ' + f.leg,
+        content:
+          '<div style="font-family:\'Josefin Sans\',sans-serif;font-size:12px;line-height:1.6;">' +
+          '<div style="color:#C8553D;letter-spacing:0.1em;text-transform:uppercase;font-size:10px;margin-bottom:6px;">' + (isReturn ? 'Return leg' : 'Outbound leg') + ' · ' + f.date + '</div>' +
+          '<div><strong>From:</strong> ' + a.name + ' (' + a.code + ')</div>' +
+          '<div><strong>To:</strong> ' + b.name + ' (' + b.code + ')</div>' +
+          '<div><strong>Duration:</strong> ' + f.dur + '</div>' +
+          '<div style="margin-top:8px;opacity:0.85;font-style:italic;">' + f.note + '</div>' +
+          '</div>'
+      },
+      popupTemplate: flightPopup
+    }));
+  });
+
+  // Airport markers
+  Object.values(AIRPORTS).forEach(a => {
+    const pt = new Point({ longitude:a.lon, latitude:a.lat, spatialReference:{ wkid:4326 } });
+    flightLayer.add(new Graphic({
+      geometry: pt,
+      symbol: new SimpleMarkerSymbol({
+        style: "circle",
+        color: [255,253,244,1],
+        size: "9px",
+        outline: { color: AZULEJO.concat([1]), width: 2 }
+      }),
+      attributes: {
+        title: '✈ ' + a.name + ' (' + a.code + ')',
+        content: '<div style="font-family:\'Josefin Sans\',sans-serif;font-size:12px;">' + a.city + '</div>'
+      },
+      popupTemplate: new PopupTemplate({ title:"{title}", content:"{content}" })
+    }));
+    flightLayer.add(new Graphic({
+      geometry: pt,
+      symbol: new TextSymbol({
+        text: a.code,
+        color: [30, 72, 104, 1],
+        haloColor: [255, 253, 244, 0.95],
+        haloSize: 2,
+        font: { size: 10, family:"Josefin Sans", weight:"600" },
+        xoffset: 0, yoffset: -16
+      })
+    }));
+  });
+
+  // ═══ DRIVE ROUTE ══════════════════════════════════
+  routeLayer.add(new Graphic({
+    geometry: new Polyline({ paths:[driveRoute], spatialReference:{ wkid:4326 } }),
+    symbol: new SimpleLineSymbol({
+      color: [200,85,61,0.18], width: 7, style:"solid", cap:"round", join:"round"
+    })
+  }));
+  const routeMain = new Graphic({
+    geometry: new Polyline({ paths:[driveRoute], spatialReference:{ wkid:4326 } }),
+    symbol: new SimpleLineSymbol({
+      color: [200,85,61,0.95], width: 2.4, style:"short-dash", cap:"round"
+    })
+  });
+  routeLayer.add(routeMain);
+
+  // Shimmer
+  let dashIdx = 0;
+  setInterval(() => {
+    dashIdx = (dashIdx + 1) % 2;
+    const sym = routeMain.symbol.clone();
+    sym.style = dashIdx === 0 ? "short-dash" : "dash";
+    routeMain.symbol = sym;
+  }, 700);
+
+  // ═══ PATH OF TOTALITY ═════════════════════════════
+  const totalityCenter = [
+    [-9.8,43.70],[-8.0,43.55],[-6.0,43.30],[-4.0,43.00],
+    [-2.0,42.55],[0.0,42.00],[2.0,40.80],[3.8,39.70]
+  ];
+  const totalityNorth = [
+    [-9.9,44.80],[-8.0,44.65],[-6.0,44.35],[-4.0,44.00],
+    [-2.0,43.55],[0.0,42.95],[2.0,41.75],[3.9,40.65]
+  ];
+  const totalitySouth = [
+    [-9.7,42.60],[-8.0,42.45],[-6.0,42.25],[-4.0,42.00],
+    [-2.0,41.55],[0.0,41.00],[2.0,39.80],[3.7,38.70]
+  ];
+  const ring = totalityNorth.concat(totalitySouth.slice().reverse());
+
+  const totalityGlow = new Graphic({
+    geometry: new Polygon({ rings:[ring], spatialReference:{ wkid:4326 } }),
+    symbol: new SimpleFillSymbol({
+      color: [255,192,74,0.14],
+      outline: { color: [232,155,22,0.55], width: 0.8, style:"dash" }
+    })
+  });
+  eclipseLayer.add(totalityGlow);
+
+  const totalityBand = new Graphic({
+    geometry: new Polygon({ rings:[ring], spatialReference:{ wkid:4326 } }),
+    symbol: new SimpleFillSymbol({
+      color: [255,192,74,0.10],
+      outline: { color:[0,0,0,0], width:0 }
+    })
+  });
+  eclipseLayer.add(totalityBand);
+
+  const totalityCenterLine = new Graphic({
+    geometry: new Polyline({ paths:[totalityCenter], spatialReference:{ wkid:4326 } }),
+    symbol: new SimpleLineSymbol({
+      color: [168,40,58,0.7], width: 1.3, style:"long-dash-dot"
+    })
+  });
+  eclipseLayer.add(totalityCenterLine);
+
+  labelLayer.add(new Graphic({
+    geometry: new Point({ longitude:-0.8, latitude:43.75, spatialReference:{ wkid:4326 } }),
+    symbol: new TextSymbol({
+      text: "PATH OF TOTALITY · 12 AUG 2026",
+      color: [168,40,58,0.95],
+      haloColor: [255,253,244,0.95],
+      haloSize: 2,
+      font: { size: 10, family:"Josefin Sans", weight:"600" },
+      angle: -10
+    })
+  }));
+
+  // ═══ STOP MARKERS ═════════════════════════════════
+  const stopGraphics = [];
+  stops.forEach((s, i) => {
+    const pt = new Point({ longitude:s.lon, latitude:s.lat, spatialReference:{ wkid:4326 } });
+    const base = s.kind === "return" ? AZULEJO : TERRA;
+
+    // halo
+    const halo = new Graphic({
+      geometry: pt,
+      symbol: new SimpleMarkerSymbol({
+        style:"circle",
+        color: [base[0],base[1],base[2],0.14],
+        size:"30px",
+        outline: { color:[base[0],base[1],base[2],0.4], width:1 }
+      })
+    });
+
+    // ring
+    const ring2 = new Graphic({
+      geometry: pt,
+      symbol: new SimpleMarkerSymbol({
+        style:"circle",
+        color:[0,0,0,0],
+        size:"20px",
+        outline:{ color:[base[0],base[1],base[2],0.7], width:1.3 }
+      })
+    });
+
+    // inner dot
+    const dot = new Graphic({
+      geometry: pt,
+      symbol: new SimpleMarkerSymbol({
+        style:"circle",
+        color:[base[0],base[1],base[2],0.95],
+        size:"13px",
+        outline:{ color:CREAM.concat([1]), width:2 }
+      }),
+      popupTemplate: new PopupTemplate({
+        title: '<span style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:600;">' + s.name + '</span>',
+        content:
+          '<div style="font-family:\'Josefin Sans\',sans-serif;font-size:12px;line-height:1.6;">' +
+          '<div style="color:#C8553D;margin-bottom:6px;letter-spacing:0.1em;text-transform:uppercase;font-size:10px;">' + s.sub + '</div>' +
+          '<div><strong>Dates:</strong> ' + s.dates + '</div>' +
+          '<div><strong>Nights:</strong> ' + s.nights + '</div>' +
+          '<div style="margin-top:6px;opacity:0.85;">' + s.note + '</div>' +
+          '<a href="' + s.link + '" target="_blank" rel="noopener" style="color:#C8902A;font-size:11px;display:inline-block;margin-top:8px;">→ view booking</a>' +
+          '</div>'
+      }),
+      attributes: { id: i }
+    });
+
+    // number
+    const numText = s.kind === "return" ? "✈" : String(i+1);
+    const numLabel = new Graphic({
+      geometry: pt,
+      symbol: new TextSymbol({
+        text: numText,
+        color: CREAM.concat([1]),
+        haloColor: [30,20,10,0.7],
+        haloSize: 1,
+        font: { size: 9, family:"Cormorant Garamond", weight:"700" },
+        xoffset: 0, yoffset: -3
+      })
+    });
+
+    // city name
+    const cityLabel = new Graphic({
+      geometry: pt,
+      symbol: new TextSymbol({
+        text: s.name,
+        color: [30,20,10,1],
+        haloColor: [255,253,244,0.95],
+        haloSize: 2,
+        font: { size: 11, family:"Cormorant Garamond", weight:"600", style:"italic" },
+        xoffset: 0, yoffset: 14
+      })
+    });
+
+    markerLayer.addMany([halo, ring2, dot]);
+    labelLayer.addMany([numLabel, cityLabel]);
+    stopGraphics.push({ halo, ring:ring2, dot, base, numLabel, cityLabel });
+  });
+
+  // Halo pulse
+  let pulseT = 0;
+  setInterval(() => {
+    pulseT += 0.12;
+    stopGraphics.forEach((sg, i) => {
+      const phase = Math.sin(pulseT + i*0.6);
+      const size = 26 + phase * 6;
+      const alpha = 0.10 + (phase+1) * 0.06;
+      const sym = sg.halo.symbol.clone();
+      sym.size = size + "px";
+      sym.color = [sg.base[0], sg.base[1], sg.base[2], alpha];
+      sg.halo.symbol = sym;
+    });
+  }, 80);
+
+  // ═══ STOP FOCUS ═══════════════════════════════════
+  window.focusStop = function(id) {
+    const s = stops[id];
+    view.goTo({ center:[s.lon, s.lat], zoom: 10 }, { duration: 900, easing:"ease-in-out" });
+    document.querySelectorAll('.stop').forEach(el => el.classList.remove('active'));
+    const el = document.querySelector('[data-stop="' + id + '"]');
+    if (el) el.classList.add('active');
+  };
+
+  // Click map → highlight sidebar
+  view.on("click", (event) => {
+    view.hitTest(event).then(resp => {
+      if (resp.results.length > 0) {
+        for (let r = 0; r < resp.results.length; r++) {
+          const g = resp.results[r].graphic;
+          const id = g.attributes && g.attributes.id;
+          if (id !== undefined && typeof id === "number" && id >= 0 && id < 6) {
+            document.querySelectorAll('.stop').forEach(el => el.classList.remove('active'));
+            const el = document.querySelector('[data-stop="' + id + '"]');
+            if (el) { el.classList.add('active'); el.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+            break;
+          }
+        }
+      }
+    });
+  });
+
+  // ═══ INITIAL VIEW ═════════════════════════════════
+  view.when(() => {
+    view.goTo({ center:[-5.5, 43.1], zoom: 6.5 }, { duration: 1800, easing:"ease-out" });
+  });
+
+  // ═══ VEHICLE ANIMATION (DOM overlay) ══════════════
+  const carEl = document.getElementById('car');
+  const planeEl = document.getElementById('plane');
+  let vehicleAnim = null;
+
+  function lonLatToScreen(lon, lat) {
+    const sp = view.toScreen(new Point({ longitude:lon, latitude:lat, spatialReference:{ wkid:4326 } }));
+    return sp; // {x, y}
+  }
+
+  function stopVehicleAnim() {
+    if (vehicleAnim) { cancelAnimationFrame(vehicleAnim.raf); vehicleAnim = null; }
+    carEl.classList.add('hidden');
+    planeEl.classList.add('hidden');
+  }
+
+  function animateAlong(points, el, loopMs, opts) {
+    opts = opts || {};
+    stopVehicleAnim();
+    el.classList.remove('hidden');
+
+    const start = performance.now();
+    const obj = { raf: 0 };
+
+    function segLen(p, q) { return Math.hypot(q[0]-p[0], q[1]-p[1]); }
+    const totals = [0];
+    for (let i = 1; i < points.length; i++) totals.push(totals[i-1] + segLen(points[i-1], points[i]));
+    const totalLen = totals[totals.length-1] || 1;
+
+    function tick(now) {
+      const raw = ((now - start) % loopMs) / loopMs; // 0..1
+      const d = raw * totalLen;
+
+      let i = 1;
+      while (i < totals.length && totals[i] < d) i++;
+      if (i >= totals.length) i = totals.length - 1;
+      const f = (d - totals[i-1]) / Math.max(1e-6, totals[i] - totals[i-1]);
+      const p = points[i-1], q = points[i];
+      const lon = p[0] + (q[0] - p[0]) * f;
+      const lat = p[1] + (q[1] - p[1]) * f;
+      const sp = lonLatToScreen(lon, lat);
+      if (sp) {
+        const heading = Math.atan2(q[1]-p[1], q[0]-p[0]) * 180 / Math.PI;
+        // Screen Y is inverted vs latitude; also emoji faces right by default
+        const screenAngle = -heading; // map lon→x (right positive), lat→y (down negative)
+        el.style.left = (sp.x - 12) + 'px';
+        el.style.top  = (sp.y - 12) + 'px';
+        el.style.transform = opts.flip === false ? '' :
+          'rotate(' + screenAngle + 'deg)' + (Math.cos(heading*Math.PI/180) < 0 ? ' scaleY(-1)' : '');
+      }
+      obj.raf = requestAnimationFrame(tick);
+    }
+    obj.raf = requestAnimationFrame(tick);
+    vehicleAnim = obj;
+  }
+
+  // Build animation points
+  function driveSegment(fromStop, toStop) {
+    // Densify the segment with small intermediate nudges for smooth motion
+    const n = 40;
+    const pts = [];
+    const a = stops[fromStop], b = stops[toStop];
+    for (let i = 0; i <= n; i++) {
+      const f = i/n;
+      pts.push([a.lon + (b.lon-a.lon)*f, a.lat + (b.lat-a.lat)*f]);
+    }
+    return pts;
+  }
+
+  function flightPath(dir) {
+    // Build concatenated arc across the legs
+    let legs;
+    if (dir === "out") legs = [["CLT","MAD"],["MAD","BIO"]];
+    else               legs = [["BIO","MAD"],["MAD","CLT"]];
+    const pts = [];
+    legs.forEach(([f, t], li) => {
+      const a = AIRPORTS[f], b = AIRPORTS[t];
+      const arc = gcArc(a.lon,a.lat, b.lon,b.lat, 40);
+      arc.forEach((p, i) => { if (li === 0 || i > 0) pts.push(p); });
+    });
+    return pts;
+  }
+
+  // ═══ THEME / DAY STATE ════════════════════════════
+  const rangeEl = document.getElementById('day-range');
+  const prevBtn = document.getElementById('day-prev');
+  const nextBtn = document.getElementById('day-next');
+  const playBtn = document.getElementById('day-play');
+  const chipEl  = document.getElementById('day-chip');
+  const emojiEl = document.getElementById('day-emoji');
+  const dateEl  = document.getElementById('day-date');
+  const descEl  = document.getElementById('day-desc');
+
+  let currentDay = 1;
+  let playing = false;
+  let playTimer = null;
+
+  function setTheme(name) {
+    document.body.setAttribute('data-theme', name);
+    // swap basemap
+    if (name === 'eclipse') {
+      map.basemap = 'dark-gray-vector';
+      // brighten corona on map
+      const gsym = totalityGlow.symbol.clone();
+      gsym.color = [255, 210, 122, 0.22];
+      gsym.outline = { color: [255,210,122,0.8], width: 1, style: "dash" };
+      totalityGlow.symbol = gsym;
+
+      const bsym = totalityBand.symbol.clone();
+      bsym.color = [255, 210, 122, 0.18];
+      totalityBand.symbol = bsym;
+
+      const csym = totalityCenterLine.symbol.clone();
+      csym.color = [255, 241, 199, 0.9];
+      totalityCenterLine.symbol = csym;
+    } else {
+      map.basemap = 'streets-vector';
+      const gsym = totalityGlow.symbol.clone();
+      gsym.color = [255,192,74,0.14];
+      gsym.outline = { color: [232,155,22,0.55], width: 0.8, style: "dash" };
+      totalityGlow.symbol = gsym;
+
+      const bsym = totalityBand.symbol.clone();
+      bsym.color = [255,192,74,0.10];
+      totalityBand.symbol = bsym;
+
+      const csym = totalityCenterLine.symbol.clone();
+      csym.color = [168,40,58,0.7];
+      totalityCenterLine.symbol = csym;
+    }
+  }
+
+  function applyDay(n) {
+    currentDay = n;
+    const d = DAYS[n-1];
+    chipEl.textContent = 'Day ' + d.n;
+    emojiEl.textContent = d.emoji;
+    dateEl.textContent = d.dow + ' · ' + d.date;
+    descEl.textContent = d.title;
+
+    // Theme
+    setTheme(d.mode === 'eclipse' ? 'eclipse' : 'day');
+
+    // Active sidebar stop
+    document.querySelectorAll('.stop').forEach(el => el.classList.remove('active'));
+    let targetStop = null;
+    if (d.mode === 'stay' || d.mode === 'eclipse') targetStop = d.at;
+    else if (d.mode === 'drive') targetStop = d.to;
+    else if (d.mode === 'fly-out') targetStop = 0;
+    else if (d.mode === 'fly-back') targetStop = 5;
+    if (targetStop !== null) {
+      const el = document.querySelector('[data-stop="' + targetStop + '"]');
+      if (el) el.classList.add('active');
+    }
+
+    // Map view + vehicle animation
+    if (d.mode === 'fly-out') {
+      // Show the whole flight arc
+      view.goTo({ center: [-40, 40], zoom: 3 }, { duration: 900, easing:"ease-in-out" });
+      animateAlong(flightPath('out'), planeEl, 8000);
+    } else if (d.mode === 'fly-back') {
+      view.goTo({ center: [-40, 40], zoom: 3 }, { duration: 900, easing:"ease-in-out" });
+      animateAlong(flightPath('back'), planeEl, 8000);
+    } else if (d.mode === 'drive') {
+      const a = stops[d.from], b = stops[d.to];
+      const midLon = (a.lon + b.lon)/2, midLat = (a.lat + b.lat)/2;
+      view.goTo({ center:[midLon, midLat], zoom: 8 }, { duration: 900, easing:"ease-in-out" });
+      animateAlong(driveSegment(d.from, d.to), carEl, 4000);
+    } else if (d.mode === 'stay' || d.mode === 'eclipse') {
+      const s = stops[d.at];
+      view.goTo({ center:[s.lon, s.lat], zoom: d.mode === 'eclipse' ? 9 : 10 }, { duration: 900, easing:"ease-in-out" });
+      stopVehicleAnim();
+    } else {
+      stopVehicleAnim();
+    }
+
+    rangeEl.value = n;
+  }
+
+  rangeEl.addEventListener('input', (e) => {
+    applyDay(parseInt(e.target.value, 10));
+  });
+  prevBtn.addEventListener('click', () => {
+    if (currentDay > 1) applyDay(currentDay - 1);
+  });
+  nextBtn.addEventListener('click', () => {
+    if (currentDay < 14) applyDay(currentDay + 1);
+  });
+  playBtn.addEventListener('click', () => {
+    playing = !playing;
+    if (playing) {
+      playBtn.textContent = '❚❚';
+      playBtn.classList.add('playing');
+      playTimer = setInterval(() => {
+        if (currentDay >= 14) { applyDay(1); }
+        else applyDay(currentDay + 1);
+      }, 2200);
+    } else {
+      playBtn.textContent = '▶';
+      playBtn.classList.remove('playing');
+      clearInterval(playTimer);
+    }
+  });
+
+  // Reposition vehicle on map move (screen coords shift as map pans/zooms)
+  view.watch("extent,stationary", () => {
+    // The animation loop reads coords on each frame so it auto-adjusts.
+  });
+
+  // Init with day 1
+  setTimeout(() => applyDay(1), 400);
+
+});
+</script>
+
+</body>
+</html>
