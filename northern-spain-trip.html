@@ -1500,19 +1500,71 @@ require([
   });
 
   // ═══ DRIVE ROUTE ══════════════════════════════════
-  routeLayer.add(new Graphic({
+  // realRoutes[i] holds the OSRM road geometry for stops[i] → stops[i+1]
+  const realRoutes = new Array(stops.length - 1).fill(null);
+
+  const routeGlow = new Graphic({
     geometry: new Polyline({ paths:[driveRoute], spatialReference:{ wkid:4326 } }),
     symbol: new SimpleLineSymbol({
       color: [200,85,61,0.18], width: 7, style:"solid", cap:"round", join:"round"
     })
-  }));
+  });
   const routeMain = new Graphic({
     geometry: new Polyline({ paths:[driveRoute], spatialReference:{ wkid:4326 } }),
     symbol: new SimpleLineSymbol({
       color: [200,85,61,0.95], width: 2.4, style:"short-dash", cap:"round"
     })
   });
-  routeLayer.add(routeMain);
+  routeLayer.addMany([routeGlow, routeMain]);
+
+  // Fetch real driving routes from OSRM public demo server
+  async function fetchOSRMRoute(a, b) {
+    const url = 'https://router.project-osrm.org/route/v1/driving/' +
+      a.lon + ',' + a.lat + ';' + b.lon + ',' + b.lat +
+      '?overview=full&geometries=geojson';
+    try {
+      const r = await fetch(url);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const data = await r.json();
+      if (!data.routes || !data.routes.length) return null;
+      return data.routes[0].geometry.coordinates; // [[lon,lat], ...]
+    } catch (e) {
+      console.warn('OSRM fetch failed for', a.name, '→', b.name, e);
+      return null;
+    }
+  }
+
+  function combinedRouteCoords() {
+    const combined = [];
+    for (let i = 0; i < stops.length - 1; i++) {
+      const seg = realRoutes[i] || [[stops[i].lon, stops[i].lat], [stops[i+1].lon, stops[i+1].lat]];
+      seg.forEach((p, idx) => {
+        if (i === 0 || idx > 0) combined.push(p);
+      });
+    }
+    return combined;
+  }
+
+  function refreshRouteGeometry() {
+    const coords = combinedRouteCoords();
+    routeGlow.geometry = new Polyline({ paths:[coords], spatialReference:{ wkid:4326 } });
+    routeMain.geometry = new Polyline({ paths:[coords], spatialReference:{ wkid:4326 } });
+  }
+
+  (async function loadAllRealRoutes() {
+    const results = await Promise.all(
+      stops.slice(0, -1).map((a, i) => fetchOSRMRoute(a, stops[i+1]))
+    );
+    results.forEach((r, i) => { realRoutes[i] = r; });
+    refreshRouteGeometry();
+    // If the user is currently on a drive day, rerun to pick up real road geometry
+    if (typeof DAYS !== 'undefined' && typeof currentDay === 'number') {
+      const d = DAYS[currentDay - 1];
+      if (d && d.mode === 'drive' && typeof animateAlong === 'function') {
+        animateAlong(driveSegment(d.from, d.to), carEl, 4000);
+      }
+    }
+  })();
 
   // Shimmer
   let dashIdx = 0;
@@ -1762,11 +1814,16 @@ require([
     vehicleAnim = obj;
   }
 
-  // Build animation points
+  // Build animation points — prefer real OSRM road geometry when cached
   function driveSegment(fromStop, toStop) {
-    // Densify the segment with small intermediate nudges for smooth motion
-    const n = 40;
-    const pts = [];
+    const lo = Math.min(fromStop, toStop);
+    const reversed = fromStop > toStop;
+    const real = realRoutes[lo];
+    if (real && real.length > 1) {
+      return reversed ? real.slice().reverse() : real.slice();
+    }
+    // Fallback: densified straight line
+    const n = 40, pts = [];
     const a = stops[fromStop], b = stops[toStop];
     for (let i = 0; i <= n; i++) {
       const f = i/n;
