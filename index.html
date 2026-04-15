@@ -896,6 +896,90 @@
     }
     body[data-theme="eclipse"] .day-ticks .eclipse-tick { color: var(--corona-hi); }
 
+    /* ═══ DUOLINGO CARD ═══════════════════════════════ */
+    .duo-card {
+      position: absolute;
+      top: 3.5rem;
+      left: 1rem;
+      z-index: 6;
+      background: #FFFFFF;
+      border: 2px solid #58CC02;
+      border-radius: 14px;
+      padding: 0.55rem 0.85rem 0.6rem 0.75rem;
+      box-shadow: 0 4px 14px rgba(88,204,2,0.25), 0 2px 8px rgba(0,0,0,0.12);
+      max-width: 230px;
+      min-width: 190px;
+      transition: background 0.7s, border-color 0.7s, transform 0.2s;
+      font-family: 'Fredoka', sans-serif;
+    }
+    body[data-theme="eclipse"] .duo-card {
+      background: #101910;
+      border-color: #58CC02;
+      box-shadow: 0 4px 14px rgba(88,204,2,0.3), 0 0 22px rgba(88,204,2,0.18);
+    }
+    .duo-card:hover { transform: translateY(-2px); }
+
+    .duo-eyebrow {
+      display: flex; align-items: center; gap: 0.35rem;
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #58CC02;
+      margin-bottom: 0.22rem;
+    }
+    .duo-owl {
+      font-size: 1.15rem;
+      display: inline-block;
+      animation: owlBob 3s ease-in-out infinite;
+    }
+    @keyframes owlBob {
+      0%, 100% { transform: translateY(0) rotate(0); }
+      50% { transform: translateY(-3px) rotate(-5deg); }
+    }
+    .duo-phrase {
+      font-size: 0.95rem;
+      color: #2B2B2B;
+      font-weight: 500;
+      line-height: 1.25;
+      margin-bottom: 0.1rem;
+    }
+    body[data-theme="eclipse"] .duo-phrase { color: #F0FFD0; }
+    .duo-translation {
+      font-size: 0.72rem;
+      color: #6F6F6F;
+      font-style: italic;
+      line-height: 1.25;
+    }
+    body[data-theme="eclipse"] .duo-translation { color: #8BA070; }
+    .duo-streak {
+      position: absolute;
+      top: -10px; right: -10px;
+      background: #FF9600;
+      color: white;
+      font-size: 0.62rem;
+      font-weight: 600;
+      padding: 0.18rem 0.5rem;
+      border-radius: 100px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      letter-spacing: 0.04em;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+    }
+
+    /* Cruzcampo / memory tag */
+    .tag-memory {
+      background: linear-gradient(90deg, rgba(255,150,0,0.16), rgba(200,50,60,0.16));
+      color: #8A3410;
+      border: 1px solid rgba(220,90,30,0.45);
+    }
+    body[data-theme="eclipse"] .tag-memory {
+      background: linear-gradient(90deg, rgba(255,150,0,0.22), rgba(220,60,70,0.22));
+      color: #FFBC7A;
+      border-color: rgba(255,150,0,0.55);
+    }
+
     /* Animated vehicle overlay layer (DOM-based, aligned to map) */
     .vehicle-layer {
       position: absolute;
@@ -970,7 +1054,7 @@
           <figcaption>nanu ♡</figcaption>
         </figure>
       </div>
-      <p class="cast-note">three families · one eclipse</p>
+      <p class="cast-note">three families · one eclipse · 🍺 one Cruzcampo quest</p>
     </div>
 
     <!-- Timeline (cartoon skylines inlined) -->
@@ -994,12 +1078,14 @@
           <div class="stop-tags">
             <span class="tag tag-fly">✈ Arrival</span>
             <span class="tag tag-nights">1 night</span>
+            <span class="tag tag-memory">🍺 Ellen's Cruzcampo</span>
             <span class="tag tag-booked">✓ Booked</span>
           </div>
           <div class="stop-highlights">
             <span class="highlight"><span class="h-ico">🏛️</span>Guggenheim</span>
             <span class="highlight"><span class="h-ico">🍷</span>Pintxos crawl</span>
             <span class="highlight"><span class="h-ico">🌉</span>Casco Viejo</span>
+            <span class="highlight"><span class="h-ico">🍺</span>Cruzcampo for Ellen</span>
           </div>
           <div class="stop-links">
             <a class="stop-link" href="https://www.batimontsuites.com/" target="_blank" rel="noopener">
@@ -1212,6 +1298,14 @@
 
     <div class="map-corner"><span class="rose">✦</span>a la costa verde</div>
 
+    <!-- Duolingo-style Palabra del día -->
+    <div class="duo-card" id="duo-card" title="Michael's Duolingo phrase of the day">
+      <div class="duo-streak">🔥 <span id="duo-streak-count">1</span>/14</div>
+      <div class="duo-eyebrow"><span class="duo-owl">🦉</span> Palabra del día</div>
+      <div class="duo-phrase" id="duo-phrase">¡Hola, España!</div>
+      <div class="duo-translation" id="duo-translation">Hello, Spain!</div>
+    </div>
+
     <!-- Postcard overlay -->
     <div class="map-overlay">
       <h4>Trip at a Glance</h4>
@@ -1294,6 +1388,24 @@
     { n:12, date:"Aug 19", dow:"Wed", emoji:"🏞", title:"Lagos de Covadonga",          mode:"stay",     at:4 },
     { n:13, date:"Aug 20", dow:"Thu", emoji:"🚗", title:"Drive back to Bilbao",        mode:"drive",    from:4, to:5 },
     { n:14, date:"Aug 21", dow:"Fri", emoji:"🛫", title:"Bilbao → Madrid → Charlotte", mode:"fly-back", at:5 }
+  ];
+
+  // ═══ DUOLINGO PHRASES (Michael's Palabra del día) ═════
+  const PHRASES = [
+    { es: "¡Hola, España!",             en: "Hello, Spain!" },
+    { es: "Vamos al norte.",            en: "Let's go north." },
+    { es: "¡A la playa!",               en: "To the beach!" },
+    { es: "Pinturas muy antiguas.",     en: "Very ancient paintings." },
+    { es: "La luna come el sol.",       en: "The moon eats the sun." },
+    { es: "¡Buen camino!",              en: "Good journey!" },
+    { es: "La catedral es preciosa.",   en: "The cathedral is lovely." },
+    { es: "Tengo hambre.",              en: "I'm hungry." },
+    { es: "Una sidra, por favor.",      en: "A cider, please." },
+    { es: "A las montañas.",            en: "To the mountains." },
+    { es: "¡Qué vista tan bonita!",     en: "What a beautiful view!" },
+    { es: "Los lagos son azules.",      en: "The lakes are blue." },
+    { es: "Una Cruzcampo para Ellen.",  en: "A Cruzcampo for Ellen." },
+    { es: "¡Hasta pronto, España!",     en: "See you soon, Spain!" }
   ];
 
   // ═══ TICKS ═══════════════════════════════════════════
@@ -1902,6 +2014,15 @@ require([
     emojiEl.textContent = d.emoji;
     dateEl.textContent = d.dow + ' · ' + d.date;
     descEl.textContent = d.title;
+
+    // Duolingo phrase of the day
+    const p = PHRASES[n-1];
+    const phraseEl = document.getElementById('duo-phrase');
+    const transEl  = document.getElementById('duo-translation');
+    const streakEl = document.getElementById('duo-streak-count');
+    if (p && phraseEl) phraseEl.textContent = p.es;
+    if (p && transEl)  transEl.textContent  = p.en;
+    if (streakEl) streakEl.textContent = n;
 
     // Theme
     setTheme(d.mode === 'eclipse' ? 'eclipse' : 'day');
