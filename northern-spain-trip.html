@@ -1000,12 +1000,106 @@
 
     /* Responsive */
     @media (max-width: 920px) {
-      .layout { flex-direction: column; }
-      .sidebar { width: 100%; max-height: 42vh; border-right: none; border-bottom: 1px solid var(--border); }
-      #map-container { flex: 1; min-height: 58vh; }
+      body { overflow: auto; }
+      .layout { flex-direction: column; overflow: visible; }
+      .sidebar {
+        width: 100%;
+        max-height: none;
+        border-right: none;
+        border-bottom: 2px solid var(--terra);
+        box-shadow: none;
+      }
+      #map-container { flex: none; height: 70vh; min-height: 420px; }
       .map-overlay { display: none; }
       .day-slider { left: 0.5rem; right: 0.5rem; bottom: 0.5rem; padding: 0.5rem 0.6rem; }
       .esri-ui-top-right { margin-right: 0.75rem !important; }
+    }
+
+    @media (max-width: 600px) {
+      /* ── HEADER ── */
+      header {
+        height: auto;
+        padding: 0.6rem 0.75rem;
+        flex-wrap: wrap;
+        gap: 0.4rem 0.6rem;
+      }
+      .header-title { gap: 0.5rem; flex: 1 1 100%; }
+      .header-title h1 { font-size: 1.15rem; }
+      .subline { display: none; }
+      .header-meta {
+        flex: 1 1 100%;
+        flex-wrap: wrap;
+        gap: 0.3rem;
+      }
+      .badge {
+        font-size: 0.55rem;
+        padding: 0.25rem 0.55rem;
+      }
+      .badge.countdown { font-size: 0.68rem; padding: 0.22rem 0.6rem; }
+
+      /* ── SIDEBAR ── */
+      .sidebar-header { padding: 0.85rem 1rem 0.7rem; }
+      .sidebar-header h2 { font-size: 1.15rem; }
+      .sidebar-header .handwritten { font-size: 0.95rem; }
+      .cast { padding: 0.7rem 0.85rem 0.6rem; }
+      .polaroids { gap: 0.2rem; }
+      .polaroid { max-width: 85px; padding: 4px 4px 14px; }
+      .polaroid figcaption { font-size: 0.78rem; }
+      .cast-note { font-size: 0.8rem; margin-top: 0.4rem; }
+
+      /* ── STOP CARDS ── */
+      .stop-line { width: 38px; padding-top: 1.1rem; }
+      .stop-content { padding: 0.9rem 0.95rem 0.9rem 0.3rem; }
+      .stop-name { font-size: 0.95rem; flex-wrap: wrap; }
+      .skyline { width: 42px; }
+      .stop-sub { font-size: 0.72rem; }
+      .tag { font-size: 0.6rem; padding: 0.18rem 0.45rem; }
+      .highlight { font-size: 0.68rem; }
+      .stop-link { font-size: 0.72rem; }
+
+      /* ── MAP OVERLAYS ── */
+      #map-container { height: 65vh; min-height: 360px; }
+      .map-corner {
+        font-size: 0.85rem;
+        padding: 0.2rem 0.5rem;
+        top: 0.5rem; left: 0.5rem;
+      }
+      .duo-card {
+        top: auto;
+        bottom: 6.2rem;
+        left: 0.5rem;
+        right: 0.5rem;
+        max-width: none;
+        min-width: 0;
+        padding: 0.45rem 0.7rem 0.5rem 0.6rem;
+      }
+      .duo-phrase { font-size: 0.85rem; }
+      .duo-translation { font-size: 0.68rem; }
+      .duo-streak { font-size: 0.55rem; padding: 0.15rem 0.4rem; top: -8px; right: -6px; }
+
+      /* ── DAY SLIDER ── */
+      .day-slider {
+        left: 0.4rem; right: 0.4rem; bottom: 0.4rem;
+        padding: 0.45rem 0.55rem 0.4rem;
+      }
+      .day-slider-head { gap: 0.4rem; margin-bottom: 0.35rem; }
+      .day-info { gap: 0.4rem; }
+      .day-chip { font-size: 0.6rem; padding: 0.2rem 0.5rem; }
+      .day-date { font-size: 0.9rem; }
+      .day-desc {
+        font-size: 0.65rem;
+        flex: 1 1 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .day-btn { width: 26px; height: 26px; font-size: 0.75rem; }
+      .day-controls { gap: 0.25rem; }
+      .day-range-wrap { height: 26px; }
+      .day-ticks { font-size: 0.5rem; padding: 0 4px; }
+      /* thin out ticks on phone: show only every other day label */
+      .day-ticks span:nth-child(even) { visibility: hidden; }
+      .day-ticks .eclipse-tick { visibility: visible !important; }
     }
   </style>
 </head>
