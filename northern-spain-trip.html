@@ -1000,7 +1000,7 @@
 
     /* Responsive */
     @media (max-width: 920px) {
-      body { overflow: auto; }
+      body { overflow: auto; overflow-x: hidden; }
       .layout { flex-direction: column; overflow: visible; }
       .sidebar {
         width: 100%;
@@ -1009,7 +1009,7 @@
         border-bottom: 2px solid var(--terra);
         box-shadow: none;
       }
-      #map-container { flex: none; height: 70vh; min-height: 420px; }
+      #map-container { flex: none; height: 55vh; min-height: 360px; }
       .map-overlay { display: none; }
       .day-slider { left: 0.5rem; right: 0.5rem; bottom: 0.5rem; padding: 0.5rem 0.6rem; }
       .esri-ui-top-right { margin-right: 0.75rem !important; }
@@ -1058,15 +1058,15 @@
       .stop-link { font-size: 0.72rem; }
 
       /* ── MAP OVERLAYS ── */
-      #map-container { height: 65vh; min-height: 360px; }
+      #map-container { height: 48vh; min-height: 320px; }
       .map-corner {
         font-size: 0.85rem;
         padding: 0.2rem 0.5rem;
         top: 0.5rem; left: 0.5rem;
       }
       .duo-card {
-        top: auto;
-        bottom: 6.2rem;
+        top: 0.5rem;
+        bottom: auto;
         left: 0.5rem;
         right: 0.5rem;
         max-width: none;
@@ -1093,13 +1093,15 @@
         overflow: hidden;
         text-overflow: ellipsis;
       }
-      .day-btn { width: 26px; height: 26px; font-size: 0.75rem; }
-      .day-controls { gap: 0.25rem; }
-      .day-range-wrap { height: 26px; }
+      .day-btn {
+        width: 40px; height: 40px;
+        font-size: 1rem;
+        touch-action: manipulation;
+      }
+      .day-controls { gap: 0.4rem; }
+      .day-range-wrap { height: 40px; }
       .day-ticks { font-size: 0.5rem; padding: 0 4px; }
-      /* thin out ticks on phone: show only every other day label */
-      .day-ticks span:nth-child(even) { visibility: hidden; }
-      .day-ticks .eclipse-tick { visibility: visible !important; }
+      .stop-link { min-height: 36px; padding: 0.35rem 0; }
     }
   </style>
 </head>
