@@ -8,6 +8,7 @@
   <!-- ArcGIS JS API 4.28 (light; we override for eclipse) -->
   <link id="esri-theme" rel="stylesheet" href="https://js.arcgis.com/4.28/esri/themes/light/main.css"/>
   <script src="https://js.arcgis.com/4.28/"></script>
+  <script src="astronomy.browser.min.js"></script>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -604,6 +605,63 @@
       stroke-width: 2;
       flex-shrink: 0;
     }
+
+    .eclipse-timing {
+      margin: 0.55rem 0 0.65rem;
+      padding: 0.65rem 0.75rem;
+      border-radius: 8px;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(255,192,74,0.22), transparent 55%),
+        linear-gradient(135deg, rgba(255,245,210,0.9), rgba(255,236,190,0.65));
+      border: 1px solid rgba(232,155,22,0.45);
+      box-shadow: var(--shadow-sm);
+    }
+    body[data-theme="eclipse"] .eclipse-timing {
+      background:
+        radial-gradient(circle at 10% 20%, rgba(255,210,122,0.18), transparent 55%),
+        linear-gradient(135deg, rgba(34,26,42,0.95), rgba(20,16,26,0.9));
+      border-color: rgba(255,210,122,0.35);
+    }
+    .eclipse-timing-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      font-style: italic;
+      color: var(--sangria);
+      margin-bottom: 0.45rem;
+      letter-spacing: 0.04em;
+    }
+    body[data-theme="eclipse"] .eclipse-timing-title { color: var(--corona-hi); }
+    .eclipse-timing-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.28rem 0.55rem;
+      font-size: 0.64rem;
+      letter-spacing: 0.03em;
+    }
+    .eclipse-timing-grid .lbl {
+      color: var(--muted);
+      text-transform: uppercase;
+      font-size: 0.58rem;
+    }
+    .eclipse-timing-grid .val {
+      color: var(--text-hi);
+      font-weight: 600;
+      text-align: right;
+    }
+    .eclipse-timing-grid .val.max {
+      color: var(--sangria);
+      font-size: 0.72rem;
+    }
+    body[data-theme="eclipse"] .eclipse-timing-grid .val.max { color: var(--corona-hi); }
+    .eclipse-timing-note {
+      margin-top: 0.45rem;
+      font-size: 0.62rem;
+      color: var(--muted);
+      font-style: italic;
+      line-height: 1.45;
+    }
+    body[data-theme="eclipse"] .eclipse-timing-note { color: #9C8A72; }
 
     /* ═══ MAP ══════════════════════════════════════════ */
     #map-container {
@@ -1215,10 +1273,22 @@
             <span class="tag tag-booked">✓ Booked</span>
           </div>
           <div class="stop-highlights">
-            <span class="highlight"><span class="h-ico">🌒</span>Totality ~20:30 local</span>
+            <span class="highlight" id="hornedo-totality-highlight"><span class="h-ico">🌒</span>Totality ~20:27 CEST</span>
             <span class="highlight"><span class="h-ico">🏖️</span>Beaches</span>
             <span class="highlight"><span class="h-ico">🏰</span>Santillana del Mar</span>
             <span class="highlight"><span class="h-ico">🎨</span>Altamira caves</span>
+          </div>
+          <div class="eclipse-timing" id="hornedo-eclipse-timing">
+            <p class="eclipse-timing-title">☀ Eclipse at Hornedo</p>
+            <div class="eclipse-timing-grid" id="hornedo-timing-grid">
+              <span class="lbl">Partial begins</span><span class="val" id="ec-partial-begin">—</span>
+              <span class="lbl">Totality begins</span><span class="val" id="ec-total-begin">—</span>
+              <span class="lbl">Maximum</span><span class="val max" id="ec-peak">—</span>
+              <span class="lbl">Totality ends</span><span class="val" id="ec-total-end">—</span>
+              <span class="lbl">Partial ends</span><span class="val" id="ec-partial-end">—</span>
+              <span class="lbl">Totality duration</span><span class="val" id="ec-duration">—</span>
+            </div>
+            <p class="eclipse-timing-note" id="ec-centerline-note">Computing path…</p>
           </div>
           <div class="stop-links">
             <a class="stop-link" href="https://www.airbnb.com/l/83UxgIHH" target="_blank" rel="noopener">
@@ -1443,9 +1513,192 @@
 </div>
 
 <script>
+  // ═══ ECLIPSE ASTRONOMY (astronomy-engine MoonShadow + GeoidIntersect) ═══
+  (function() {
+    const DEG = Math.PI / 180;
+    const RAD = 180 / Math.PI;
+    const R_EARTH = 6378.1366;
+    const R_SUN = 695700;
+    const KM_PER_AU = 149597870.7;
+    const EARTH_FLATTENING = 0.996647180302104;
+    const EARTH_FLATTENING_SQ = EARTH_FLATTENING * EARTH_FLATTENING;
+    const MOON_MEAN_RADIUS_KM = 1737.4;
+    const UMBRA_TOTAL_KM = 0.014;
+    const HORNEDO_LAT = 43.3872;
+    const HORNEDO_LON = -3.7478;
+    const CEST_OFFSET_H = 2;
+
+    function dateToJD(d) { return d.getTime() / 86400000 + 2440587.5; }
+
+    function moonShadow(jd_ut) {
+      const date = new Date((jd_ut - 2440587.5) * 86400000);
+      const t = Astronomy.MakeTime(date);
+      const sun = Astronomy.GeoVector(Astronomy.Body.Sun, t, true);
+      const moon = Astronomy.GeoMoon(t);
+      const target = { x: -moon.x, y: -moon.y, z: -moon.z };
+      const dir = { x: moon.x - sun.x, y: moon.y - sun.y, z: moon.z - sun.z };
+      const u = (dir.x * target.x + dir.y * target.y + dir.z * target.z)
+              / (dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
+      const dx = u * dir.x - target.x;
+      const dy = u * dir.y - target.y;
+      const dz = u * dir.z - target.z;
+      const r = KM_PER_AU * Math.hypot(dx, dy, dz);
+      const k = R_SUN - (1 + u) * (R_SUN - MOON_MEAN_RADIUS_KM);
+      const p = -R_SUN + (1 + u) * (R_SUN + MOON_MEAN_RADIUS_KM);
+      return { jd: jd_ut, t, target, dir, u, r, k, p };
+    }
+
+    function geoidIntersect(shadow) {
+      const rot = Astronomy.Rotation_EQJ_EQD(shadow.t);
+      let v = Astronomy.RotateVector(rot, shadow.dir);
+      let e = Astronomy.RotateVector(rot, shadow.target);
+      v = { x: v.x * KM_PER_AU, y: v.y * KM_PER_AU, z: v.z * KM_PER_AU / EARTH_FLATTENING };
+      e = { x: e.x * KM_PER_AU, y: e.y * KM_PER_AU, z: e.z * KM_PER_AU / EARTH_FLATTENING };
+      const A = v.x * v.x + v.y * v.y + v.z * v.z;
+      const B = -2 * (v.x * e.x + v.y * e.y + v.z * e.z);
+      const C = e.x * e.x + e.y * e.y + e.z * e.z - R_EARTH * R_EARTH;
+      const radic = B * B - 4 * A * C;
+      if (radic <= 0) return null;
+      const u = (-B - Math.sqrt(radic)) / (2 * A);
+      const px = u * v.x - e.x;
+      const py = u * v.y - e.y;
+      const pz = (u * v.z - e.z) * EARTH_FLATTENING;
+      const proj = Math.hypot(px, py) * EARTH_FLATTENING_SQ;
+      const lat = proj === 0 ? (pz > 0 ? 90 : -90) : RAD * Math.atan(pz / proj);
+      const gast = Astronomy.SiderealTime(shadow.t);
+      let lon = (RAD * Math.atan2(py, px) - 15 * gast) % 360;
+      if (lon <= -180) lon += 360;
+      if (lon > 180) lon -= 360;
+      return { lat, lon, k: shadow.k, p: shadow.p, r: shadow.r };
+    }
+
+    function localMoonShadow(date, observer) {
+      const t = Astronomy.MakeTime(date);
+      const ov = Astronomy.ObserverVector(t, observer, true);
+      const sun = Astronomy.GeoVector(Astronomy.Body.Sun, t, true);
+      const moon = Astronomy.GeoMoon(t);
+      const target = { x: ov.x - moon.x, y: ov.y - moon.y, z: ov.z - moon.z };
+      const dir = { x: moon.x - sun.x, y: moon.y - sun.y, z: moon.z - sun.z };
+      const dot = (dir.x * target.x + dir.y * target.y + dir.z * target.z)
+                / (dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
+      const dx = dot * dir.x - target.x;
+      const dy = dot * dir.y - target.y;
+      const dz = dot * dir.z - target.z;
+      const r = KM_PER_AU * Math.hypot(dx, dy, dz);
+      const k = R_SUN - (1 + dot) * (R_SUN - MOON_MEAN_RADIUS_KM);
+      return { r, k };
+    }
+
+    function computeCentralPath(jd0, spanH, stepSec) {
+      const points = [];
+      const start = jd0 - spanH / 24;
+      const end = jd0 + spanH / 24;
+      const step = stepSec / 86400;
+      for (let jd = start; jd <= end; jd += step) {
+        const sh = moonShadow(jd);
+        const hit = geoidIntersect(sh);
+        if (hit && hit.k > UMBRA_TOTAL_KM) {
+          points.push({ jd, lat: hit.lat, lon: hit.lon, k: hit.k, p: hit.p });
+        }
+      }
+      return { points };
+    }
+
+    function offsetKm(lat, lon, km, bearingDeg) {
+      const brg = bearingDeg * DEG;
+      const lat1 = lat * DEG;
+      const lon1 = lon * DEG;
+      const d = km / R_EARTH;
+      const lat2 = Math.asin(Math.sin(lat1) * Math.cos(d) + Math.cos(lat1) * Math.sin(d) * Math.cos(brg));
+      const lon2 = lon1 + Math.atan2(
+        Math.sin(brg) * Math.sin(d) * Math.cos(lat1),
+        Math.cos(d) - Math.sin(lat1) * Math.sin(lat2)
+      );
+      return { lat: lat2 * RAD, lon: lon2 * RAD };
+    }
+
+    function computeTotalityPath(jd0) {
+      const pathInfo = computeCentralPath(jd0, 3.0, 30);
+      const points = pathInfo.points.filter(p =>
+        p.lat >= 38 && p.lat <= 46 && p.lon >= -10 && p.lon <= 5
+      );
+      if (points.length < 2) return null;
+      const center = points.map(p => [p.lon, p.lat]);
+      const north = [];
+      const south = [];
+      points.forEach(p => {
+        const n = offsetKm(p.lat, p.lon, p.k, 0);
+        const s = offsetKm(p.lat, p.lon, p.k, 180);
+        north.push([n.lon, n.lat]);
+        south.push([s.lon, s.lat]);
+      });
+      const ring = north.concat(south.slice().reverse());
+      const mid = points[Math.floor(points.length / 2)];
+      return { center, north, south, ring, labelLon: mid.lon, labelLat: mid.lat };
+    }
+
+    function formatTimeCEST(d) {
+      const ms = d.getTime() + CEST_OFFSET_H * 3600000;
+      const t = new Date(ms);
+      const h = t.getUTCHours().toString().padStart(2, '0');
+      const m = t.getUTCMinutes().toString().padStart(2, '0');
+      const s = t.getUTCSeconds().toString().padStart(2, '0');
+      return h + ':' + m + ':' + s + ' CEST';
+    }
+
+    function formatTimeShortCEST(d) {
+      const ms = d.getTime() + CEST_OFFSET_H * 3600000;
+      const t = new Date(ms);
+      const h = t.getUTCHours().toString().padStart(2, '0');
+      const m = t.getUTCMinutes().toString().padStart(2, '0');
+      return h + ':' + m + ' CEST';
+    }
+
+    function formatDurationSec(sec) {
+      const s = Math.round(sec);
+      return s >= 60 ? Math.floor(s / 60) + 'm ' + (s % 60) + 's' : s + 's';
+    }
+
+    const hornedoObs = new Astronomy.Observer(HORNEDO_LAT, HORNEDO_LON, 0);
+    const hornedoEclipse = Astronomy.SearchLocalSolarEclipse(
+      new Date(Date.UTC(2026, 7, 10)), hornedoObs
+    );
+    const globalEclipse = Astronomy.SearchGlobalSolarEclipse(new Date(Date.UTC(2026, 7, 1)));
+    const peakDate = hornedoEclipse.peak.time.date;
+    const totalitySec = (hornedoEclipse.total_end.time.ut - hornedoEclipse.total_begin.time.ut) * 86400;
+    const axisDistKm = localMoonShadow(peakDate, hornedoObs).r;
+    const totalityPath = computeTotalityPath(dateToJD(globalEclipse.peak.date));
+
+    window.ECLIPSE_DATA = {
+      peak: peakDate,
+      hornedo: hornedoEclipse,
+      totalitySec,
+      axisDistKm,
+      path: totalityPath,
+      formatTimeCEST,
+      formatTimeShortCEST,
+      formatDurationSec
+    };
+
+    const ev = (e) => e ? e.time.date : null;
+    const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+    setText('ec-partial-begin', formatTimeCEST(ev(hornedoEclipse.partial_begin)));
+    setText('ec-total-begin', formatTimeCEST(ev(hornedoEclipse.total_begin)));
+    setText('ec-peak', formatTimeCEST(ev(hornedoEclipse.peak)));
+    setText('ec-total-end', formatTimeCEST(ev(hornedoEclipse.total_end)));
+    setText('ec-partial-end', formatTimeCEST(ev(hornedoEclipse.partial_end)));
+    setText('ec-duration', formatDurationSec(totalitySec));
+    setText('ec-centerline-note',
+      Math.round(axisDistKm) + ' km from centerline — still total!');
+    const hi = document.getElementById('hornedo-totality-highlight');
+    if (hi) {
+      hi.innerHTML = '<span class="h-ico">🌒</span>Totality ' + formatTimeShortCEST(peakDate) + ' · ' + Math.round(totalitySec) + 's';
+    }
+  })();
+
   // ═══ ECLIPSE COUNTDOWN ══════════════════════════════
   (function() {
-    const eclipse = new Date('2026-08-12T18:30:00Z');
+    const eclipse = window.ECLIPSE_DATA.peak;
     const el = document.getElementById('countdown');
     function tick() {
       const now = new Date();
@@ -1783,20 +2036,10 @@ require([
     routeMain.symbol = sym;
   }, 700);
 
-  // ═══ PATH OF TOTALITY ═════════════════════════════
-  const totalityCenter = [
-    [-9.8,43.70],[-8.0,43.55],[-6.0,43.30],[-4.0,43.00],
-    [-2.0,42.55],[0.0,42.00],[2.0,40.80],[3.8,39.70]
-  ];
-  const totalityNorth = [
-    [-9.9,44.80],[-8.0,44.65],[-6.0,44.35],[-4.0,44.00],
-    [-2.0,43.55],[0.0,42.95],[2.0,41.75],[3.9,40.65]
-  ];
-  const totalitySouth = [
-    [-9.7,42.60],[-8.0,42.45],[-6.0,42.25],[-4.0,42.00],
-    [-2.0,41.55],[0.0,41.00],[2.0,39.80],[3.7,38.70]
-  ];
-  const ring = totalityNorth.concat(totalitySouth.slice().reverse());
+  // ═══ PATH OF TOTALITY (astronomy-engine MoonShadow + GeoidIntersect) ═══
+  const eclipsePath = window.ECLIPSE_DATA.path;
+  const totalityCenter = eclipsePath ? eclipsePath.center : [[-6.75, 43.68], [-3.5, 43.2]];
+  const ring = eclipsePath ? eclipsePath.ring : totalityCenter;
 
   const totalityGlow = new Graphic({
     geometry: new Polygon({ rings:[ring], spatialReference:{ wkid:4326 } }),
@@ -1824,8 +2067,10 @@ require([
   });
   eclipseLayer.add(totalityCenterLine);
 
+  const pathLabelLon = eclipsePath ? eclipsePath.labelLon : -4.5;
+  const pathLabelLat = eclipsePath ? eclipsePath.labelLat : 43.4;
   labelLayer.add(new Graphic({
-    geometry: new Point({ longitude:-0.8, latitude:43.75, spatialReference:{ wkid:4326 } }),
+    geometry: new Point({ longitude:pathLabelLon, latitude:pathLabelLat, spatialReference:{ wkid:4326 } }),
     symbol: new TextSymbol({
       text: "PATH OF TOTALITY · 12 AUG 2026",
       color: [168,40,58,0.95],
@@ -2109,7 +2354,19 @@ require([
     chipEl.textContent = 'Day ' + d.n;
     emojiEl.textContent = d.emoji;
     dateEl.textContent = d.dow + ' · ' + d.date;
-    descEl.textContent = d.title;
+    if (d.mode === 'eclipse' && window.ECLIPSE_DATA) {
+      const ec = window.ECLIPSE_DATA;
+      const h = ec.hornedo;
+      const ev = (e) => e ? ec.formatTimeShortCEST(e.time.date) : '—';
+      descEl.textContent =
+        'Partial ' + ev(h.partial_begin) +
+        ' · Totality ' + ev(h.total_begin) + '–' + ev(h.total_end) +
+        ' · Max ' + ev(h.peak) +
+        ' · ' + Math.round(ec.totalitySec) + 's · ' +
+        Math.round(ec.axisDistKm) + ' km off centerline';
+    } else {
+      descEl.textContent = d.title;
+    }
 
     // Duolingo phrase of the day
     const p = PHRASES[n-1];
