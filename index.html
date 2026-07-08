@@ -11,9 +11,9 @@
   <meta name="format-detection" content="telephone=no"/>
   <title>Eclipse 2026 · Flynn Family · Northern Spain</title>
 
-  <!-- ArcGIS JS API 4.28 (light; we override for eclipse) -->
-  <link id="esri-theme" rel="stylesheet" href="https://js.arcgis.com/4.28/esri/themes/light/main.css"/>
-  <script src="https://js.arcgis.com/4.28/"></script>
+  <!-- Leaflet (keyless map — no API key required) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="astronomy.browser.min.js"></script>
 
   <!-- Google Fonts -->
@@ -804,16 +804,6 @@
     }
     .legend-label { font-size: 0.6rem; color: var(--muted); letter-spacing: 0.03em; }
 
-    /* popup overrides */
-    .esri-popup__header-title {
-      font-family: 'Cormorant Garamond', serif !important;
-      font-size: 1.15rem !important;
-      font-style: italic;
-    }
-
-    /* Esri UI tuning */
-    .esri-ui-top-right { margin-top: 0.5rem !important; margin-right: 14.5rem !important; }
-
     /* ═══ DAY SLIDER ═══════════════════════════════════ */
     .day-slider {
       position: absolute;
@@ -1078,7 +1068,6 @@
       #map-container { flex: none; height: 55vh; min-height: 360px; }
       .map-overlay { display: none; }
       .day-slider { left: 0.5rem; right: 0.5rem; bottom: 0.5rem; padding: 0.5rem 0.6rem; }
-      .esri-ui-top-right { margin-right: 0.75rem !important; }
     }
 
     @media (max-width: 600px) {
@@ -1629,6 +1618,53 @@
         font-size: 8.5px; color: #4A3420;
       }
     }
+
+    /* ═══ LEAFLET MAP ══════════════════════════════════ */
+    #viewDiv { width: 100%; height: 100%; background: var(--bg-2); }
+    .leaflet-container { font-family: 'Josefin Sans', sans-serif; background: var(--bg-2); }
+    body[data-theme="eclipse"] .leaflet-container,
+    body[data-theme="eclipse"] #viewDiv { background: #0A0711; }
+    /* drop the zoom control below the "a la costa verde" corner badge */
+    .leaflet-top.leaflet-left { top: 3.2rem; }
+    .leaflet-bar a, .leaflet-bar a:hover {
+      background: var(--panel); color: var(--text-hi); border-bottom-color: var(--border);
+    }
+    body[data-theme="eclipse"] .leaflet-bar a { background: var(--panel-2); color: var(--text-hi); }
+    .leaflet-control-attribution {
+      font-size: 9px; background: rgba(255,248,228,0.72); color: #6A4A2A;
+    }
+    .leaflet-control-attribution a { color: #8A5A2A; }
+    body[data-theme="eclipse"] .leaflet-control-attribution { background: rgba(20,16,26,0.7); color: #9C8A72; }
+    body[data-theme="eclipse"] .leaflet-control-attribution a { color: #C9A96A; }
+
+    /* map text labels (divIcons, centred on their point) */
+    .map-label {
+      position: absolute; left: 0; top: 0;
+      white-space: nowrap; pointer-events: none;
+      font-family: 'Cormorant Garamond', serif; text-align: center;
+      will-change: transform;
+    }
+    .lbl-num { color: #FFFDF4; font-weight: 700; font-size: 11px;
+      text-shadow: 0 0 2px rgba(30,20,10,0.95), 0 0 2px rgba(30,20,10,0.95); }
+    .lbl-city { color: #1A1008; font-style: italic; font-weight: 600; font-size: 13px;
+      text-shadow: 0 1px 2px rgba(255,253,244,0.95), 0 0 3px rgba(255,253,244,0.9); }
+    body[data-theme="eclipse"] .lbl-city { color: #F2E8D4; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
+    .lbl-air { color: #1E4868; font-family: 'Josefin Sans', sans-serif; font-weight: 600; font-size: 11px;
+      text-shadow: 0 0 3px rgba(255,253,244,0.95); }
+    body[data-theme="eclipse"] .lbl-air { color: #9FD0E0; text-shadow: 0 0 3px rgba(0,0,0,0.85); }
+    .lbl-kid { color: #1E2C42; font-family: 'Josefin Sans', sans-serif; font-weight: 600; font-size: 9.5px;
+      text-shadow: 0 0 2px rgba(255,253,244,0.95); }
+    body[data-theme="eclipse"] .lbl-kid { color: #CFE0EC; text-shadow: 0 0 3px rgba(0,0,0,0.85); }
+    .lbl-emoji { font-size: 13px; line-height: 1; }
+    .lbl-totality { color: #A8283A; font-family: 'Josefin Sans', sans-serif; font-weight: 600; font-size: 10px;
+      letter-spacing: 0.05em; text-shadow: 0 0 3px rgba(255,253,244,0.95); }
+    body[data-theme="eclipse"] .lbl-totality { color: #FFC04A; text-shadow: 0 0 4px rgba(0,0,0,0.9); }
+
+    /* popups */
+    .leaflet-popup-content-wrapper { border-radius: 10px; box-shadow: 0 6px 18px rgba(90,40,10,0.28); }
+    .leaflet-popup-content { font-family: 'Josefin Sans', sans-serif; margin: 11px 13px; }
+    body[data-theme="eclipse"] .leaflet-popup-content-wrapper,
+    body[data-theme="eclipse"] .leaflet-popup-tip { background: #221A2A; color: #F2E8D4; }
   </style>
 </head>
 <body data-theme="day">
@@ -2704,52 +2740,17 @@
 </script>
 
 <script>
-require([
-  "esri/Map",
-  "esri/Basemap",
-  "esri/views/MapView",
-  "esri/Graphic",
-  "esri/layers/GraphicsLayer",
-  "esri/layers/WebTileLayer",
-  "esri/geometry/Polyline",
-  "esri/geometry/Polygon",
-  "esri/geometry/Point",
-  "esri/symbols/SimpleMarkerSymbol",
-  "esri/symbols/SimpleLineSymbol",
-  "esri/symbols/SimpleFillSymbol",
-  "esri/symbols/TextSymbol",
-  "esri/PopupTemplate"
-], function(Map, Basemap, MapView, Graphic, GraphicsLayer, WebTileLayer, Polyline, Polygon, Point,
-            SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, TextSymbol, PopupTemplate) {
+(function () {
+  // ══════════════════════════════════════════════════════
+  //  LEAFLET MAP  (keyless — CARTO / OpenStreetMap tiles)
+  // ══════════════════════════════════════════════════════
 
-  // ── KEYLESS BASEMAPS (CARTO / OpenStreetMap — no API key needed) ──
-  // Esri's *-vector basemaps require an ArcGIS API key; these free XYZ
-  // tiles keep the map working out of the box and match each theme.
-  function cartoBasemap(style, id, title) {
-    return new Basemap({
-      baseLayers: [ new WebTileLayer({
-        urlTemplate: "https://{subDomain}.basemaps.cartocdn.com/" + style + "/{level}/{col}/{row}.png",
-        subDomains: ["a", "b", "c", "d"],
-        copyright: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>'
-      })],
-      id: id,
-      title: title
-    });
-  }
-  const dayBasemap     = cartoBasemap("rastertiles/voyager", "carto-voyager", "CARTO Voyager");
-  const eclipseBasemap = cartoBasemap("dark_all",            "carto-dark",    "CARTO Dark Matter");
+  // ── colour helpers ──
+  const TERRA=[200,85,61], SANGRIA=[168,40,58], AZULEJO=[46,91,126], CREAM=[255,253,244];
+  const rgb = (c,a) => (a==null) ? 'rgb('+c[0]+','+c[1]+','+c[2]+')' : 'rgba('+c[0]+','+c[1]+','+c[2]+','+a+')';
+  const toLL = arr => arr.map(p => [p[1], p[0]]);   // [lon,lat] -> [lat,lon]
 
-  // ── PALETTE (matches day theme defaults) ──
-  const TERRA    = [200, 85, 61];
-  const SANGRIA  = [168, 40, 58];
-  const SAFFRON  = [232, 161, 58];
-  const GOLD     = [200, 144, 42];
-  const AZULEJO  = [46, 91, 126];
-  const AZUL_HI  = [85, 144, 181];
-  const CORONA   = [255, 192, 74];
-  const CREAM    = [255, 253, 244];
-
-  // ── STOPS (kept from before) ──
+  // ── STOPS ──
   const stops = [
     { id:0, name:"Bilbao",                sub:"Basque Country",            dates:"Aug 8, 2026",
       lat:43.2630, lon:-2.9350, nights:1, kind:"arrival",
@@ -2776,7 +2777,6 @@ require([
       note:"Drive back. IHG near airport. Morning flight home.",
       link:"https://www.ihg.com/hotels/us/en/pay/confirmation?confirmationNumber=24950788" }
   ];
-
   const driveRoute = stops.map(s => [s.lon, s.lat]);
 
   // ── AIRPORTS & FLIGHTS ──
@@ -2785,7 +2785,6 @@ require([
     MAD: { code:"MAD", lon:-3.5626,  lat:40.4719, name:"Madrid-Barajas",         city:"Madrid" },
     BIO: { code:"BIO", lon:-2.9106,  lat:43.3011, name:"Bilbao Airport",         city:"Bilbao" }
   };
-
   const FLIGHTS = [
     { id:"OUT1", from:"CLT", to:"MAD", date:"Aug 8, 2026",  dir:"out",  leg:"Transatlantic", dur:"~7.5 hrs", note:"Overnight departure from Charlotte" },
     { id:"OUT2", from:"MAD", to:"BIO", date:"Aug 8, 2026",  dir:"out",  leg:"Connection",    dur:"~1 hr",    note:"Short hop to the north coast" },
@@ -2793,424 +2792,201 @@ require([
     { id:"RET2", from:"MAD", to:"CLT", date:"Aug 21, 2026", dir:"back", leg:"Transatlantic", dur:"~9 hrs",   note:"Daytime flight home" }
   ];
 
-  // Great-circle arc between two lon/lat points
+  // Great-circle arc between two lon/lat points -> array of [lon,lat]
   function gcArc(lon1, lat1, lon2, lat2, steps) {
     const toRad = Math.PI/180, toDeg = 180/Math.PI;
-    const φ1 = lat1*toRad, λ1 = lon1*toRad;
-    const φ2 = lat2*toRad, λ2 = lon2*toRad;
+    const p1 = lat1*toRad, l1 = lon1*toRad, p2 = lat2*toRad, l2 = lon2*toRad;
     const d = 2*Math.asin(Math.sqrt(
-      Math.pow(Math.sin((φ2-φ1)/2),2) +
-      Math.cos(φ1)*Math.cos(φ2)*Math.pow(Math.sin((λ2-λ1)/2),2)
-    ));
+      Math.pow(Math.sin((p2-p1)/2),2) + Math.cos(p1)*Math.cos(p2)*Math.pow(Math.sin((l2-l1)/2),2)));
     const pts = [];
-    for (let i = 0; i <= steps; i++) {
+    for (let i=0; i<=steps; i++) {
       const f = i/steps;
-      const A = Math.sin((1-f)*d)/Math.sin(d);
-      const B = Math.sin(f*d)/Math.sin(d);
-      const x = A*Math.cos(φ1)*Math.cos(λ1) + B*Math.cos(φ2)*Math.cos(λ2);
-      const y = A*Math.cos(φ1)*Math.sin(λ1) + B*Math.cos(φ2)*Math.sin(λ2);
-      const z = A*Math.sin(φ1) + B*Math.sin(φ2);
-      const φ = Math.atan2(z, Math.sqrt(x*x+y*y));
-      const λ = Math.atan2(y, x);
-      pts.push([λ*toDeg, φ*toDeg]);
+      const A = Math.sin((1-f)*d)/Math.sin(d), B = Math.sin(f*d)/Math.sin(d);
+      const x = A*Math.cos(p1)*Math.cos(l1) + B*Math.cos(p2)*Math.cos(l2);
+      const y = A*Math.cos(p1)*Math.sin(l1) + B*Math.cos(p2)*Math.sin(l2);
+      const z = A*Math.sin(p1) + B*Math.sin(p2);
+      pts.push([Math.atan2(y,x)*toDeg, Math.atan2(z, Math.sqrt(x*x+y*y))*toDeg]);
     }
     return pts;
   }
 
   // ── MAP ──
-  const map = new Map({ basemap: dayBasemap });
+  const map = L.map('viewDiv', {
+    zoomControl: false,
+    minZoom: 3, maxZoom: 14,
+    zoomSnap: 0.5,
+    worldCopyJump: true
+  }).setView([43.1, -5.5], 7);
+  L.control.zoom({ position: 'topleft' }).addTo(map);
 
-  const view = new MapView({
-    container: "viewDiv",
-    map: map,
-    center: [-5.5, 43.1],
-    zoom: 7,
-    ui: { components: ["zoom"] },
-    constraints: { minZoom: 3, maxZoom: 14 },
-    padding: { right: 30, bottom: 110 }
-  });
-  view.ui.move("zoom", "top-right");
+  // stacking panes
+  [['eclipsePane',405],['flightPane',410],['routePane',415],['circlePane',430],['labelPane',640]]
+    .forEach(([n,z]) => { map.createPane(n); map.getPane(n).style.zIndex = z; });
 
-  // Layers (order matters)
-  const flightLayer   = new GraphicsLayer();
-  const eclipseLayer  = new GraphicsLayer();
-  const routeLayer    = new GraphicsLayer();
-  const markerLayer   = new GraphicsLayer();
-  const kidLayer      = new GraphicsLayer();
-  const labelLayer    = new GraphicsLayer();
-  map.addMany([flightLayer, eclipseLayer, routeLayer, markerLayer, kidLayer, labelLayer]);
+  // ── basemaps (keyless) ──
+  const attr = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
+  const dayTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    { subdomains:'abcd', maxZoom:19, attribution:attr });
+  const eclipseTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    { subdomains:'abcd', maxZoom:19, attribution:attr });
+  let currentTiles = dayTiles.addTo(map);
+
+  // ── text-label helper (divIcon centred on the point) ──
+  function lbl(lat, lon, cls, text, dy, rot) {
+    const t = 'translate(-50%,-50%) translateY(' + (dy||0) + 'px)' + (rot ? ' rotate(' + rot + 'deg)' : '');
+    return L.marker([lat,lon], { interactive:false, keyboard:false, pane:'labelPane',
+      icon: L.divIcon({ className:'', iconSize:[0,0],
+        html:'<span class="map-label ' + cls + '" style="transform:' + t + '">' + text + '</span>' }) }).addTo(map);
+  }
+  const popOpts = { closeButton:true, autoPan:true, maxWidth:240 };
 
   // ═══ FLIGHT PATHS ═════════════════════════════════
-  const flightPopup = new PopupTemplate({
-    title: "{title}",
-    content: "{content}"
-  });
-
   FLIGHTS.forEach(f => {
     const a = AIRPORTS[f.from], b = AIRPORTS[f.to];
-    const pts = gcArc(a.lon, a.lat, b.lon, b.lat, 64);
-    const isReturn = f.dir === "back";
-
-    // Glow halo
-    flightLayer.add(new Graphic({
-      geometry: new Polyline({ paths:[pts], spatialReference:{ wkid:4326 } }),
-      symbol: new SimpleLineSymbol({
-        color: isReturn ? [85,144,181,0.15] : [46,91,126,0.15],
-        width: 8, style:"solid", cap:"round", join:"round"
-      })
-    }));
-
-    // Main dashed arc
-    flightLayer.add(new Graphic({
-      geometry: new Polyline({ paths:[pts], spatialReference:{ wkid:4326 } }),
-      symbol: new SimpleLineSymbol({
-        color: isReturn ? [85,144,181,0.9] : [46,91,126,0.95],
-        width: isReturn ? 1.8 : 2.2,
-        style: isReturn ? "dash" : "short-dash",
-        cap: "round"
-      }),
-      attributes: {
-        title: '✈ ' + a.code + ' → ' + b.code + '  ·  ' + f.leg,
-        content:
-          '<div style="font-family:\'Josefin Sans\',sans-serif;font-size:12px;line-height:1.6;">' +
-          '<div style="color:#C8553D;letter-spacing:0.1em;text-transform:uppercase;font-size:10px;margin-bottom:6px;">' + (isReturn ? 'Return leg' : 'Outbound leg') + ' · ' + f.date + '</div>' +
-          '<div><strong>From:</strong> ' + a.name + ' (' + a.code + ')</div>' +
-          '<div><strong>To:</strong> ' + b.name + ' (' + b.code + ')</div>' +
-          '<div><strong>Duration:</strong> ' + f.dur + '</div>' +
-          '<div style="margin-top:8px;opacity:0.85;font-style:italic;">' + f.note + '</div>' +
-          '</div>'
-      },
-      popupTemplate: flightPopup
-    }));
+    const pts = toLL(gcArc(a.lon, a.lat, b.lon, b.lat, 64));
+    const ret = f.dir === "back";
+    L.polyline(pts, { pane:'flightPane', color:rgb(ret?[85,144,181]:AZULEJO), opacity:0.15, weight:8, lineCap:'round', lineJoin:'round' }).addTo(map);
+    L.polyline(pts, { pane:'flightPane', color:rgb(ret?[85,144,181]:AZULEJO, ret?0.9:0.95), weight:ret?1.8:2.2, dashArray:ret?'10 8':'6 6', lineCap:'round' })
+      .addTo(map)
+      .bindPopup(
+        '<div style="font-family:\'Josefin Sans\',sans-serif;font-size:12px;line-height:1.6;">' +
+        '<div style="font-weight:600;font-size:13px;">✈ ' + a.code + ' → ' + b.code + ' · ' + f.leg + '</div>' +
+        '<div style="color:#C8553D;letter-spacing:0.1em;text-transform:uppercase;font-size:10px;margin:4px 0 6px;">' + (ret?'Return leg':'Outbound leg') + ' · ' + f.date + '</div>' +
+        '<div><strong>From:</strong> ' + a.name + ' (' + a.code + ')</div>' +
+        '<div><strong>To:</strong> ' + b.name + ' (' + b.code + ')</div>' +
+        '<div><strong>Duration:</strong> ' + f.dur + '</div>' +
+        '<div style="margin-top:8px;opacity:0.85;font-style:italic;">' + f.note + '</div></div>', popOpts);
   });
-
-  // Airport markers
   Object.values(AIRPORTS).forEach(a => {
-    const pt = new Point({ longitude:a.lon, latitude:a.lat, spatialReference:{ wkid:4326 } });
-    flightLayer.add(new Graphic({
-      geometry: pt,
-      symbol: new SimpleMarkerSymbol({
-        style: "circle",
-        color: [255,253,244,1],
-        size: "9px",
-        outline: { color: AZULEJO.concat([1]), width: 2 }
-      }),
-      attributes: {
-        title: '✈ ' + a.name + ' (' + a.code + ')',
-        content: '<div style="font-family:\'Josefin Sans\',sans-serif;font-size:12px;">' + a.city + '</div>'
-      },
-      popupTemplate: new PopupTemplate({ title:"{title}", content:"{content}" })
-    }));
-    flightLayer.add(new Graphic({
-      geometry: pt,
-      symbol: new TextSymbol({
-        text: a.code,
-        color: [30, 72, 104, 1],
-        haloColor: [255, 253, 244, 0.95],
-        haloSize: 2,
-        font: { size: 10, family:"Josefin Sans", weight:"600" },
-        xoffset: 0, yoffset: -16
-      })
-    }));
+    L.circleMarker([a.lat, a.lon], { pane:'circlePane', radius:4.5, color:rgb(AZULEJO), weight:2, fillColor:'#FFFDF4', fillOpacity:1 })
+      .addTo(map)
+      .bindPopup('<div style="font-family:\'Josefin Sans\',sans-serif;font-size:12px;"><b>✈ ' + a.name + ' (' + a.code + ')</b><br>' + a.city + '</div>', popOpts);
+    lbl(a.lat, a.lon, 'lbl-air', a.code, -16);
   });
 
   // ═══ DRIVE ROUTE ══════════════════════════════════
-  // realRoutes[i] holds the OSRM road geometry for stops[i] → stops[i+1]
   const realRoutes = new Array(stops.length - 1).fill(null);
+  const routeGlow = L.polyline(toLL(driveRoute), { pane:'routePane', color:rgb(TERRA), opacity:0.18, weight:7, lineCap:'round', lineJoin:'round' }).addTo(map);
+  const routeMain = L.polyline(toLL(driveRoute), { pane:'routePane', color:rgb(TERRA), opacity:0.95, weight:2.4, dashArray:'6 6', lineCap:'round' }).addTo(map);
 
-  const routeGlow = new Graphic({
-    geometry: new Polyline({ paths:[driveRoute], spatialReference:{ wkid:4326 } }),
-    symbol: new SimpleLineSymbol({
-      color: [200,85,61,0.18], width: 7, style:"solid", cap:"round", join:"round"
-    })
-  });
-  const routeMain = new Graphic({
-    geometry: new Polyline({ paths:[driveRoute], spatialReference:{ wkid:4326 } }),
-    symbol: new SimpleLineSymbol({
-      color: [200,85,61,0.95], width: 2.4, style:"short-dash", cap:"round"
-    })
-  });
-  routeLayer.addMany([routeGlow, routeMain]);
-
-  // Fetch real driving routes from OSRM public demo server
   async function fetchOSRMRoute(a, b) {
     const url = 'https://router.project-osrm.org/route/v1/driving/' +
-      a.lon + ',' + a.lat + ';' + b.lon + ',' + b.lat +
-      '?overview=full&geometries=geojson';
+      a.lon + ',' + a.lat + ';' + b.lon + ',' + b.lat + '?overview=full&geometries=geojson';
     try {
       const r = await fetch(url);
       if (!r.ok) throw new Error('HTTP ' + r.status);
       const data = await r.json();
       if (!data.routes || !data.routes.length) return null;
       return data.routes[0].geometry.coordinates; // [[lon,lat], ...]
-    } catch (e) {
-      console.warn('OSRM fetch failed for', a.name, '→', b.name, e);
-      return null;
-    }
+    } catch (e) { console.warn('OSRM fetch failed', a.name, '→', b.name, e); return null; }
   }
-
   function combinedRouteCoords() {
     const combined = [];
     for (let i = 0; i < stops.length - 1; i++) {
       const seg = realRoutes[i] || [[stops[i].lon, stops[i].lat], [stops[i+1].lon, stops[i+1].lat]];
-      seg.forEach((p, idx) => {
-        if (i === 0 || idx > 0) combined.push(p);
-      });
+      seg.forEach((p, idx) => { if (i === 0 || idx > 0) combined.push(p); });
     }
     return combined;
   }
-
   function refreshRouteGeometry() {
-    const coords = combinedRouteCoords();
-    routeGlow.geometry = new Polyline({ paths:[coords], spatialReference:{ wkid:4326 } });
-    routeMain.geometry = new Polyline({ paths:[coords], spatialReference:{ wkid:4326 } });
+    const ll = toLL(combinedRouteCoords());
+    routeGlow.setLatLngs(ll); routeMain.setLatLngs(ll);
   }
-
   (async function loadAllRealRoutes() {
-    const results = await Promise.all(
-      stops.slice(0, -1).map((a, i) => fetchOSRMRoute(a, stops[i+1]))
-    );
+    const results = await Promise.all(stops.slice(0, -1).map((a, i) => fetchOSRMRoute(a, stops[i+1])));
     results.forEach((r, i) => { realRoutes[i] = r; });
     refreshRouteGeometry();
-    // If the user is currently on a drive day, rerun to pick up real road geometry
     if (typeof DAYS !== 'undefined' && typeof currentDay === 'number') {
       const d = DAYS[currentDay - 1];
-      if (d && d.mode === 'drive' && typeof animateAlong === 'function') {
-        animateAlong(driveSegment(d.from, d.to), carEl, 4000);
-      }
+      if (d && d.mode === 'drive') animateAlong(driveSegment(d.from, d.to), carEl, 4000);
     }
   })();
-
-  // Shimmer
+  // shimmer
   let dashIdx = 0;
-  setInterval(() => {
-    dashIdx = (dashIdx + 1) % 2;
-    const sym = routeMain.symbol.clone();
-    sym.style = dashIdx === 0 ? "short-dash" : "dash";
-    routeMain.symbol = sym;
-  }, 700);
+  setInterval(() => { dashIdx = (dashIdx + 1) % 2; routeMain.setStyle({ dashArray: dashIdx === 0 ? '6 6' : '10 6' }); }, 700);
 
-  // ═══ PATH OF TOTALITY (astronomy-engine MoonShadow + GeoidIntersect) ═══
-  const eclipsePath = window.ECLIPSE_DATA.path;
+  // ═══ PATH OF TOTALITY ═════════════════════════════
+  const ED = window.ECLIPSE_DATA || {};
+  const eclipsePath = ED.path;
   const totalityCenter = eclipsePath ? eclipsePath.center : [[-6.75, 43.68], [-3.5, 43.2]];
   const ring = eclipsePath ? eclipsePath.ring : totalityCenter;
 
-  const totalityGlow = new Graphic({
-    geometry: new Polygon({ rings:[ring], spatialReference:{ wkid:4326 } }),
-    symbol: new SimpleFillSymbol({
-      color: [255,192,74,0.14],
-      outline: { color: [232,155,22,0.55], width: 0.8, style:"dash" }
-    })
-  });
-  eclipseLayer.add(totalityGlow);
-
-  const totalityBand = new Graphic({
-    geometry: new Polygon({ rings:[ring], spatialReference:{ wkid:4326 } }),
-    symbol: new SimpleFillSymbol({
-      color: [255,192,74,0.10],
-      outline: { color:[0,0,0,0], width:0 }
-    })
-  });
-  eclipseLayer.add(totalityBand);
-
-  const totalityCenterLine = new Graphic({
-    geometry: new Polyline({ paths:[totalityCenter], spatialReference:{ wkid:4326 } }),
-    symbol: new SimpleLineSymbol({
-      color: [168,40,58,0.7], width: 1.3, style:"long-dash-dot"
-    })
-  });
-  eclipseLayer.add(totalityCenterLine);
-
-  const pathLabelLon = eclipsePath ? eclipsePath.labelLon : -4.5;
-  const pathLabelLat = eclipsePath ? eclipsePath.labelLat : 43.4;
-  labelLayer.add(new Graphic({
-    geometry: new Point({ longitude:pathLabelLon, latitude:pathLabelLat, spatialReference:{ wkid:4326 } }),
-    symbol: new TextSymbol({
-      text: "PATH OF TOTALITY · 12 AUG 2026",
-      color: [168,40,58,0.95],
-      haloColor: [255,253,244,0.95],
-      haloSize: 2,
-      font: { size: 10, family:"Josefin Sans", weight:"600" },
-      angle: -10
-    })
-  }));
+  const totalityGlow = L.polygon(toLL(ring), { pane:'eclipsePane', color:rgb([232,155,22],0.55), weight:0.8, dashArray:'4 4', fillColor:rgb([255,192,74]), fillOpacity:0.14 }).addTo(map);
+  const totalityBand = L.polygon(toLL(ring), { pane:'eclipsePane', stroke:false, fillColor:rgb([255,192,74]), fillOpacity:0.10 }).addTo(map);
+  const totalityCenterLine = L.polyline(toLL(totalityCenter), { pane:'eclipsePane', color:rgb(SANGRIA,0.7), weight:1.3, dashArray:'16 6 2 6' }).addTo(map);
+  lbl(eclipsePath ? eclipsePath.labelLat : 43.4, eclipsePath ? eclipsePath.labelLon : -4.5, 'lbl-totality', 'PATH OF TOTALITY · 12 AUG 2026', 0, -10);
 
   // ═══ STOP MARKERS ═════════════════════════════════
   const stopGraphics = [];
   stops.forEach((s, i) => {
-    const pt = new Point({ longitude:s.lon, latitude:s.lat, spatialReference:{ wkid:4326 } });
     const base = s.kind === "return" ? AZULEJO : TERRA;
-
-    // halo
-    const halo = new Graphic({
-      geometry: pt,
-      symbol: new SimpleMarkerSymbol({
-        style:"circle",
-        color: [base[0],base[1],base[2],0.14],
-        size:"30px",
-        outline: { color:[base[0],base[1],base[2],0.4], width:1 }
-      })
-    });
-
-    // ring
-    const ring2 = new Graphic({
-      geometry: pt,
-      symbol: new SimpleMarkerSymbol({
-        style:"circle",
-        color:[0,0,0,0],
-        size:"20px",
-        outline:{ color:[base[0],base[1],base[2],0.7], width:1.3 }
-      })
-    });
-
-    // inner dot
-    const dot = new Graphic({
-      geometry: pt,
-      symbol: new SimpleMarkerSymbol({
-        style:"circle",
-        color:[base[0],base[1],base[2],0.95],
-        size:"13px",
-        outline:{ color:CREAM.concat([1]), width:2 }
-      }),
-      popupTemplate: new PopupTemplate({
-        title: '<span style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:600;">' + s.name + '</span>',
-        content:
-          '<div style="font-family:\'Josefin Sans\',sans-serif;font-size:12px;line-height:1.6;">' +
-          '<div style="color:#C8553D;margin-bottom:6px;letter-spacing:0.1em;text-transform:uppercase;font-size:10px;">' + s.sub + '</div>' +
-          '<div><strong>Dates:</strong> ' + s.dates + '</div>' +
-          '<div><strong>Nights:</strong> ' + s.nights + '</div>' +
-          '<div style="margin-top:6px;opacity:0.85;">' + s.note + '</div>' +
-          '<a href="' + s.link + '" target="_blank" rel="noopener" style="color:#C8902A;font-size:11px;display:inline-block;margin-top:8px;">→ view booking</a>' +
-          '</div>'
-      }),
-      attributes: { id: i }
-    });
-
-    // number
-    const numText = s.kind === "return" ? "✈" : String(i+1);
-    const numLabel = new Graphic({
-      geometry: pt,
-      symbol: new TextSymbol({
-        text: numText,
-        color: CREAM.concat([1]),
-        haloColor: [30,20,10,0.7],
-        haloSize: 1,
-        font: { size: 9, family:"Cormorant Garamond", weight:"700" },
-        xoffset: 0, yoffset: -3
-      })
-    });
-
-    // city name
-    const cityLabel = new Graphic({
-      geometry: pt,
-      symbol: new TextSymbol({
-        text: s.name,
-        color: [30,20,10,1],
-        haloColor: [255,253,244,0.95],
-        haloSize: 2,
-        font: { size: 11, family:"Cormorant Garamond", weight:"600", style:"italic" },
-        xoffset: 0, yoffset: 14
-      })
-    });
-
-    markerLayer.addMany([halo, ring2, dot]);
-    labelLayer.addMany([numLabel, cityLabel]);
-    stopGraphics.push({ halo, ring:ring2, dot, base, numLabel, cityLabel });
+    const halo = L.circleMarker([s.lat, s.lon], { pane:'circlePane', interactive:false, radius:13, stroke:true, color:rgb(base,0.4), weight:1, fillColor:rgb(base), fillOpacity:0.14 }).addTo(map);
+    L.circleMarker([s.lat, s.lon], { pane:'circlePane', interactive:false, radius:10, color:rgb(base,0.7), weight:1.3, fill:false }).addTo(map);
+    L.circleMarker([s.lat, s.lon], { pane:'circlePane', radius:6.5, color:rgb(CREAM), weight:2, fillColor:rgb(base), fillOpacity:0.95 })
+      .addTo(map)
+      .on('click', () => activateStop(i, true))
+      .bindPopup(
+        '<div style="font-family:\'Josefin Sans\',sans-serif;font-size:12px;line-height:1.6;">' +
+        '<div style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:600;font-size:15px;">' + s.name + '</div>' +
+        '<div style="color:#C8553D;margin:4px 0 6px;letter-spacing:0.1em;text-transform:uppercase;font-size:10px;">' + s.sub + '</div>' +
+        '<div><strong>Dates:</strong> ' + s.dates + '</div>' +
+        '<div><strong>Nights:</strong> ' + s.nights + '</div>' +
+        '<div style="margin-top:6px;opacity:0.85;">' + s.note + '</div>' +
+        '<a href="' + s.link + '" target="_blank" rel="noopener" style="color:#C8902A;font-size:11px;display:inline-block;margin-top:8px;">→ view booking</a></div>', popOpts);
+    lbl(s.lat, s.lon, 'lbl-num', s.kind === "return" ? "✈" : String(i+1), -1);
+    lbl(s.lat, s.lon, 'lbl-city', s.name, 15);
+    stopGraphics.push({ halo, base });
   });
-
-  // Halo pulse
+  // halo pulse
   let pulseT = 0;
   setInterval(() => {
     pulseT += 0.12;
     stopGraphics.forEach((sg, i) => {
       const phase = Math.sin(pulseT + i*0.6);
-      const size = 26 + phase * 6;
-      const alpha = 0.10 + (phase+1) * 0.06;
-      const sym = sg.halo.symbol.clone();
-      sym.size = size + "px";
-      sym.color = [sg.base[0], sg.base[1], sg.base[2], alpha];
-      sg.halo.symbol = sym;
+      sg.halo.setRadius(13 + phase*3);
+      sg.halo.setStyle({ fillOpacity: 0.10 + (phase+1)*0.06 });
     });
   }, 80);
 
-  // ═══ STOP FOCUS ═══════════════════════════════════
-  window.focusStop = function(id) {
-    const s = stops[id];
-    view.goTo({ center:[s.lon, s.lat], zoom: 10 }, { duration: 900, easing:"ease-in-out" });
+  function activateStop(id, scroll) {
     document.querySelectorAll('.stop').forEach(el => el.classList.remove('active'));
     const el = document.querySelector('[data-stop="' + id + '"]');
-    if (el) el.classList.add('active');
+    if (el) { el.classList.add('active'); if (scroll) el.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+  }
+
+  window.focusStop = function(id) {
+    const s = stops[id];
+    map.flyTo([s.lat, s.lon], 10, { duration: 0.9 });
+    activateStop(id, false);
   };
 
   // ═══ KIDS' PLAYGROUND MARKERS 🛝 ═══════════════════
-  const KID_BLUE = AZULEJO;
+  const kidGroup = L.layerGroup();
   (typeof KID_SPOTS !== 'undefined' ? KID_SPOTS : []).forEach(k => {
-    const pt = new Point({ longitude:k.lon, latitude:k.lat, spatialReference:{ wkid:4326 } });
-
-    // soft halo
-    kidLayer.add(new Graphic({
-      geometry: pt,
-      symbol: new SimpleMarkerSymbol({
-        style:"circle",
-        color:[85,144,181,0.16],
-        size:"26px",
-        outline:{ color:[46,91,126,0.4], width:1 }
-      })
-    }));
-
-    // white pin disc (tap target) with popup
-    kidLayer.add(new Graphic({
-      geometry: pt,
-      symbol: new SimpleMarkerSymbol({
-        style:"circle",
-        color:[255,253,244,0.96],
-        size:"20px",
-        outline:{ color:[46,91,126,0.9], width:1.6 }
-      }),
-      popupTemplate: new PopupTemplate({
-        title: '<span style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:600;">' + k.emoji + ' ' + k.name + '</span>',
-        content:
-          '<div style="font-family:\'Josefin Sans\',sans-serif;font-size:12px;line-height:1.6;">' +
-          '<div style="color:#2E5B7E;margin-bottom:6px;letter-spacing:0.1em;text-transform:uppercase;font-size:10px;">' + k.near + '</div>' +
-          '<div style="opacity:0.9;">' + k.note + '</div>' +
-          '<a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(k.q) + '" target="_blank" rel="noopener" style="color:#C8553D;font-size:11px;display:inline-block;margin-top:8px;">📍 open in Maps</a>' +
-          '</div>'
-      }),
-      attributes: { kid: true }
-    }));
-
-    // emoji on top
-    kidLayer.add(new Graphic({
-      geometry: pt,
-      symbol: new TextSymbol({
-        text: k.emoji,
-        font: { size: 11 },
-        yoffset: -1
-      })
-    }));
-
-    // name label below (kept in kidLayer so it hides with the toggle)
-    kidLayer.add(new Graphic({
-      geometry: pt,
-      symbol: new TextSymbol({
-        text: k.name,
-        color: [30,44,66,1],
-        haloColor: [255,253,244,0.95],
-        haloSize: 1.6,
-        font: { size: 8.5, family:"Josefin Sans", weight:"600" },
-        xoffset: 0, yoffset: -13
-      })
-    }));
+    L.circleMarker([k.lat, k.lon], { pane:'circlePane', interactive:false, radius:13, color:rgb(AZULEJO,0.4), weight:1, fillColor:rgb([85,144,181]), fillOpacity:0.16 }).addTo(kidGroup);
+    L.circleMarker([k.lat, k.lon], { pane:'circlePane', radius:10, color:rgb(AZULEJO,0.9), weight:1.6, fillColor:rgb(CREAM), fillOpacity:0.96 })
+      .addTo(kidGroup)
+      .bindPopup(
+        '<div style="font-family:\'Josefin Sans\',sans-serif;font-size:12px;line-height:1.6;">' +
+        '<div style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:600;font-size:15px;">' + k.emoji + ' ' + k.name + '</div>' +
+        '<div style="color:#2E5B7E;margin:4px 0 6px;letter-spacing:0.1em;text-transform:uppercase;font-size:10px;">' + k.near + '</div>' +
+        '<div style="opacity:0.9;">' + k.note + '</div>' +
+        '<a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(k.q) + '" target="_blank" rel="noopener" style="color:#C8553D;font-size:11px;display:inline-block;margin-top:8px;">📍 open in Maps</a></div>', popOpts);
+    const em = L.marker([k.lat, k.lon], { interactive:false, keyboard:false, pane:'labelPane',
+      icon: L.divIcon({ className:'', iconSize:[0,0], html:'<span class="map-label lbl-emoji" style="transform:translate(-50%,-50%)">' + k.emoji + '</span>' }) });
+    const nm = L.marker([k.lat, k.lon], { interactive:false, keyboard:false, pane:'labelPane',
+      icon: L.divIcon({ className:'', iconSize:[0,0], html:'<span class="map-label lbl-kid" style="transform:translate(-50%,-50%) translateY(-13px)">' + k.name + '</span>' }) });
+    kidGroup.addLayer(em); kidGroup.addLayer(nm);
   });
+  kidGroup.addTo(map);
 
-  // Fly the map to an arbitrary point (used by the kids cards)
   window.focusPoint = function(lon, lat, zoom) {
-    kidLayer.visible = true;
+    if (!map.hasLayer(kidGroup)) map.addLayer(kidGroup);
     syncKidToggle(true);
-    view.goTo({ center:[lon, lat], zoom: zoom || 13 }, { duration: 900, easing:"ease-in-out" });
+    map.flyTo([lat, lon], zoom || 13, { duration: 0.9 });
   };
 
-  // ═══ KIDS' SPOTS TOGGLE ════════════════════════════
+  // toggle
   const kidToggleBtn = document.getElementById('kid-toggle');
   const kidCountEl = document.getElementById('kt-count');
   if (kidCountEl && typeof KID_SPOTS !== 'undefined') kidCountEl.textContent = KID_SPOTS.length;
@@ -3219,35 +2995,10 @@ require([
     kidToggleBtn.classList.toggle('on', on);
     kidToggleBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
   }
-  if (kidToggleBtn) {
-    kidToggleBtn.addEventListener('click', () => {
-      const on = !kidLayer.visible;
-      kidLayer.visible = on;
-      syncKidToggle(on);
-    });
-  }
-
-  // Click map → highlight sidebar
-  view.on("click", (event) => {
-    view.hitTest(event).then(resp => {
-      if (resp.results.length > 0) {
-        for (let r = 0; r < resp.results.length; r++) {
-          const g = resp.results[r].graphic;
-          const id = g.attributes && g.attributes.id;
-          if (id !== undefined && typeof id === "number" && id >= 0 && id < 6) {
-            document.querySelectorAll('.stop').forEach(el => el.classList.remove('active'));
-            const el = document.querySelector('[data-stop="' + id + '"]');
-            if (el) { el.classList.add('active'); el.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
-            break;
-          }
-        }
-      }
-    });
-  });
-
-  // ═══ INITIAL VIEW ═════════════════════════════════
-  view.when(() => {
-    view.goTo({ center:[-5.5, 43.1], zoom: 6.5 }, { duration: 1800, easing:"ease-out" });
+  if (kidToggleBtn) kidToggleBtn.addEventListener('click', () => {
+    const on = !map.hasLayer(kidGroup);
+    if (on) map.addLayer(kidGroup); else map.removeLayer(kidGroup);
+    syncKidToggle(on);
   });
 
   // ═══ VEHICLE ANIMATION (DOM overlay) ══════════════
@@ -3255,85 +3006,54 @@ require([
   const planeEl = document.getElementById('plane');
   let vehicleAnim = null;
 
-  function lonLatToScreen(lon, lat) {
-    const sp = view.toScreen(new Point({ longitude:lon, latitude:lat, spatialReference:{ wkid:4326 } }));
-    return sp; // {x, y}
-  }
-
   function stopVehicleAnim() {
     if (vehicleAnim) { cancelAnimationFrame(vehicleAnim.raf); vehicleAnim = null; }
-    carEl.classList.add('hidden');
-    planeEl.classList.add('hidden');
+    carEl.classList.add('hidden'); planeEl.classList.add('hidden');
   }
-
   function animateAlong(points, el, loopMs, opts) {
     opts = opts || {};
     stopVehicleAnim();
     el.classList.remove('hidden');
-
     const start = performance.now();
     const obj = { raf: 0 };
-
-    function segLen(p, q) { return Math.hypot(q[0]-p[0], q[1]-p[1]); }
+    const seg = (p,q) => Math.hypot(q[0]-p[0], q[1]-p[1]);
     const totals = [0];
-    for (let i = 1; i < points.length; i++) totals.push(totals[i-1] + segLen(points[i-1], points[i]));
+    for (let i=1;i<points.length;i++) totals.push(totals[i-1] + seg(points[i-1], points[i]));
     const totalLen = totals[totals.length-1] || 1;
-
     function tick(now) {
-      const raw = ((now - start) % loopMs) / loopMs; // 0..1
-      const d = raw * totalLen;
-
-      let i = 1;
-      while (i < totals.length && totals[i] < d) i++;
+      const raw = ((now - start) % loopMs) / loopMs;
+      const dd = raw * totalLen;
+      let i = 1; while (i < totals.length && totals[i] < dd) i++;
       if (i >= totals.length) i = totals.length - 1;
-      const f = (d - totals[i-1]) / Math.max(1e-6, totals[i] - totals[i-1]);
+      const f = (dd - totals[i-1]) / Math.max(1e-6, totals[i] - totals[i-1]);
       const p = points[i-1], q = points[i];
-      const lon = p[0] + (q[0] - p[0]) * f;
-      const lat = p[1] + (q[1] - p[1]) * f;
-      const sp = lonLatToScreen(lon, lat);
+      const lon = p[0] + (q[0]-p[0])*f, lat = p[1] + (q[1]-p[1])*f;
+      const sp = map.latLngToContainerPoint([lat, lon]);
       if (sp) {
         const heading = Math.atan2(q[1]-p[1], q[0]-p[0]) * 180 / Math.PI;
-        // Screen Y is inverted vs latitude; also emoji faces right by default
-        const screenAngle = -heading; // map lon→x (right positive), lat→y (down negative)
         el.style.left = (sp.x - 12) + 'px';
         el.style.top  = (sp.y - 12) + 'px';
         el.style.transform = opts.flip === false ? '' :
-          'rotate(' + screenAngle + 'deg)' + (Math.cos(heading*Math.PI/180) < 0 ? ' scaleY(-1)' : '');
+          'rotate(' + (-heading) + 'deg)' + (Math.cos(heading*Math.PI/180) < 0 ? ' scaleY(-1)' : '');
       }
       obj.raf = requestAnimationFrame(tick);
     }
     obj.raf = requestAnimationFrame(tick);
     vehicleAnim = obj;
   }
-
-  // Build animation points — prefer real OSRM road geometry when cached
   function driveSegment(fromStop, toStop) {
-    const lo = Math.min(fromStop, toStop);
-    const reversed = fromStop > toStop;
-    const real = realRoutes[lo];
-    if (real && real.length > 1) {
-      return reversed ? real.slice().reverse() : real.slice();
-    }
-    // Fallback: densified straight line
-    const n = 40, pts = [];
-    const a = stops[fromStop], b = stops[toStop];
-    for (let i = 0; i <= n; i++) {
-      const f = i/n;
-      pts.push([a.lon + (b.lon-a.lon)*f, a.lat + (b.lat-a.lat)*f]);
-    }
+    const lo = Math.min(fromStop, toStop), reversed = fromStop > toStop, real = realRoutes[lo];
+    if (real && real.length > 1) return reversed ? real.slice().reverse() : real.slice();
+    const n = 40, pts = [], a = stops[fromStop], b = stops[toStop];
+    for (let i=0;i<=n;i++){ const f=i/n; pts.push([a.lon+(b.lon-a.lon)*f, a.lat+(b.lat-a.lat)*f]); }
     return pts;
   }
-
   function flightPath(dir) {
-    // Build concatenated arc across the legs
-    let legs;
-    if (dir === "out") legs = [["CLT","MAD"],["MAD","BIO"]];
-    else               legs = [["BIO","MAD"],["MAD","CLT"]];
+    const legs = dir === "out" ? [["CLT","MAD"],["MAD","BIO"]] : [["BIO","MAD"],["MAD","CLT"]];
     const pts = [];
-    legs.forEach(([f, t], li) => {
+    legs.forEach(([f,t], li) => {
       const a = AIRPORTS[f], b = AIRPORTS[t];
-      const arc = gcArc(a.lon,a.lat, b.lon,b.lat, 40);
-      arc.forEach((p, i) => { if (li === 0 || i > 0) pts.push(p); });
+      gcArc(a.lon,a.lat, b.lon,b.lat, 40).forEach((p,i) => { if (li===0 || i>0) pts.push(p); });
     });
     return pts;
   }
@@ -3348,42 +3068,20 @@ require([
   const dateEl  = document.getElementById('day-date');
   const descEl  = document.getElementById('day-desc');
 
-  let currentDay = 1;
-  let playing = false;
-  let playTimer = null;
+  let currentDay = 1, playing = false, playTimer = null;
 
   function setTheme(name) {
     document.body.setAttribute('data-theme', name);
-    // swap basemap
     if (name === 'eclipse') {
-      map.basemap = eclipseBasemap;
-      // brighten corona on map
-      const gsym = totalityGlow.symbol.clone();
-      gsym.color = [255, 210, 122, 0.22];
-      gsym.outline = { color: [255,210,122,0.8], width: 1, style: "dash" };
-      totalityGlow.symbol = gsym;
-
-      const bsym = totalityBand.symbol.clone();
-      bsym.color = [255, 210, 122, 0.18];
-      totalityBand.symbol = bsym;
-
-      const csym = totalityCenterLine.symbol.clone();
-      csym.color = [255, 241, 199, 0.9];
-      totalityCenterLine.symbol = csym;
+      if (map.hasLayer(dayTiles)) { map.removeLayer(dayTiles); eclipseTiles.addTo(map); currentTiles = eclipseTiles; eclipseTiles.bringToBack(); }
+      totalityGlow.setStyle({ fillColor:rgb([255,210,122]), fillOpacity:0.22, color:rgb([255,210,122],0.8), weight:1 });
+      totalityBand.setStyle({ fillColor:rgb([255,210,122]), fillOpacity:0.18 });
+      totalityCenterLine.setStyle({ color:rgb([255,241,199],0.9) });
     } else {
-      map.basemap = dayBasemap;
-      const gsym = totalityGlow.symbol.clone();
-      gsym.color = [255,192,74,0.14];
-      gsym.outline = { color: [232,155,22,0.55], width: 0.8, style: "dash" };
-      totalityGlow.symbol = gsym;
-
-      const bsym = totalityBand.symbol.clone();
-      bsym.color = [255,192,74,0.10];
-      totalityBand.symbol = bsym;
-
-      const csym = totalityCenterLine.symbol.clone();
-      csym.color = [168,40,58,0.7];
-      totalityCenterLine.symbol = csym;
+      if (map.hasLayer(eclipseTiles)) { map.removeLayer(eclipseTiles); dayTiles.addTo(map); currentTiles = dayTiles; dayTiles.bringToBack(); }
+      totalityGlow.setStyle({ fillColor:rgb([255,192,74]), fillOpacity:0.14, color:rgb([232,155,22],0.55), weight:0.8 });
+      totalityBand.setStyle({ fillColor:rgb([255,192,74]), fillOpacity:0.10 });
+      totalityCenterLine.setStyle({ color:rgb(SANGRIA,0.7) });
     }
   }
 
@@ -3394,101 +3092,56 @@ require([
     emojiEl.textContent = d.emoji;
     dateEl.textContent = d.dow + ' · ' + d.date;
     if (d.mode === 'eclipse' && window.ECLIPSE_DATA) {
-      const ec = window.ECLIPSE_DATA;
-      const h = ec.hornedo;
-      const ev = (e) => e ? ec.formatTimeShortCEST(e.time.date) : '—';
-      descEl.textContent =
-        'Partial ' + ev(h.partial_begin) +
-        ' · Totality ' + ev(h.total_begin) + '–' + ev(h.total_end) +
-        ' · Max ' + ev(h.peak) +
-        ' · ' + Math.round(ec.totalitySec) + 's · ' +
-        Math.round(ec.axisDistKm) + ' km off centerline';
-    } else {
-      descEl.textContent = d.title;
-    }
+      const ec = window.ECLIPSE_DATA, h = ec.hornedo, ev = (e) => e ? ec.formatTimeShortCEST(e.time.date) : '—';
+      descEl.textContent = 'Partial ' + ev(h.partial_begin) + ' · Totality ' + ev(h.total_begin) + '–' + ev(h.total_end) +
+        ' · Max ' + ev(h.peak) + ' · ' + Math.round(ec.totalitySec) + 's · ' + Math.round(ec.axisDistKm) + ' km off centerline';
+    } else { descEl.textContent = d.title; }
 
-    // Duolingo phrase of the day
     const p = PHRASES[n-1];
-    const phraseEl = document.getElementById('duo-phrase');
-    const transEl  = document.getElementById('duo-translation');
-    const streakEl = document.getElementById('duo-streak-count');
+    const phraseEl = document.getElementById('duo-phrase'), transEl = document.getElementById('duo-translation'), streakEl = document.getElementById('duo-streak-count');
     if (p && phraseEl) phraseEl.textContent = p.es;
     if (p && transEl)  transEl.textContent  = p.en;
     if (streakEl) streakEl.textContent = n;
 
-    // Theme
     setTheme(d.mode === 'eclipse' ? 'eclipse' : 'day');
 
-    // Active sidebar stop
     document.querySelectorAll('.stop').forEach(el => el.classList.remove('active'));
     let targetStop = null;
     if (d.mode === 'stay' || d.mode === 'eclipse') targetStop = d.at;
     else if (d.mode === 'drive') targetStop = d.to;
     else if (d.mode === 'fly-out') targetStop = 0;
     else if (d.mode === 'fly-back') targetStop = 5;
-    if (targetStop !== null) {
-      const el = document.querySelector('[data-stop="' + targetStop + '"]');
-      if (el) el.classList.add('active');
-    }
+    if (targetStop !== null) { const el = document.querySelector('[data-stop="' + targetStop + '"]'); if (el) el.classList.add('active'); }
 
-    // Map view + vehicle animation
-    if (d.mode === 'fly-out') {
-      // Show the whole flight arc
-      view.goTo({ center: [-40, 40], zoom: 3 }, { duration: 900, easing:"ease-in-out" });
-      animateAlong(flightPath('out'), planeEl, 8000);
-    } else if (d.mode === 'fly-back') {
-      view.goTo({ center: [-40, 40], zoom: 3 }, { duration: 900, easing:"ease-in-out" });
-      animateAlong(flightPath('back'), planeEl, 8000);
+    if (d.mode === 'fly-out' || d.mode === 'fly-back') {
+      map.flyTo([40, -40], 3, { duration: 0.9 });
+      animateAlong(flightPath(d.mode === 'fly-out' ? 'out' : 'back'), planeEl, 8000);
     } else if (d.mode === 'drive') {
       const a = stops[d.from], b = stops[d.to];
-      const midLon = (a.lon + b.lon)/2, midLat = (a.lat + b.lat)/2;
-      view.goTo({ center:[midLon, midLat], zoom: 8 }, { duration: 900, easing:"ease-in-out" });
+      map.flyTo([(a.lat+b.lat)/2, (a.lon+b.lon)/2], 8, { duration: 0.9 });
       animateAlong(driveSegment(d.from, d.to), carEl, 4000);
     } else if (d.mode === 'stay' || d.mode === 'eclipse') {
       const s = stops[d.at];
-      view.goTo({ center:[s.lon, s.lat], zoom: d.mode === 'eclipse' ? 9 : 10 }, { duration: 900, easing:"ease-in-out" });
+      map.flyTo([s.lat, s.lon], d.mode === 'eclipse' ? 9 : 10, { duration: 0.9 });
       stopVehicleAnim();
-    } else {
-      stopVehicleAnim();
-    }
+    } else { stopVehicleAnim(); }
 
     rangeEl.value = n;
   }
 
-  rangeEl.addEventListener('input', (e) => {
-    applyDay(parseInt(e.target.value, 10));
-  });
-  prevBtn.addEventListener('click', () => {
-    if (currentDay > 1) applyDay(currentDay - 1);
-  });
-  nextBtn.addEventListener('click', () => {
-    if (currentDay < 14) applyDay(currentDay + 1);
-  });
+  rangeEl.addEventListener('input', (e) => applyDay(parseInt(e.target.value, 10)));
+  prevBtn.addEventListener('click', () => { if (currentDay > 1) applyDay(currentDay - 1); });
+  nextBtn.addEventListener('click', () => { if (currentDay < 14) applyDay(currentDay + 1); });
   playBtn.addEventListener('click', () => {
     playing = !playing;
     if (playing) {
-      playBtn.textContent = '❚❚';
-      playBtn.classList.add('playing');
-      playTimer = setInterval(() => {
-        if (currentDay >= 14) { applyDay(1); }
-        else applyDay(currentDay + 1);
-      }, 2200);
-    } else {
-      playBtn.textContent = '▶';
-      playBtn.classList.remove('playing');
-      clearInterval(playTimer);
-    }
+      playBtn.textContent = '❚❚'; playBtn.classList.add('playing');
+      playTimer = setInterval(() => { applyDay(currentDay >= 14 ? 1 : currentDay + 1); }, 2200);
+    } else { playBtn.textContent = '▶'; playBtn.classList.remove('playing'); clearInterval(playTimer); }
   });
 
-  // Reposition vehicle on map move (screen coords shift as map pans/zooms)
-  view.watch("extent,stationary", () => {
-    // The animation loop reads coords on each frame so it auto-adjusts.
-  });
-
-  // Init with day 1
-  setTimeout(() => applyDay(1), 400);
-
-});
+  map.whenReady(() => { setTimeout(() => applyDay(1), 400); });
+})();
 </script>
 
 </body>
