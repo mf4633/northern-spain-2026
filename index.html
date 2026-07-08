@@ -2,7 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#C8553D" media="(prefers-color-scheme: light)"/>
+  <meta name="theme-color" content="#0A0711" media="(prefers-color-scheme: dark)"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Flynns · España"/>
+  <meta name="format-detection" content="telephone=no"/>
   <title>Eclipse 2026 · Flynn Family · Northern Spain</title>
 
   <!-- ArcGIS JS API 4.28 (light; we override for eclipse) -->
@@ -119,6 +125,8 @@
         linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
       border-bottom: 2px solid var(--terra);
       padding: 0 1.75rem;
+      padding-left: max(1.75rem, env(safe-area-inset-left));
+      padding-right: max(1.75rem, env(safe-area-inset-right));
       height: 74px;
       display: flex;
       align-items: center;
@@ -1161,6 +1169,245 @@
       .day-ticks { font-size: 0.5rem; padding: 0 4px; }
       .stop-link { min-height: 36px; padding: 0.35rem 0; }
     }
+
+    /* ═══ FOR THE KIDS 🛝 ══════════════════════════════ */
+    .kids-section {
+      margin: 0;
+      padding: 1rem 1.4rem 1.3rem;
+      border-top: 1px solid var(--border);
+      background:
+        radial-gradient(circle at 12% 0%, rgba(85,144,181,0.10), transparent 45%),
+        radial-gradient(circle at 90% 10%, rgba(232,161,58,0.10), transparent 45%);
+    }
+    .kids-head { margin-bottom: 0.85rem; }
+    .kids-eyebrow {
+      font-family: 'Caveat', cursive;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--azulejo);
+      line-height: 1.1;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    body[data-theme="eclipse"] .kids-eyebrow { color: var(--azul-hi); }
+    .kids-sub {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
+      letter-spacing: 0.02em;
+    }
+    .kid-card {
+      display: flex;
+      gap: 0.7rem;
+      align-items: flex-start;
+      padding: 0.7rem 0.75rem;
+      margin-bottom: 0.6rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--azul-hi);
+      border-radius: 10px;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .kid-card:hover, .kid-card:focus-visible { transform: translateY(-2px); box-shadow: var(--shadow-md); border-left-color: var(--saffron); outline: none; }
+    .kid-card:active { transform: scale(0.99); }
+    body[data-theme="eclipse"] .kid-card { border-left-color: var(--azul-hi); }
+    .kid-emoji {
+      font-size: 1.55rem;
+      line-height: 1;
+      flex-shrink: 0;
+      margin-top: 0.05rem;
+      filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
+    }
+    .kid-body { min-width: 0; flex: 1; }
+    .kid-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 1.02rem;
+      color: var(--text-hi);
+      line-height: 1.15;
+    }
+    .kid-near {
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--terra);
+      margin-top: 0.1rem;
+    }
+    body[data-theme="eclipse"] .kid-near { color: var(--saffron); }
+    .kid-note {
+      font-size: 0.74rem;
+      color: var(--text);
+      opacity: 0.9;
+      line-height: 1.4;
+      margin-top: 0.3rem;
+    }
+    .kid-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.4rem; }
+    .kid-tag {
+      font-size: 0.56rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.16rem 0.42rem;
+      border-radius: 100px;
+      background: rgba(85,144,181,0.13);
+      color: #1E4868;
+      border: 1px solid rgba(46,91,126,0.35);
+      white-space: nowrap;
+    }
+    .kid-tag.free { background: rgba(111,130,51,0.15); color: #556B20; border-color: rgba(111,130,51,0.4); }
+    .kid-tag.tip  { background: rgba(232,161,58,0.16); color: #7A5010; border-color: rgba(232,161,58,0.45); }
+    body[data-theme="eclipse"] .kid-tag { color: #9FD0E0; border-color: rgba(122,174,191,0.4); }
+    body[data-theme="eclipse"] .kid-tag.free { color: #B8D080; }
+    body[data-theme="eclipse"] .kid-tag.tip { color: var(--gold-hi); }
+    .kid-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+    .kid-link {
+      font-size: 0.66rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      color: var(--azulejo);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.28rem;
+      min-height: 30px;
+    }
+    .kid-link.maps { color: var(--terra); }
+    .kid-link:hover { text-decoration: underline; }
+    body[data-theme="eclipse"] .kid-link { color: var(--azul-hi); }
+    body[data-theme="eclipse"] .kid-link.maps { color: var(--saffron); }
+
+    /* kid highlight chip reused inside stop cards */
+    .highlight.kid { color: var(--azulejo); font-weight: 600; }
+    body[data-theme="eclipse"] .highlight.kid { color: var(--azul-hi); }
+
+    /* ═══ ELLEN'S CORNER 🍺 ════════════════════════════ */
+    .ellen-corner {
+      margin: 0.9rem 0 0;
+      padding: 0.8rem 0.9rem;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(200,144,42,0.12), rgba(200,85,61,0.08));
+      border: 1px dashed rgba(200,144,42,0.5);
+    }
+    .ellen-title {
+      font-family: 'Caveat', cursive;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--terra);
+      display: flex; align-items: center; gap: 0.35rem;
+    }
+    body[data-theme="eclipse"] .ellen-title { color: var(--saffron); }
+    .ellen-sub { font-size: 0.68rem; color: var(--muted); margin: 0.15rem 0 0.5rem; }
+    .quest-list { display: flex; flex-direction: column; gap: 0.3rem; }
+    .quest-item {
+      display: flex; align-items: center; gap: 0.45rem;
+      font-size: 0.76rem; color: var(--text);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      min-height: 30px;
+    }
+    .quest-box {
+      width: 18px; height: 18px; flex-shrink: 0;
+      border-radius: 5px;
+      border: 1.5px solid var(--gold);
+      display: grid; place-items: center;
+      font-size: 0.7rem; color: transparent;
+      transition: background 0.15s, color 0.15s;
+    }
+    .quest-item.done .quest-box { background: var(--olive); border-color: var(--olive); color: #fff; }
+    .quest-item.done .quest-label { text-decoration: line-through; opacity: 0.6; }
+    .quest-label { line-height: 1.25; }
+
+    /* ═══ KIDS MAP TOGGLE 🛝 ═══════════════════════════ */
+    .kid-toggle {
+      position: absolute;
+      top: 0.75rem; right: 0.75rem;
+      z-index: 7;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.5rem 0.8rem;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-hi);
+      background: var(--panel);
+      border: 1.5px solid var(--azul-hi);
+      border-radius: 100px;
+      box-shadow: var(--shadow-md);
+      cursor: pointer;
+      transition: transform 0.15s, background 0.2s, box-shadow 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .kid-toggle:hover { transform: translateY(-1px); }
+    .kid-toggle:active { transform: scale(0.97); }
+    .kid-toggle.on {
+      background: var(--azulejo);
+      color: #FFF8E4;
+      border-color: var(--azulejo);
+    }
+    .kid-toggle .kt-count {
+      font-size: 0.62rem;
+      background: rgba(0,0,0,0.12);
+      border-radius: 100px;
+      padding: 0.05rem 0.4rem;
+    }
+    .kid-toggle.on .kt-count { background: rgba(255,255,255,0.22); }
+
+    /* ═══ SIDEBAR JUMP-NAV (mobile quick links) ════════ */
+    .jump-nav {
+      display: none;
+      gap: 0.4rem;
+      overflow-x: auto;
+      padding: 0.55rem 0.9rem;
+      background: var(--panel-2);
+      border-bottom: 1px solid var(--border);
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .jump-nav::-webkit-scrollbar { display: none; }
+    .jump-chip {
+      flex-shrink: 0;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--text-hi);
+      background: var(--card);
+      border: 1px solid var(--border-hi);
+      border-radius: 100px;
+      padding: 0.4rem 0.75rem;
+      white-space: nowrap;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .jump-chip.kids { border-color: var(--azul-hi); color: var(--azulejo); }
+    body[data-theme="eclipse"] .jump-chip.kids { color: var(--azul-hi); }
+
+    @media (max-width: 920px) {
+      .kid-toggle { top: 0.6rem; right: 0.6rem; }
+    }
+    @media (max-width: 600px) {
+      .jump-nav {
+        display: flex;
+        position: sticky;
+        top: 0;
+        z-index: 4;
+        padding-left: max(0.9rem, env(safe-area-inset-left));
+        padding-right: max(0.9rem, env(safe-area-inset-right));
+      }
+      /* sidebar-header no longer needs to be sticky once we have the jump bar */
+      .sidebar-header { position: relative; }
+      .kids-section { padding: 0.9rem 1rem 1.2rem; }
+      .kid-card { padding: 0.65rem 0.7rem; }
+      .kid-name { font-size: 1rem; }
+      .kid-link { min-height: 34px; font-size: 0.72rem; }
+      .kid-toggle { font-size: 0.74rem; padding: 0.45rem 0.7rem; }
+      /* keep the day slider clear of the iPhone home indicator */
+      .day-slider { bottom: max(0.4rem, env(safe-area-inset-bottom)); }
+      .quest-item { min-height: 34px; }
+    }
   </style>
 </head>
 <body data-theme="day">
@@ -1177,6 +1424,7 @@
     <div class="badge active">5 Stops</div>
     <div class="badge">13 Nights</div>
     <div class="badge">~480 mi</div>
+    <div class="badge" style="cursor:pointer;" onclick="jumpTo('#kids-section')">🛝 7 Playgrounds</div>
   </div>
 </header>
 
@@ -1185,6 +1433,16 @@
 
   <!-- ── SIDEBAR ───────────────────── -->
   <aside class="sidebar">
+    <!-- Quick jump-nav (mobile) -->
+    <nav class="jump-nav" aria-label="Jump to section">
+      <button class="jump-chip" onclick="jumpTo('#crew')">👋 Crew</button>
+      <button class="jump-chip" onclick="jumpTo('[data-stop=&quot;0&quot;]')">🇪🇸 Bilbao</button>
+      <button class="jump-chip" onclick="jumpTo('[data-stop=&quot;1&quot;]')">🌊 Hornedo</button>
+      <button class="jump-chip" onclick="jumpTo('[data-stop=&quot;2&quot;]')">⛪ Santiago</button>
+      <button class="jump-chip" onclick="jumpTo('[data-stop=&quot;3&quot;]')">🍎 Asturias</button>
+      <button class="jump-chip" onclick="jumpTo('[data-stop=&quot;4&quot;]')">⛰️ Potes</button>
+      <button class="jump-chip kids" onclick="jumpTo('#kids-section')">🛝 Kids</button>
+    </nav>
     <div class="sidebar-header">
       <p class="eyebrow">Total Solar Eclipse · Aug 12, 2026</p>
       <h2>The Green Coast &amp; the Path of Totality</h2>
@@ -1192,7 +1450,7 @@
     </div>
 
     <!-- Cast of Characters -->
-    <div class="cast">
+    <div class="cast" id="crew">
       <p class="cast-eyebrow">The Crew</p>
       <div class="polaroids">
         <figure class="polaroid" style="--tilt:-4deg">
@@ -1240,6 +1498,7 @@
             <span class="highlight"><span class="h-ico">🍷</span>Pintxos crawl</span>
             <span class="highlight"><span class="h-ico">🌉</span>Casco Viejo</span>
             <span class="highlight"><span class="h-ico">🍺</span>Cruzcampo for Ellen</span>
+            <span class="highlight kid"><span class="h-ico">🛝</span>Doña Casilda duck park</span>
           </div>
           <div class="stop-links">
             <a class="stop-link" href="https://www.batimontsuites.com/" target="_blank" rel="noopener">
@@ -1277,6 +1536,7 @@
             <span class="highlight"><span class="h-ico">🏖️</span>Beaches</span>
             <span class="highlight"><span class="h-ico">🏰</span>Santillana del Mar</span>
             <span class="highlight"><span class="h-ico">🎨</span>Altamira caves</span>
+            <span class="highlight kid"><span class="h-ico">🦭</span>Santander: seals & mini-train</span>
           </div>
           <div class="eclipse-timing" id="hornedo-eclipse-timing">
             <p class="eclipse-timing-title">☀ Eclipse at Hornedo</p>
@@ -1329,6 +1589,8 @@
             <span class="highlight"><span class="h-ico">⛪</span>The Cathedral</span>
             <span class="highlight"><span class="h-ico">🥟</span>Empanadas</span>
             <span class="highlight"><span class="h-ico">🚶</span>Camino finish</span>
+            <span class="highlight kid"><span class="h-ico">🏰</span>Alameda playground</span>
+            <span class="highlight kid"><span class="h-ico">🦚</span>En route: Gijón park &amp; Playa de las Catedrales</span>
           </div>
           <div class="stop-links">
             <a class="stop-link" href="https://www.airbnb.com/l/4yXzSmio" target="_blank" rel="noopener">
@@ -1367,6 +1629,7 @@
             <span class="highlight"><span class="h-ico">🍏</span>Sidra country</span>
             <span class="highlight"><span class="h-ico">🏖️</span>San Lorenzo</span>
             <span class="highlight"><span class="h-ico">🧀</span>Cabrales</span>
+            <span class="highlight kid"><span class="h-ico">🐿️</span>San Francisco park (squirrels)</span>
           </div>
           <div class="stop-links">
             <a class="stop-link" href="https://www.airbnb.com/l/ghFqElI3" target="_blank" rel="noopener">
@@ -1400,7 +1663,7 @@
             <span class="tag tag-nights">4 nights</span>
           </div>
           <div class="stop-highlights">
-            <span class="highlight"><span class="h-ico">🚠</span>Fuente Dé</span>
+            <span class="highlight kid"><span class="h-ico">🚠</span>Fuente Dé cable car</span>
             <span class="highlight"><span class="h-ico">🥾</span>Picos hikes</span>
             <span class="highlight"><span class="h-ico">🏞️</span>Lagos de Covadonga</span>
           </div>
@@ -1450,6 +1713,22 @@
       </div>
 
     </div>
+
+    <!-- ── FOR THE KIDS 🛝 (rendered by JS) ── -->
+    <section class="kids-section" id="kids-section">
+      <div class="kids-head">
+        <div class="kids-eyebrow">🛝 For the little ones</div>
+        <p class="kids-sub">Playgrounds, parks &amp; a cable car — tap any card to fly there on the map.</p>
+      </div>
+      <div id="kids-list"></div>
+
+      <!-- Ellen's Corner -->
+      <div class="ellen-corner">
+        <div class="ellen-title">🍺 Ellen's Cruzcampo Quest</div>
+        <p class="ellen-sub">One cold Cruzcampo in every province — tap to check them off. (Terraces near the playgrounds noted above 😉)</p>
+        <div class="quest-list" id="quest-list"></div>
+      </div>
+    </section>
   </aside>
 
   <!-- ── MAP ───────────────────── -->
@@ -1463,6 +1742,11 @@
     </div>
 
     <div class="map-corner"><span class="rose">✦</span>a la costa verde</div>
+
+    <!-- Kids' spots toggle -->
+    <button class="kid-toggle on" id="kid-toggle" aria-pressed="true" title="Show / hide kids' playgrounds">
+      🛝 <span class="kt-label">Kids' spots</span> <span class="kt-count" id="kt-count">0</span>
+    </button>
 
     <!-- Duolingo-style Palabra del día -->
     <div class="duo-card" id="duo-card" title="Michael's Duolingo phrase of the day">
@@ -1486,6 +1770,7 @@
       <div class="legend-entry"><div class="legend-line"></div><span class="legend-label">Drive route</span></div>
       <div class="legend-entry"><div class="legend-plane"></div><span class="legend-label">Flight · click for info</span></div>
       <div class="legend-entry"><div class="legend-dot" style="background:rgba(255,192,74,0.35);border-color:var(--corona);box-shadow:0 0 6px rgba(255,192,74,0.5);"></div><span class="legend-label">Path of totality</span></div>
+      <div class="legend-entry"><div class="legend-dot" style="background:#FFFDF4;border-color:var(--azulejo);"></div><span class="legend-label">🛝 Kids' playgrounds</span></div>
     </div>
 
     <!-- Day slider -->
@@ -1757,6 +2042,134 @@
     { es: "¡Hasta pronto, España!",     en: "See you soon, Spain!" }
   ];
 
+  // ═══ FOR THE KIDS 🛝 — playgrounds & family stops ════
+  // Ordered roughly along the trip. Coords are approximate (good for map pins).
+  const KID_SPOTS = [
+    {
+      id:"casilda", emoji:"🦆", name:"Parque de Doña Casilda",
+      near:"Bilbao · day 1", lon:-2.9440, lat:43.2668,
+      note:"Bilbao's big \"Duck Park\" — a proper playground with swings, slides & climbing frames, a duck pond to feed, and fountains. 5 min from the Guggenheim.",
+      q:"Parque de Doña Casilda Iturrizar, Bilbao",
+      tags:[{t:"free",l:"Free"},{t:"",l:"Ducks 🦆"},{t:"tip",l:"Café terraces for Ellen"}]
+    },
+    {
+      id:"magdalena", emoji:"🦭", name:"Península de la Magdalena",
+      near:"Santander · en route to Hornedo", lon:-3.7690, lat:43.4636,
+      note:"Seaside park with a free mini-zoo (seals & penguins — feeding ~1 PM), a little tourist train, playgrounds, and gentle beaches. An easy detour on the way from Bilbao to the house.",
+      q:"Península de la Magdalena, Santander",
+      tags:[{t:"free",l:"Free park"},{t:"",l:"Seals & train"},{t:"tip",l:"~30 min from Hornedo"}]
+    },
+    {
+      id:"isabel", emoji:"🦚", name:"Parque de Isabel la Católica",
+      near:"Gijón · on the way to Santiago", lon:-5.6558, lat:43.5343,
+      note:"Gijón's greenest park and a perfect drive-break: huge playground for all ages (baby swings too), lakes with swans & geese, and peacocks strolling free. Great leg-stretch on the long push west.",
+      q:"Parque de Isabel la Católica, Gijón",
+      tags:[{t:"free",l:"Free"},{t:"",l:"Peacocks 🦚"},{t:"tip",l:"Big drive break"}]
+    },
+    {
+      id:"catedrales", emoji:"🏖️", name:"Playa de las Catedrales",
+      near:"Ribadeo · on the way to Santiago", lon:-7.1583, lat:43.5537,
+      note:"Natural cathedral-like rock arches you can walk under at low tide — pure magic for kids. Sits right on the Asturias→Galicia coast road toward Santiago.",
+      q:"Playa de las Catedrales, Ribadeo",
+      tags:[{t:"tip",l:"Low tide only"},{t:"tip",l:"Free reservation in summer"},{t:"",l:"Beach"}]
+    },
+    {
+      id:"alameda", emoji:"🏰", name:"Parque da Alameda",
+      near:"Santiago de Compostela", lon:-8.5470, lat:42.8783,
+      note:"The city's favourite park, a short walk from the cathedral: a brand-new inclusive playground with a castle, zip-line, carousel & spiral slide, plus the famous \"As Marías\" statue and postcard cathedral views.",
+      q:"Parque da Alameda, Santiago de Compostela",
+      tags:[{t:"free",l:"Free"},{t:"",l:"Zip-line & castle"},{t:"tip",l:"Cathedral views"}]
+    },
+    {
+      id:"sanfran", emoji:"🐿️", name:"Parque de San Francisco",
+      near:"Oviedo · Asturias base", lon:-5.8480, lat:43.3626,
+      note:"Oviedo's leafy central park — playground, peacocks and tame squirrels the kids can spot, right by the old town and its cider houses.",
+      q:"Parque de San Francisco, Oviedo",
+      tags:[{t:"free",l:"Free"},{t:"",l:"Squirrels 🐿️"},{t:"tip",l:"By the sidrerías"}]
+    },
+    {
+      id:"fuentede", emoji:"🚠", name:"Teleférico de Fuente Dé",
+      near:"Picos de Europa · from Potes", lon:-4.8140, lat:43.1468,
+      note:"The big adventure: a cable car that soars 750 m up a sheer cliff to a 1,823 m mirador in under 4 minutes. Jaw-dropping for kids and grown-ups. Go early — summer queues build fast.",
+      q:"Teleférico de Fuente Dé",
+      tags:[{t:"tip",l:"Go early — queues"},{t:"",l:"Tickets ~€19 adult"},{t:"tip",l:"Bring layers up top"}]
+    }
+  ];
+
+  // Ellen's Cruzcampo Quest — one per province
+  const QUEST = [
+    "Basque Country (Bilbao) 🇪🇸",
+    "Cantabria (Hornedo / Santander) 🌊",
+    "Galicia (Santiago) ⛪",
+    "Asturias (sidra country) 🍏",
+    "Picos de Europa (Potes) ⛰️"
+  ];
+
+  // ── Render the kids list ──
+  (function renderKids() {
+    const list = document.getElementById('kids-list');
+    if (!list) return;
+    const enc = s => encodeURIComponent(s);
+    KID_SPOTS.forEach(k => {
+      const card = document.createElement('div');
+      card.className = 'kid-card';
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+      card.dataset.lon = k.lon;
+      card.dataset.lat = k.lat;
+      const tags = k.tags.map(t => '<span class="kid-tag ' + (t.t||'') + '">' + t.l + '</span>').join('');
+      card.innerHTML =
+        '<div class="kid-emoji">' + k.emoji + '</div>' +
+        '<div class="kid-body">' +
+          '<div class="kid-name">' + k.name + '</div>' +
+          '<div class="kid-near">' + k.near + '</div>' +
+          '<div class="kid-note">' + k.note + '</div>' +
+          '<div class="kid-tags">' + tags + '</div>' +
+          '<div class="kid-actions">' +
+            '<a class="kid-link maps" href="https://www.google.com/maps/search/?api=1&query=' + enc(k.q) + '" target="_blank" rel="noopener">📍 Directions</a>' +
+            '<span class="kid-link">🗺️ Show on map</span>' +
+          '</div>' +
+        '</div>';
+      const go = (e) => {
+        // don't hijack taps on the real directions link
+        if (e.target.closest('a')) return;
+        if (typeof window.focusPoint === 'function') window.focusPoint(k.lon, k.lat, 13);
+        if (window.matchMedia('(max-width: 920px)').matches) {
+          const mc = document.getElementById('map-container');
+          if (mc) mc.scrollIntoView({ behavior:'smooth', block:'start' });
+        }
+      };
+      card.addEventListener('click', go);
+      card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(e); } });
+      list.appendChild(card);
+    });
+  })();
+
+  // ── Ellen's quest (persisted locally) ──
+  (function renderQuest() {
+    const wrap = document.getElementById('quest-list');
+    if (!wrap) return;
+    let done = {};
+    try { done = JSON.parse(localStorage.getItem('cruzcampoQuest') || '{}'); } catch (e) {}
+    QUEST.forEach((label, i) => {
+      const item = document.createElement('div');
+      item.className = 'quest-item' + (done[i] ? ' done' : '');
+      item.innerHTML = '<span class="quest-box">✓</span><span class="quest-label">' + label + '</span>';
+      item.addEventListener('click', () => {
+        const isDone = item.classList.toggle('done');
+        done[i] = isDone;
+        try { localStorage.setItem('cruzcampoQuest', JSON.stringify(done)); } catch (e) {}
+      });
+      wrap.appendChild(item);
+    });
+  })();
+
+  // ── Jump-nav helper (mobile) ──
+  window.jumpTo = function(sel) {
+    const el = document.querySelector(sel);
+    if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
+  };
+
   // ═══ TICKS ═══════════════════════════════════════════
   (function() {
     const wrap = document.getElementById('day-ticks');
@@ -1883,8 +2296,9 @@ require([
   const eclipseLayer  = new GraphicsLayer();
   const routeLayer    = new GraphicsLayer();
   const markerLayer   = new GraphicsLayer();
+  const kidLayer      = new GraphicsLayer();
   const labelLayer    = new GraphicsLayer();
-  map.addMany([flightLayer, eclipseLayer, routeLayer, markerLayer, labelLayer]);
+  map.addMany([flightLayer, eclipseLayer, routeLayer, markerLayer, kidLayer, labelLayer]);
 
   // ═══ FLIGHT PATHS ═════════════════════════════════
   const flightPopup = new PopupTemplate({
@@ -2187,6 +2601,91 @@ require([
     const el = document.querySelector('[data-stop="' + id + '"]');
     if (el) el.classList.add('active');
   };
+
+  // ═══ KIDS' PLAYGROUND MARKERS 🛝 ═══════════════════
+  const KID_BLUE = AZULEJO;
+  (typeof KID_SPOTS !== 'undefined' ? KID_SPOTS : []).forEach(k => {
+    const pt = new Point({ longitude:k.lon, latitude:k.lat, spatialReference:{ wkid:4326 } });
+
+    // soft halo
+    kidLayer.add(new Graphic({
+      geometry: pt,
+      symbol: new SimpleMarkerSymbol({
+        style:"circle",
+        color:[85,144,181,0.16],
+        size:"26px",
+        outline:{ color:[46,91,126,0.4], width:1 }
+      })
+    }));
+
+    // white pin disc (tap target) with popup
+    kidLayer.add(new Graphic({
+      geometry: pt,
+      symbol: new SimpleMarkerSymbol({
+        style:"circle",
+        color:[255,253,244,0.96],
+        size:"20px",
+        outline:{ color:[46,91,126,0.9], width:1.6 }
+      }),
+      popupTemplate: new PopupTemplate({
+        title: '<span style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:600;">' + k.emoji + ' ' + k.name + '</span>',
+        content:
+          '<div style="font-family:\'Josefin Sans\',sans-serif;font-size:12px;line-height:1.6;">' +
+          '<div style="color:#2E5B7E;margin-bottom:6px;letter-spacing:0.1em;text-transform:uppercase;font-size:10px;">' + k.near + '</div>' +
+          '<div style="opacity:0.9;">' + k.note + '</div>' +
+          '<a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(k.q) + '" target="_blank" rel="noopener" style="color:#C8553D;font-size:11px;display:inline-block;margin-top:8px;">📍 open in Maps</a>' +
+          '</div>'
+      }),
+      attributes: { kid: true }
+    }));
+
+    // emoji on top
+    kidLayer.add(new Graphic({
+      geometry: pt,
+      symbol: new TextSymbol({
+        text: k.emoji,
+        font: { size: 11 },
+        yoffset: -1
+      })
+    }));
+
+    // name label below (kept in kidLayer so it hides with the toggle)
+    kidLayer.add(new Graphic({
+      geometry: pt,
+      symbol: new TextSymbol({
+        text: k.name,
+        color: [30,44,66,1],
+        haloColor: [255,253,244,0.95],
+        haloSize: 1.6,
+        font: { size: 8.5, family:"Josefin Sans", weight:"600" },
+        xoffset: 0, yoffset: -13
+      })
+    }));
+  });
+
+  // Fly the map to an arbitrary point (used by the kids cards)
+  window.focusPoint = function(lon, lat, zoom) {
+    kidLayer.visible = true;
+    syncKidToggle(true);
+    view.goTo({ center:[lon, lat], zoom: zoom || 13 }, { duration: 900, easing:"ease-in-out" });
+  };
+
+  // ═══ KIDS' SPOTS TOGGLE ════════════════════════════
+  const kidToggleBtn = document.getElementById('kid-toggle');
+  const kidCountEl = document.getElementById('kt-count');
+  if (kidCountEl && typeof KID_SPOTS !== 'undefined') kidCountEl.textContent = KID_SPOTS.length;
+  function syncKidToggle(on) {
+    if (!kidToggleBtn) return;
+    kidToggleBtn.classList.toggle('on', on);
+    kidToggleBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+  if (kidToggleBtn) {
+    kidToggleBtn.addEventListener('click', () => {
+      const on = !kidLayer.visible;
+      kidLayer.visible = on;
+      syncKidToggle(on);
+    });
+  }
 
   // Click map → highlight sidebar
   view.on("click", (event) => {
