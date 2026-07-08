@@ -2706,9 +2706,11 @@
 <script>
 require([
   "esri/Map",
+  "esri/Basemap",
   "esri/views/MapView",
   "esri/Graphic",
   "esri/layers/GraphicsLayer",
+  "esri/layers/WebTileLayer",
   "esri/geometry/Polyline",
   "esri/geometry/Polygon",
   "esri/geometry/Point",
@@ -2717,8 +2719,25 @@ require([
   "esri/symbols/SimpleFillSymbol",
   "esri/symbols/TextSymbol",
   "esri/PopupTemplate"
-], function(Map, MapView, Graphic, GraphicsLayer, Polyline, Polygon, Point,
+], function(Map, Basemap, MapView, Graphic, GraphicsLayer, WebTileLayer, Polyline, Polygon, Point,
             SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, TextSymbol, PopupTemplate) {
+
+  // ── KEYLESS BASEMAPS (CARTO / OpenStreetMap — no API key needed) ──
+  // Esri's *-vector basemaps require an ArcGIS API key; these free XYZ
+  // tiles keep the map working out of the box and match each theme.
+  function cartoBasemap(style, id, title) {
+    return new Basemap({
+      baseLayers: [ new WebTileLayer({
+        urlTemplate: "https://{subDomain}.basemaps.cartocdn.com/" + style + "/{level}/{col}/{row}.png",
+        subDomains: ["a", "b", "c", "d"],
+        copyright: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>'
+      })],
+      id: id,
+      title: title
+    });
+  }
+  const dayBasemap     = cartoBasemap("rastertiles/voyager", "carto-voyager", "CARTO Voyager");
+  const eclipseBasemap = cartoBasemap("dark_all",            "carto-dark",    "CARTO Dark Matter");
 
   // ── PALETTE (matches day theme defaults) ──
   const TERRA    = [200, 85, 61];
@@ -2799,7 +2818,7 @@ require([
   }
 
   // ── MAP ──
-  const map = new Map({ basemap: "streets-vector" });
+  const map = new Map({ basemap: dayBasemap });
 
   const view = new MapView({
     container: "viewDiv",
@@ -3337,7 +3356,7 @@ require([
     document.body.setAttribute('data-theme', name);
     // swap basemap
     if (name === 'eclipse') {
-      map.basemap = 'dark-gray-vector';
+      map.basemap = eclipseBasemap;
       // brighten corona on map
       const gsym = totalityGlow.symbol.clone();
       gsym.color = [255, 210, 122, 0.22];
@@ -3352,7 +3371,7 @@ require([
       csym.color = [255, 241, 199, 0.9];
       totalityCenterLine.symbol = csym;
     } else {
-      map.basemap = 'streets-vector';
+      map.basemap = dayBasemap;
       const gsym = totalityGlow.symbol.clone();
       gsym.color = [255,192,74,0.14];
       gsym.outline = { color: [232,155,22,0.55], width: 0.8, style: "dash" };
