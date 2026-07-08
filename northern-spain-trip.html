@@ -1527,6 +1527,108 @@
       .pack-head { min-height: 48px; }
       .pack-check { min-height: 38px; }
     }
+
+    /* café/restaurant pick inside a kid card */
+    .kid-eat {
+      display: flex; align-items: flex-start; gap: 0.35rem;
+      margin-top: 0.5rem; padding: 0.4rem 0.55rem;
+      background: rgba(232,161,58,0.12);
+      border: 1px solid rgba(200,144,42,0.35);
+      border-radius: 8px;
+      font-size: 0.71rem; line-height: 1.35;
+      color: var(--text); text-decoration: none;
+      transition: background 0.15s;
+    }
+    .kid-eat:hover { background: rgba(232,161,58,0.2); }
+    .kid-eat b { color: var(--terra); }
+    body[data-theme="eclipse"] .kid-eat b { color: var(--saffron); }
+    .kid-eat-ico { font-size: 0.9rem; line-height: 1.2; flex-shrink: 0; }
+
+    /* per-list reset button */
+    .pack-reset {
+      align-self: flex-start;
+      margin-top: 0.35rem;
+      font-size: 0.64rem; font-weight: 600; letter-spacing: 0.03em;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 0.25rem 0.6rem;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .pack-reset:hover { color: var(--terra); border-color: var(--border-hi); }
+
+    /* trip tools (print) */
+    .trip-tools {
+      padding: 1.1rem 1.4rem 1.6rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+    .print-btn {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 0.9rem; font-weight: 500;
+      color: #FFF8E4;
+      background: linear-gradient(135deg, var(--terra), var(--sangria));
+      border: none; border-radius: 100px;
+      box-shadow: var(--shadow-md);
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .print-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+    .print-btn:active { transform: scale(0.98); }
+    .print-hint { font-size: 0.66rem; color: var(--muted); margin-top: 0.5rem; line-height: 1.4; }
+
+    /* ═══ PRINT SHEET ══════════════════════════════════ */
+    #print-sheet { display: none; }
+
+    @media print {
+      @page { size: A4; margin: 1cm; }
+      html, body { height: auto !important; overflow: visible !important; background: #fff !important; }
+      body > *:not(#print-sheet) { display: none !important; }
+      #print-sheet {
+        display: block;
+        color: #1A1008;
+        font-family: 'Josefin Sans', Arial, sans-serif;
+        font-size: 9.5px;
+        line-height: 1.4;
+      }
+      #print-sheet .ps-head { border-bottom: 2px solid #C8553D; padding-bottom: 4px; margin-bottom: 6px; }
+      #print-sheet h1 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 20px; font-style: italic; color: #A8283A; }
+      #print-sheet .ps-sub { font-size: 10px; color: #6A4A2A; margin-top: 1px; }
+      #print-sheet h2 {
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-size: 12.5px; color: #2E5B7E;
+        margin: 8px 0 3px; border-bottom: 1px solid #ddd; padding-bottom: 1px;
+      }
+      #print-sheet .ps-eclipse {
+        background: #FFF3D6; border: 1px solid #E8A13A; border-radius: 5px;
+        padding: 4px 7px; margin: 4px 0;
+      }
+      #print-sheet table.ps-itin { width: 100%; border-collapse: collapse; }
+      #print-sheet table.ps-itin th {
+        text-align: left; font-size: 8px; text-transform: uppercase; letter-spacing: 0.05em;
+        color: #8F6F4D; border-bottom: 1px solid #C8553D; padding: 2px 4px;
+      }
+      #print-sheet table.ps-itin td { padding: 3px 4px; border-bottom: 1px solid #eee; vertical-align: top; }
+      #print-sheet td.pd { white-space: nowrap; font-weight: 600; }
+      #print-sheet .pr-muted { color: #8F6F4D; font-size: 8.5px; }
+      #print-sheet .ps-cols { display: flex; gap: 16px; }
+      #print-sheet .ps-cols > div { flex: 1; }
+      #print-sheet ul.ps-list { margin: 2px 0 0 14px; padding: 0; }
+      #print-sheet ul.ps-list li { margin-bottom: 1.5px; }
+      #print-sheet .ps-pack { columns: 2; column-gap: 16px; }
+      #print-sheet .ps-pack .pk { break-inside: avoid; margin-bottom: 4px; }
+      #print-sheet .ps-foot {
+        margin-top: 8px; border-top: 1px solid #C8553D; padding-top: 4px;
+        display: flex; justify-content: space-between; gap: 12px;
+        font-size: 8.5px; color: #4A3420;
+      }
+    }
   </style>
 </head>
 <body data-theme="day">
@@ -1864,6 +1966,12 @@
       <p class="section-sub">Tap a trip to open its checklist — ticks save on your phone.</p>
       <div id="pack-list"></div>
     </section>
+
+    <!-- ── TRIP TOOLS ── -->
+    <section class="trip-tools">
+      <button class="print-btn" type="button" onclick="printSheet()">🖨️ Print one-page trip sheet</button>
+      <p class="print-hint">On iPhone: tap, then <b>Share → Print</b> or “Save to Files” as a PDF.</p>
+    </section>
   </aside>
 
   <!-- ── MAP ───────────────────── -->
@@ -1931,6 +2039,9 @@
   </div>
 
 </div>
+
+<!-- ═══ PRINTABLE ONE-PAGE TRIP SHEET (populated by JS, shown only when printing) ═══ -->
+<div id="print-sheet" aria-hidden="true"></div>
 
 <script>
   // ═══ ECLIPSE ASTRONOMY (astronomy-engine MoonShadow + GeoidIntersect) ═══
@@ -2185,49 +2296,56 @@
       near:"Bilbao · day 1", lon:-2.9440, lat:43.2668,
       note:"Bilbao's big \"Duck Park\" — a proper playground with swings, slides & climbing frames, a duck pond to feed, and fountains. 5 min from the Guggenheim.",
       q:"Parque de Doña Casilda Iturrizar, Bilbao",
-      tags:[{t:"free",l:"Free"},{t:"",l:"Ducks 🦆"},{t:"tip",l:"Café terraces for Ellen"}]
+      tags:[{t:"free",l:"Free"},{t:"",l:"Ducks 🦆"},{t:"tip",l:"Café terraces for Ellen"}],
+      eat:{ name:"El Globo (pintxos)", q:"El Globo Bilbao Calle Diputación", note:"pintxos & a cold caña a couple of blocks toward Gran Vía" }
     },
     {
       id:"magdalena", emoji:"🦭", name:"Península de la Magdalena",
       near:"Santander · en route to Hornedo", lon:-3.7690, lat:43.4636,
       note:"Seaside park with a free mini-zoo (seals & penguins — feeding ~1 PM), a little tourist train, playgrounds, and gentle beaches. An easy detour on the way from Bilbao to the house.",
       q:"Península de la Magdalena, Santander",
-      tags:[{t:"free",l:"Free park"},{t:"",l:"Seals & train"},{t:"tip",l:"~30 min from Hornedo"}]
+      tags:[{t:"free",l:"Free park"},{t:"",l:"Seals & train"},{t:"tip",l:"~30 min from Hornedo"}],
+      eat:{ name:"Casa Lita", q:"Casa Lita Santander", note:"legendary pintxos & a seafront terrace on Paseo de Pereda, on the way in" }
     },
     {
       id:"isabel", emoji:"🦚", name:"Parque de Isabel la Católica",
       near:"Gijón · on the way to Santiago", lon:-5.6558, lat:43.5343,
       note:"Gijón's greenest park and a perfect drive-break: huge playground for all ages (baby swings too), lakes with swans & geese, and peacocks strolling free. Great leg-stretch on the long push west.",
       q:"Parque de Isabel la Católica, Gijón",
-      tags:[{t:"free",l:"Free"},{t:"",l:"Peacocks 🦚"},{t:"tip",l:"Big drive break"}]
+      tags:[{t:"free",l:"Free"},{t:"",l:"Peacocks 🦚"},{t:"tip",l:"Big drive break"}],
+      eat:{ name:"Paseo de Begoña terraces", q:"Paseo de Begoña Gijón", note:"leafy café terraces (pour a sidra) a short walk from the park" }
     },
     {
       id:"catedrales", emoji:"🏖️", name:"Playa de las Catedrales",
       near:"Ribadeo · on the way to Santiago", lon:-7.1583, lat:43.5537,
       note:"Natural cathedral-like rock arches you can walk under at low tide — pure magic for kids. Sits right on the Asturias→Galicia coast road toward Santiago.",
       q:"Playa de las Catedrales, Ribadeo",
-      tags:[{t:"tip",l:"Low tide only"},{t:"tip",l:"Free reservation in summer"},{t:"",l:"Beach"}]
+      tags:[{t:"tip",l:"Low tide only"},{t:"tip",l:"Free reservation in summer"},{t:"",l:"Beach"}],
+      eat:{ name:"Restaurante As Catedrais", q:"Restaurante As Catedrais Ribadeo", note:"Galician seafood steps from the beach car park" }
     },
     {
       id:"alameda", emoji:"🏰", name:"Parque da Alameda",
       near:"Santiago de Compostela", lon:-8.5470, lat:42.8783,
       note:"The city's favourite park, a short walk from the cathedral: a brand-new inclusive playground with a castle, zip-line, carousel & spiral slide, plus the famous \"As Marías\" statue and postcard cathedral views.",
       q:"Parque da Alameda, Santiago de Compostela",
-      tags:[{t:"free",l:"Free"},{t:"",l:"Zip-line & castle"},{t:"tip",l:"Cathedral views"}]
+      tags:[{t:"free",l:"Free"},{t:"",l:"Zip-line & castle"},{t:"tip",l:"Cathedral views"}],
+      eat:{ name:"Café Derby", q:"Café Derby Santiago de Compostela", note:"a historic coffee — or a cold Estrella Galicia — steps from the park" }
     },
     {
       id:"sanfran", emoji:"🐿️", name:"Parque de San Francisco",
       near:"Oviedo · Asturias base", lon:-5.8480, lat:43.3626,
       note:"Oviedo's leafy central park — playground, peacocks and tame squirrels the kids can spot, right by the old town and its cider houses.",
       q:"Parque de San Francisco, Oviedo",
-      tags:[{t:"free",l:"Free"},{t:"",l:"Squirrels 🐿️"},{t:"tip",l:"By the sidrerías"}]
+      tags:[{t:"free",l:"Free"},{t:"",l:"Squirrels 🐿️"},{t:"tip",l:"By the sidrerías"}],
+      eat:{ name:"Calle Gascona", q:"Calle Gascona Oviedo", note:"the \"cider boulevard\" a block away — sidra poured tableside" }
     },
     {
       id:"fuentede", emoji:"🚠", name:"Teleférico de Fuente Dé",
       near:"Picos de Europa · from Potes", lon:-4.8140, lat:43.1468,
       note:"The big adventure: a cable car that soars 750 m up a sheer cliff to a 1,823 m mirador in under 4 minutes. Jaw-dropping for kids and grown-ups. Go early — summer queues build fast.",
       q:"Teleférico de Fuente Dé",
-      tags:[{t:"tip",l:"Go early — queues"},{t:"",l:"Tickets ~€19 adult"},{t:"tip",l:"Bring layers up top"}]
+      tags:[{t:"tip",l:"Go early — queues"},{t:"",l:"Tickets ~€19 adult"},{t:"tip",l:"Bring layers up top"}],
+      eat:{ name:"Parador de Fuente Dé", q:"Parador de Fuente Dé", note:"big mountain-view terrace by the base (café El Cable waits at the top)" }
     }
   ];
 
@@ -2253,6 +2371,11 @@
       card.dataset.lon = k.lon;
       card.dataset.lat = k.lat;
       const tags = k.tags.map(t => '<span class="kid-tag ' + (t.t||'') + '">' + t.l + '</span>').join('');
+      const eat = k.eat ? (
+        '<a class="kid-eat" href="https://www.google.com/maps/search/?api=1&query=' + enc(k.eat.q) + '" target="_blank" rel="noopener">' +
+          '<span class="kid-eat-ico">☕</span>' +
+          '<span><b>' + k.eat.name + '</b> — ' + k.eat.note + '</span>' +
+        '</a>') : '';
       card.innerHTML =
         '<div class="kid-emoji">' + k.emoji + '</div>' +
         '<div class="kid-body">' +
@@ -2260,6 +2383,7 @@
           '<div class="kid-near">' + k.near + '</div>' +
           '<div class="kid-note">' + k.note + '</div>' +
           '<div class="kid-tags">' + tags + '</div>' +
+          eat +
           '<div class="kid-actions">' +
             '<a class="kid-link maps" href="https://www.google.com/maps/search/?api=1&query=' + enc(k.q) + '" target="_blank" rel="noopener">📍 Directions</a>' +
             '<span class="kid-link">🗺️ Show on map</span>' +
@@ -2467,6 +2591,7 @@
         }
       };
 
+      const rows = [];
       trip.items.forEach((label, i) => {
         const key = ti + ':' + i;
         const row = document.createElement('div');
@@ -2478,14 +2603,87 @@
           try { localStorage.setItem('packState', JSON.stringify(state)); } catch (e) {}
           updateCount();
         });
+        rows.push(row);
         items.appendChild(row);
       });
+
+      const reset = document.createElement('button');
+      reset.type = 'button';
+      reset.className = 'pack-reset';
+      reset.textContent = '↺ Reset this list';
+      reset.addEventListener('click', () => {
+        rows.forEach((row, i) => { row.classList.remove('done'); delete state[ti + ':' + i]; });
+        try { localStorage.setItem('packState', JSON.stringify(state)); } catch (e) {}
+        updateCount();
+      });
+      items.appendChild(reset);
 
       box.appendChild(items);
       wrap.appendChild(box);
       updateCount();
     });
   })();
+
+  // ═══ PRINTABLE ONE-PAGE TRIP SHEET 🖨️ ══════════════
+  const ITINERARY = [
+    { d:"Aug 8",     place:"Bilbao",                region:"Basque Country",  stay:"Batimontsuites · 1 night",    drive:"Fly in → BIO" },
+    { d:"Aug 9–13",  place:"Hornedo",               region:"Cantabria",       stay:"Airbnb 83UxgIHH · 4 nights",  drive:"~1 hr · ☀ ECLIPSE Aug 12" },
+    { d:"Aug 13–15", place:"Santiago de Compostela",region:"Galicia",         stay:"Airbnb 4yXzSmio · 2 nights",  drive:"~5 hr drive" },
+    { d:"Aug 15–17", place:"Oviedo / Gijón",        region:"Asturias",        stay:"Airbnb ghFqElI3 · 2 nights",  drive:"~3 hr drive" },
+    { d:"Aug 17–21", place:"Potes",                 region:"Picos de Europa", stay:"Airbnb · 4 nights",           drive:"~2.5 hr drive" },
+    { d:"Aug 20–21", place:"Bilbao (return)",       region:"Basque Country",  stay:"IHG near airport · 1 night",  drive:"~2.5 hr · fly home Aug 21" }
+  ];
+
+  function buildPrintSheet() {
+    const sheet = document.getElementById('print-sheet');
+    if (!sheet) return;
+    const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+    const itinRows = ITINERARY.map(r =>
+      '<tr><td class="pd">' + esc(r.d) + '</td><td><b>' + esc(r.place) + '</b><br><span class="pr-muted">' + esc(r.region) + '</span></td>' +
+      '<td>' + esc(r.stay) + '</td><td>' + esc(r.drive) + '</td></tr>'
+    ).join('');
+
+    // eclipse line — prefer the live computed values if present
+    const gv = id => { const el = document.getElementById(id); const t = el && el.textContent.trim(); return (t && t !== '—') ? t : null; };
+    const tBegin = gv('ec-total-begin'), tDur = gv('ec-duration');
+    const eclipseLine = (tBegin && tDur)
+      ? ('Totality begins <b>' + esc(tBegin) + '</b> · lasts <b>' + esc(tDur) + '</b> at Hornedo (CEST)')
+      : 'Totality ~<b>20:27 CEST</b> · ~<b>1¾ min</b> at Hornedo — confirm on the site';
+
+    const kids = KID_SPOTS.map(k => '<li><b>' + esc(k.name) + '</b> — ' + esc(k.near.split('·')[0].trim()) + '</li>').join('');
+    const rain = RAIN_BACKUPS.map(g =>
+      '<li><b>' + esc(g.base) + ':</b> ' + g.items.map(i => esc(i.name)).join(' · ') + '</li>'
+    ).join('');
+    const pack = PACKING.map(t =>
+      '<div class="pk"><b>' + esc(t.emoji + ' ' + t.title) + '</b><br>' + t.items.map(esc).join(' · ') + '</div>'
+    ).join('');
+    const quest = QUEST.map(q => '☐ ' + esc(q)).join('  ·  ');
+
+    sheet.innerHTML =
+      '<div class="ps-head">' +
+        '<h1>Flynn Family · Northern Spain</h1>' +
+        '<div class="ps-sub">Aug 8 – 21, 2026 · Total Solar Eclipse Aug 12 · ¡chasing totality!</div>' +
+      '</div>' +
+      '<div class="ps-eclipse">🌑 <b>Eclipse Day — Wed Aug 12:</b> ' + eclipseLine + '. Certified eclipse glasses for everyone; save times offline.</div>' +
+      '<h2>Itinerary</h2>' +
+      '<table class="ps-itin"><thead><tr><th>Dates</th><th>Base</th><th>Stay</th><th>Getting there</th></tr></thead><tbody>' + itinRows + '</tbody></table>' +
+      '<div class="ps-cols">' +
+        '<div><h2>🛝 Playgrounds & kid stops</h2><ul class="ps-list">' + kids + '</ul></div>' +
+        '<div><h2>☔ Rainy-day backups</h2><ul class="ps-list">' + rain + '</ul></div>' +
+      '</div>' +
+      '<h2>🎒 Day-trip packing</h2><div class="ps-pack">' + pack + '</div>' +
+      '<div class="ps-foot">' +
+        '<div>🍺 Ellen\'s Cruzcampo quest: ' + quest + '</div>' +
+        '<div>📞 Emergencies: <b>112</b> · 🇪🇸 flynns in españa</div>' +
+      '</div>';
+  }
+  buildPrintSheet();
+
+  window.printSheet = function() {
+    buildPrintSheet(); // refresh (picks up computed eclipse times if ready)
+    window.print();
+  };
 
   // ── Jump-nav helper (mobile) ──
   window.jumpTo = function(sel) {
