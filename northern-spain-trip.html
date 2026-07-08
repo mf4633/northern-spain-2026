@@ -1408,6 +1408,125 @@
       .day-slider { bottom: max(0.4rem, env(safe-area-inset-bottom)); }
       .quest-item { min-height: 34px; }
     }
+
+    /* ═══ SHARED SECTION HEADINGS ══════════════════════ */
+    .section-eyebrow {
+      font-family: 'Caveat', cursive;
+      font-size: 1.35rem;
+      font-weight: 700;
+      line-height: 1.1;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .section-sub {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin: 0.15rem 0 0.85rem;
+      letter-spacing: 0.02em;
+    }
+
+    /* ═══ RAINY-DAY BACKUPS ☔ ══════════════════════════ */
+    .rain-section {
+      padding: 1rem 1.4rem 1.3rem;
+      border-top: 1px solid var(--border);
+      background: radial-gradient(circle at 15% 0%, rgba(46,91,126,0.12), transparent 52%);
+    }
+    .rain-section .section-eyebrow { color: var(--azulejo); }
+    body[data-theme="eclipse"] .rain-section .section-eyebrow { color: var(--azul-hi); }
+    .rain-group { margin-bottom: 0.9rem; }
+    .rain-group-head {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-weight: 600;
+      font-size: 0.95rem; color: var(--terra);
+      margin-bottom: 0.45rem;
+      display: flex; align-items: center; gap: 0.35rem;
+    }
+    body[data-theme="eclipse"] .rain-group-head { color: var(--saffron); }
+    .rain-item {
+      display: block;
+      padding: 0.55rem 0.7rem;
+      margin-bottom: 0.4rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--azul-hi);
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text);
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .rain-item:hover, .rain-item:focus-visible { transform: translateY(-1px); box-shadow: var(--shadow-md); outline: none; }
+    .rain-name {
+      font-weight: 600; font-size: 0.84rem; color: var(--text-hi);
+      display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between;
+    }
+    .rain-name .rain-go { font-size: 0.64rem; color: var(--azulejo); font-weight: 700; white-space: nowrap; letter-spacing: 0.03em; }
+    body[data-theme="eclipse"] .rain-name .rain-go { color: var(--azul-hi); }
+    .rain-note { font-size: 0.73rem; color: var(--text); opacity: 0.86; line-height: 1.4; margin-top: 0.22rem; }
+
+    /* ═══ DAY-TRIP PACKING 🎒 ══════════════════════════ */
+    .pack-section {
+      padding: 1rem 1.4rem 1.4rem;
+      border-top: 1px solid var(--border);
+      background: radial-gradient(circle at 85% 0%, rgba(232,161,58,0.13), transparent 52%);
+    }
+    .pack-section .section-eyebrow { color: var(--gold); }
+    body[data-theme="eclipse"] .pack-section .section-eyebrow { color: var(--gold-hi); }
+    .pack-trip {
+      margin-bottom: 0.5rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .pack-head {
+      display: flex; align-items: center; gap: 0.5rem; width: 100%;
+      padding: 0.65rem 0.8rem;
+      cursor: pointer; user-select: none;
+      background: transparent; border: none; text-align: left;
+      color: var(--text-hi);
+      font-family: 'Josefin Sans', sans-serif;
+      min-height: 46px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pack-emoji { font-size: 1.2rem; line-height: 1; flex-shrink: 0; }
+    .pack-title { flex: 1; font-weight: 600; font-size: 0.86rem; }
+    .pack-count {
+      font-size: 0.58rem; font-weight: 700; letter-spacing: 0.05em;
+      color: var(--muted); background: var(--panel-2);
+      padding: 0.14rem 0.48rem; border-radius: 100px;
+      white-space: nowrap;
+    }
+    .pack-count.full { color: #556B20; background: rgba(111,130,51,0.18); }
+    body[data-theme="eclipse"] .pack-count.full { color: #B8D080; background: rgba(176,200,120,0.18); }
+    .pack-chevron { transition: transform 0.2s ease; color: var(--muted); font-size: 0.8rem; }
+    .pack-trip.open .pack-chevron { transform: rotate(90deg); }
+    .pack-items { display: none; padding: 0 0.8rem 0.7rem; flex-direction: column; gap: 0.1rem; }
+    .pack-trip.open .pack-items { display: flex; }
+    .pack-check {
+      display: flex; align-items: flex-start; gap: 0.5rem;
+      font-size: 0.78rem; color: var(--text);
+      cursor: pointer; user-select: none;
+      padding: 0.35rem 0.2rem; min-height: 34px; line-height: 1.3;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pack-box {
+      width: 17px; height: 17px; margin-top: 0.08rem; flex-shrink: 0;
+      border-radius: 5px; border: 1.5px solid var(--gold);
+      display: grid; place-items: center;
+      font-size: 0.62rem; color: transparent;
+      transition: background 0.15s, color 0.15s;
+    }
+    .pack-check.done .pack-box { background: var(--olive); border-color: var(--olive); color: #fff; }
+    .pack-check.done .pack-text { text-decoration: line-through; opacity: 0.55; }
+
+    @media (max-width: 600px) {
+      .rain-section, .pack-section { padding: 0.9rem 1rem 1.2rem; }
+      .rain-item { padding: 0.6rem 0.7rem; }
+      .pack-head { min-height: 48px; }
+      .pack-check { min-height: 38px; }
+    }
   </style>
 </head>
 <body data-theme="day">
@@ -1442,6 +1561,8 @@
       <button class="jump-chip" onclick="jumpTo('[data-stop=&quot;3&quot;]')">🍎 Asturias</button>
       <button class="jump-chip" onclick="jumpTo('[data-stop=&quot;4&quot;]')">⛰️ Potes</button>
       <button class="jump-chip kids" onclick="jumpTo('#kids-section')">🛝 Kids</button>
+      <button class="jump-chip" onclick="jumpTo('#rain-section')">☔ Rain</button>
+      <button class="jump-chip" onclick="jumpTo('#pack-section')">🎒 Pack</button>
     </nav>
     <div class="sidebar-header">
       <p class="eyebrow">Total Solar Eclipse · Aug 12, 2026</p>
@@ -1728,6 +1849,20 @@
         <p class="ellen-sub">One cold Cruzcampo in every province — tap to check them off. (Terraces near the playgrounds noted above 😉)</p>
         <div class="quest-list" id="quest-list"></div>
       </div>
+    </section>
+
+    <!-- ── RAINY-DAY BACKUPS ☔ (rendered by JS) ── -->
+    <section class="rain-section" id="rain-section">
+      <div class="section-eyebrow">☔ Rainy-day backups</div>
+      <p class="section-sub">The Green Coast earns its name — indoor winners near every base. Tap for directions.</p>
+      <div id="rain-list"></div>
+    </section>
+
+    <!-- ── DAY-TRIP PACKING 🎒 (rendered by JS) ── -->
+    <section class="pack-section" id="pack-section">
+      <div class="section-eyebrow">🎒 Day-trip packing</div>
+      <p class="section-sub">Tap a trip to open its checklist — ticks save on your phone.</p>
+      <div id="pack-list"></div>
     </section>
   </aside>
 
@@ -2161,6 +2296,194 @@
         try { localStorage.setItem('cruzcampoQuest', JSON.stringify(done)); } catch (e) {}
       });
       wrap.appendChild(item);
+    });
+  })();
+
+  // ═══ RAINY-DAY BACKUPS ☔ — indoor wins near each base ═
+  const RAIN_BACKUPS = [
+    { base:"Bilbao", emoji:"🏛️", items:[
+      { name:"Guggenheim Museum", q:"Guggenheim Museum Bilbao",
+        note:"Gehry's titanium ship full of modern art — kids' trails inside and the giant flower Puppy dog out front." },
+      { name:"Itsasmuseum (Maritime)", q:"Itsasmuseum Bilbao",
+        note:"Boats, cranes and river history down by the estuary — hands-on and mostly undercover." },
+      { name:"Azkuna Zentroa", q:"Azkuna Zentroa Bilbao",
+        note:"Old wine warehouse turned culture house: quirky pillars, a library, cafés and a glass-bottom rooftop pool." }
+    ]},
+    { base:"Hornedo · Cantabria", emoji:"🌊", items:[
+      { name:"Altamira Museum & Neocueva", q:"Museo de Altamira Santillana del Mar",
+        note:"Walk a full-size replica of the \"Sistine Chapel of cave art\" — warm, dry and unmissable near Santillana." },
+      { name:"Museo Marítimo del Cantábrico", q:"Museo Marítimo del Cantábrico Santander",
+        note:"Santander's aquarium with seals and a walk-through tank, plus seafaring history upstairs." },
+      { name:"El Soplao show cave", q:"Cueva El Soplao",
+        note:"Jaw-dropping cave with a little mine-train ride in — bring a jacket, it's cool inside." }
+    ]},
+    { base:"Santiago · Galicia", emoji:"⛪", items:[
+      { name:"Cathedral, Museum & rooftops", q:"Catedral de Santiago de Compostela",
+        note:"Duck out of the rain into the crypt and museum, or take the guided rooftop walk for the big city view." },
+      { name:"Museo do Pobo Galego", q:"Museo do Pobo Galego Santiago",
+        note:"Galician folk life housed around a famous triple-helix spiral staircase kids love to climb." },
+      { name:"Cidade da Cultura", q:"Cidade da Cultura de Galicia Santiago",
+        note:"Vast modernist hilltop complex with exhibitions and sheltered space to roam." }
+    ]},
+    { base:"Oviedo · Gijón · Asturias", emoji:"🍎", items:[
+      { name:"MUJA — Jurassic Museum 🦕", q:"Museo del Jurásico de Asturias MUJA Colunga",
+        note:"Dinosaurs! Full skeletons and real coastal footprints at Colunga — the top rainy-day pick for kids." },
+      { name:"Acuario de Gijón", q:"Acuario de Gijón",
+        note:"60+ tanks from local rivers to tropical reefs, sharks and a glass tunnel." },
+      { name:"Museo del Ferrocarril", q:"Museo del Ferrocarril de Asturias Gijón",
+        note:"Gijón's railway museum — real steam engines and carriages to clamber around." }
+    ]},
+    { base:"Potes · Picos", emoji:"⛰️", items:[
+      { name:"El Soplao show cave", q:"Cueva El Soplao",
+        note:"~1 hr from Potes: the region's best cave for the days the peaks (and Fuente Dé) are lost in cloud." },
+      { name:"Sto. Toribio de Liébana", q:"Monasterio de Santo Toribio de Liébana",
+        note:"Holy-year monastery holding a fragment of the True Cross, just minutes above Potes." },
+      { name:"Cabárceno Nature Park", q:"Parque de la Naturaleza de Cabárceno",
+        note:"Drive-through animal park — bears, elephants, giraffes — that still works in drizzle." }
+    ]}
+  ];
+
+  // ═══ DAY-TRIP PACKING 🎒 — checkable, saved locally ═══
+  const PACKING = [
+    { id:"eclipse", emoji:"🌑", title:"Eclipse day · Aug 12", items:[
+      "Certified eclipse glasses — one per person (ISO 12312-2)",
+      "Phone + power bank for the long evening",
+      "Camera + tripod (solar filter if zooming the sun)",
+      "Warm layer — the air cools right before totality",
+      "Head-lamp or red-light torch for the dark",
+      "Snacks, water & a picnic blanket or chairs",
+      "Totality times saved offline (signal jams up)",
+      "Something to keep kids busy in the partial phase"
+    ]},
+    { id:"beach", emoji:"🏖️", title:"Beach day · Green Coast", items:[
+      "Swimsuits & quick-dry towels",
+      "Reef/water shoes — some coves are pebbly",
+      "Reef-safe sunscreen + sun hats",
+      "Bucket, spade & a ball",
+      "Windbreak or pop-up shade (Cantabrian breeze)",
+      "A dry change of clothes per kid",
+      "Cash for the beach chiringuito"
+    ]},
+    { id:"fuentede", emoji:"🚠", title:"Fuente Dé cable car", items:[
+      "Warm layers — ~1,800 m and windy up top",
+      "Sturdy shoes for the mirador trails",
+      "Cable-car tickets booked / arrive early",
+      "Water & snacks (little on offer up there)",
+      "Sunglasses & sunscreen (strong at altitude)",
+      "Motion-sickness remedy for the mountain road",
+      "Fully charged phone for the photos"
+    ]},
+    { id:"covadonga", emoji:"🏞️", title:"Lagos de Covadonga", items:[
+      "Rain jacket + warm layer (weather turns fast)",
+      "Hiking shoes — trails get muddy",
+      "Check if the shuttle-bus rule is on & bring cash",
+      "Water & a picnic (few facilities at the lakes)",
+      "Sunscreen even under cloud",
+      "Binoculars for cows, chamois & vultures"
+    ]},
+    { id:"catedrales", emoji:"🌊", title:"Playa de las Catedrales", items:[
+      "Free entry reservation confirmation (summer)",
+      "Low-tide time checked — arches only show then",
+      "Water shoes for slippery rock",
+      "Camera — this is the photo of the trip",
+      "Light rain shell (Galician sky)"
+    ]},
+    { id:"santiago", emoji:"⛪", title:"Santiago old town", items:[
+      "Umbrella or rain shell — Spain's rainiest city",
+      "Comfy shoes for the granite streets",
+      "Shoulders covered for the cathedral",
+      "Cash for the covered Mercado de Abastos",
+      "Refillable water bottle"
+    ]},
+    { id:"playground", emoji:"🛝", title:"Any playground stop", items:[
+      "Snacks & water",
+      "Wipes & hand sanitiser",
+      "A spare change of clothes",
+      "A ball or bubbles",
+      "Plasters & small first-aid basics"
+    ]}
+  ];
+
+  // ── Render rainy-day backups ──
+  (function renderRain() {
+    const wrap = document.getElementById('rain-list');
+    if (!wrap) return;
+    const enc = s => encodeURIComponent(s);
+    RAIN_BACKUPS.forEach(g => {
+      const grp = document.createElement('div');
+      grp.className = 'rain-group';
+      grp.innerHTML = '<div class="rain-group-head">' + g.emoji + ' ' + g.base + '</div>';
+      g.items.forEach(it => {
+        const a = document.createElement('a');
+        a.className = 'rain-item';
+        a.href = 'https://www.google.com/maps/search/?api=1&query=' + enc(it.q);
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.innerHTML =
+          '<div class="rain-name"><span>' + it.name + '</span><span class="rain-go">📍 Map</span></div>' +
+          '<div class="rain-note">' + it.note + '</div>';
+        grp.appendChild(a);
+      });
+      wrap.appendChild(grp);
+    });
+  })();
+
+  // ── Render packing checklists (accordion, persisted) ──
+  (function renderPack() {
+    const wrap = document.getElementById('pack-list');
+    if (!wrap) return;
+    let state = {};
+    try { state = JSON.parse(localStorage.getItem('packState') || '{}'); } catch (e) {}
+    PACKING.forEach((trip, ti) => {
+      const box = document.createElement('div');
+      box.className = 'pack-trip' + (ti === 0 ? ' open' : '');
+      const countId = 'pack-count-' + ti;
+
+      const head = document.createElement('button');
+      head.type = 'button';
+      head.className = 'pack-head';
+      head.setAttribute('aria-expanded', ti === 0 ? 'true' : 'false');
+      head.innerHTML =
+        '<span class="pack-emoji">' + trip.emoji + '</span>' +
+        '<span class="pack-title">' + trip.title + '</span>' +
+        '<span class="pack-count" id="' + countId + '"></span>' +
+        '<span class="pack-chevron">▸</span>';
+      head.addEventListener('click', () => {
+        const open = box.classList.toggle('open');
+        head.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      box.appendChild(head);
+
+      const items = document.createElement('div');
+      items.className = 'pack-items';
+
+      const updateCount = () => {
+        let done = 0;
+        trip.items.forEach((_, i) => { if (state[ti + ':' + i]) done++; });
+        const el = document.getElementById(countId);
+        if (el) {
+          el.textContent = done + '/' + trip.items.length;
+          el.classList.toggle('full', done === trip.items.length);
+        }
+      };
+
+      trip.items.forEach((label, i) => {
+        const key = ti + ':' + i;
+        const row = document.createElement('div');
+        row.className = 'pack-check' + (state[key] ? ' done' : '');
+        row.innerHTML = '<span class="pack-box">✓</span><span class="pack-text">' + label + '</span>';
+        row.addEventListener('click', () => {
+          const d = row.classList.toggle('done');
+          state[key] = d;
+          try { localStorage.setItem('packState', JSON.stringify(state)); } catch (e) {}
+          updateCount();
+        });
+        items.appendChild(row);
+      });
+
+      box.appendChild(items);
+      wrap.appendChild(box);
+      updateCount();
     });
   })();
 
