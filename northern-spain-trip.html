@@ -9,6 +9,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="Flynns · España"/>
   <meta name="format-detection" content="telephone=no"/>
+  <meta name="robots" content="noindex, nofollow"/>
   <title>Eclipse 2026 · Flynn Family · Northern Spain</title>
 
   <!-- Leaflet (keyless map — no API key required) -->
@@ -1453,6 +1454,37 @@
     body[data-theme="eclipse"] .rain-name .rain-go { color: var(--azul-hi); }
     .rain-note { font-size: 0.73rem; color: var(--text); opacity: 0.86; line-height: 1.4; margin-top: 0.22rem; }
 
+    /* ═══ LU & DONDI · PARALLEL ITINERARY 👵 ═══════════ */
+    .lu-section {
+      padding: 1rem 1.4rem 1.3rem;
+      border-top: 1px solid var(--border);
+      background: radial-gradient(circle at 85% 0%, rgba(168,40,58,0.10), transparent 52%);
+    }
+    .lu-section .section-eyebrow { color: var(--sangria); }
+    body[data-theme="eclipse"] .lu-section .section-eyebrow { color: var(--saffron); }
+    .lu-row {
+      display: block;
+      padding: 0.55rem 0.7rem;
+      margin-bottom: 0.4rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--sangria);
+      border-radius: 8px;
+      color: var(--text);
+      box-shadow: var(--shadow-sm);
+    }
+    .lu-when {
+      font-weight: 700; font-size: 0.7rem; letter-spacing: 0.04em;
+      color: var(--sangria); text-transform: uppercase;
+    }
+    body[data-theme="eclipse"] .lu-when { color: var(--saffron); }
+    .lu-what { font-weight: 600; font-size: 0.84rem; color: var(--text-hi); margin-top: 0.1rem; }
+    .lu-note { font-size: 0.73rem; color: var(--text); opacity: 0.86; line-height: 1.45; margin-top: 0.18rem; }
+    .lu-note a { color: var(--azulejo); font-weight: 600; text-decoration: none; }
+    body[data-theme="eclipse"] .lu-note a { color: var(--azul-hi); }
+    .lu-contacts { font-size: 0.73rem; line-height: 1.6; }
+    .lu-contacts a { color: inherit; text-decoration: none; font-weight: 600; }
+
     /* ═══ DAY-TRIP PACKING 🎒 ══════════════════════════ */
     .pack-section {
       padding: 1rem 1.4rem 1.4rem;
@@ -1816,6 +1848,10 @@
               <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
               Airbnb · 83UxgIHH
             </a>
+            <a class="stop-link" href="https://www.airbnb.com/l/zjeqhYzv" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+              Join Lu's trip · Esmerelda Cottage
+            </a>
             <a class="stop-link" href="https://www.airbnb.com/trips" target="_blank" rel="noopener">
               <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
               Your reservation · Airbnb Trips
@@ -1905,6 +1941,10 @@
               <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
               Airbnb · ghFqElI3
             </a>
+            <a class="stop-link" href="https://www.airbnb.com/l/oJDvwaTk" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+              Join Lu's trip · C/ Argüelles 27
+            </a>
             <a class="stop-link" href="https://www.airbnb.com/trips" target="_blank" rel="noopener">
               <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
               Your reservation · Airbnb Trips
@@ -1934,6 +1974,7 @@
           <div class="stop-tags">
             <span class="tag tag-drive">↗ 2.5 hrs</span>
             <span class="tag tag-nights">4 nights</span>
+            <span class="tag tag-booked">✓ Booked via Lu</span>
           </div>
           <div class="stop-highlights">
             <span class="highlight kid"><span class="h-ico">🚠</span>Fuente Dé cable car</span>
@@ -1945,6 +1986,14 @@
             <span class="highlight"><span class="h-ico">🌉</span>Cangas de Onís Roman bridge</span>
           </div>
           <div class="stop-links">
+            <a class="stop-link" href="https://www.airbnb.com/l/GGRlNqA5" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+              Join Lu's trip · Finca Roja unit 1
+            </a>
+            <a class="stop-link" href="https://www.airbnb.com/l/nIC8oOVR" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+              Join Lu's trip · Finca Roja unit 2
+            </a>
             <a class="stop-link" href="https://www.airbnb.com/l/Vt6ILuT7" target="_blank" rel="noopener">
               <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
               Airbnb · Vt6ILuT7
@@ -2014,6 +2063,76 @@
       </div>
 
     </div>
+
+    <!-- ── LU & DONDI · PARALLEL ITINERARY 👵 ── -->
+    <section class="lu-section" id="lu-section">
+      <div class="section-eyebrow">👵 Lu &amp; Dondi — parallel itinerary</div>
+      <p class="section-sub">From Lu's trip sheet — they run a day ahead of us on both ends, and swap Santiago for San Sebastián.</p>
+
+      <div class="lu-row">
+        <div class="lu-when">Contacts</div>
+        <div class="lu-contacts">
+          Lu <a href="tel:+18282312577">828-231-2577</a> ·
+          Ellen <a href="tel:+14063968033">406-396-8033</a> ·
+          Michael <a href="tel:+16318043470">631-804-3470</a> ·
+          Dondi <a href="tel:+18282796322">828-279-6322</a>
+        </div>
+      </div>
+
+      <div class="lu-row">
+        <div class="lu-when">Aug 6 → 7 · Thu–Fri</div>
+        <div class="lu-what">✈ Fly out — American Airlines, code AQXEWM</div>
+        <div class="lu-note">Asheville → Charlotte AA5973 (11:57a–1:09p) · Charlotte → Madrid AA748 (3:40p–5:30a, lands Fri 8/7) · Madrid → Bilbao AA8618 op. Iberia (7:25a–8:30a).</div>
+      </div>
+
+      <div class="lu-row">
+        <div class="lu-when">Aug 7 – 9 · 2 nights</div>
+        <div class="lu-what">🏨 Batimont, Bilbao — a day ahead of us</div>
+        <div class="lu-note">Hotel tel. <a href="tel:+34946022771">+34 946 022 771</a>. We arrive Sat 8/8 to the same hotel; Lisa Lindesmith &amp; Toni too.</div>
+      </div>
+
+      <div class="lu-row">
+        <div class="lu-when">Aug 8 · Sat</div>
+        <div class="lu-what">🚗 Alamo rental car pickup</div>
+        <div class="lu-note">Confirmation 2115445881 · 2-week rental.</div>
+      </div>
+
+      <div class="lu-row">
+        <div class="lu-when">Aug 9 – 13</div>
+        <div class="lu-what">🌊 Esmerelda Cottage, Hornedo — all 8 of us through the eclipse</div>
+        <div class="lu-note">Airbnb conf. HMZKW529AD · <a href="https://www.airbnb.com/l/zjeqhYzv" target="_blank" rel="noopener">join Lu's trip ↗</a>. Lisa &amp; Toni head back to Bilbao 8/13.</div>
+      </div>
+
+      <div class="lu-row">
+        <div class="lu-when">Aug 13 – 15</div>
+        <div class="lu-what">🌉 San Sebastián (while we're in Santiago)</div>
+        <div class="lu-note">Airbnb apt Kanpandegi Kalea 5, Bajo Derecha — bell tower, old town · conf. HMCPSBQME4.</div>
+      </div>
+
+      <div class="lu-row">
+        <div class="lu-when">Aug 15 – 17</div>
+        <div class="lu-what">🍎 Oviedo — everyone back together</div>
+        <div class="lu-note">Airbnb Calle de Argüelles 27, 3ºB · conf. HM2AAPQDE · <a href="https://www.airbnb.com/l/oJDvwaTk" target="_blank" rel="noopener">join Lu's trip ↗</a>.</div>
+      </div>
+
+      <div class="lu-row">
+        <div class="lu-when">Aug 17 – 20</div>
+        <div class="lu-what">⛰️ Potes — Finca Roja farm stay, all together</div>
+        <div class="lu-note">Diseminado Potes 18, apto 2 (Calle Albanes 2, apt 2) · confs HMAKT459FH + HMEAAF3TQS · join Lu's trips: <a href="https://www.airbnb.com/l/GGRlNqA5" target="_blank" rel="noopener">unit 1 ↗</a> · <a href="https://www.airbnb.com/l/nIC8oOVR" target="_blank" rel="noopener">unit 2 ↗</a>.</div>
+      </div>
+
+      <div class="lu-row">
+        <div class="lu-when">Aug 20 · Thu</div>
+        <div class="lu-what">🏨 Bilbao — Holiday Inn Express</div>
+        <div class="lu-note">cc #47287341.</div>
+      </div>
+
+      <div class="lu-row">
+        <div class="lu-when">Aug 21 · Fri</div>
+        <div class="lu-what">🛫 Home via Chicago (we go via Madrid–Charlotte)</div>
+        <div class="lu-note">Bilbao → Madrid AA8509 (9:15a–10:25a) · Madrid → Chicago AA8666 (11:45a–2:25p) · Chicago → Asheville AA4429 (6:16p–9:10p).</div>
+      </div>
+    </section>
 
     <!-- ── FOR THE KIDS 🛝 (rendered by JS) ── -->
     <section class="kids-section" id="kids-section">
@@ -2708,7 +2827,7 @@
     { d:"Aug 9–13",  place:"Hornedo",               region:"Cantabria",       stay:"Airbnb 83UxgIHH · 4 nights",  drive:"~1 hr · ☀ ECLIPSE Aug 12" },
     { d:"Aug 13–15", place:"Santiago de Compostela",region:"Galicia",         stay:"Airbnb 4yXzSmio · 2 nights",  drive:"~5 hr drive" },
     { d:"Aug 15–17", place:"Oviedo / Gijón",        region:"Asturias",        stay:"Airbnb ghFqElI3 · 2 nights",  drive:"~3 hr drive" },
-    { d:"Aug 17–21", place:"Potes",                 region:"Picos de Europa", stay:"Airbnb · 4 nights",           drive:"~2.5 hr drive" },
+    { d:"Aug 17–21", place:"Potes",                 region:"Picos de Europa", stay:"Finca Roja farm stay via Lu (HMAKT459FH + HMEAAF3TQS) · 4 nights", drive:"~2.5 hr drive" },
     { d:"Aug 20–21", place:"Bilbao (return)",       region:"Basque Country",  stay:"Holiday Inn Express (IHG #24950788) · 1 night", drive:"~2.5 hr · fly home Aug 21" }
   ];
 
@@ -2746,6 +2865,13 @@
       '<div class="ps-eclipse">🌑 <b>Eclipse Day — Wed Aug 12:</b> ' + eclipseLine + '. Certified eclipse glasses for everyone; save times offline.</div>' +
       '<h2>Itinerary</h2>' +
       '<table class="ps-itin"><thead><tr><th>Dates</th><th>Base</th><th>Stay</th><th>Getting there</th></tr></thead><tbody>' + itinRows + '</tbody></table>' +
+      '<h2>👵 Lu &amp; Dondi (parallel)</h2><ul class="ps-list">' +
+        '<li>Out Aug 6 (AA code AQXEWM): AVL→CLT AA5973 · CLT→MAD AA748 · MAD→BIO AA8618 — Batimont Bilbao Aug 7–9 (tel +34 946 022 771)</li>' +
+        '<li>Hornedo with us Aug 9–13 (HMZKW529AD) · San Sebastián Aug 13–15: Kanpandegi Kalea 5, Bajo Dcha (HMCPSBQME4)</li>' +
+        '<li>Oviedo Aug 15–17: C/ Argüelles 27, 3ºB (HM2AAPQDE) · Potes Aug 17–20: Finca Roja, Diseminado Potes 18 apto 2</li>' +
+        '<li>Home Aug 21 via Chicago: BIO→MAD AA8509 · MAD→ORD AA8666 · ORD→AVL AA4429 · Alamo car conf 2115445881 (pickup 8/8, 2 wks)</li>' +
+        '<li>Lu 828-231-2577 · Dondi 828-279-6322 · Lisa &amp; Toni: same hotel 8/8, leave Hornedo for Bilbao 8/13</li>' +
+      '</ul>' +
       '<div class="ps-cols">' +
         '<div><h2>🛝 Playgrounds & kid stops</h2><ul class="ps-list">' + kids + '</ul></div>' +
         '<div><h2>☔ Rainy-day backups</h2><ul class="ps-list">' + rain + '</ul></div>' +
@@ -2812,7 +2938,7 @@
       link:"https://www.airbnb.com/l/ghFqElI3" },
     { id:4, name:"Potes",                 sub:"Picos de Europa, Cantabria",dates:"Aug 17 – 21",
       lat:43.1518, lon:-4.6206, nights:4, kind:"stay",
-      note:"Mountain base. Fuente Dé cable car, Torre del Infantado, Roman bridge at Cangas de Onís, Lagos de Covadonga, hikes.",
+      note:"Mountain base — Finca Roja farm stay, booked via Lu. Fuente Dé cable car, Torre del Infantado, Roman bridge at Cangas de Onís, Lagos de Covadonga, hikes.",
       link:"https://www.airbnb.com/l/lrYUsLWP" },
     { id:5, name:"Bilbao (Return)",       sub:"Basque Country",            dates:"Aug 20 – 21",
       lat:43.2800, lon:-2.9200, nights:1, kind:"return",
