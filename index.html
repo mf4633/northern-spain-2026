@@ -2168,6 +2168,8 @@
     <section class="trip-tools">
       <button class="print-btn" type="button" onclick="printSheet()">🖨️ Print one-page trip sheet</button>
       <p class="print-hint">On iPhone: tap, then <b>Share → Print</b> or “Save to Files” as a PDF.</p>
+      <a class="print-btn" style="display:inline-block; text-decoration:none; margin-top:0.6rem;" href="directions.html">🗺️ Reservations &amp; driving directions (printable)</a>
+      <p class="print-hint">One page per driving leg — reservation details, route map, and turn-by-turn directions.</p>
     </section>
   </aside>
 
@@ -2954,10 +2956,10 @@
     BIO: { code:"BIO", lon:-2.9106,  lat:43.3011, name:"Bilbao Airport",         city:"Bilbao" }
   };
   const FLIGHTS = [
-    { id:"OUT1", from:"CLT", to:"MAD", date:"Aug 8, 2026",  dir:"out",  leg:"Transatlantic", dur:"~7.5 hrs", note:"Overnight departure from Charlotte" },
-    { id:"OUT2", from:"MAD", to:"BIO", date:"Aug 8, 2026",  dir:"out",  leg:"Connection",    dur:"~1 hr",    note:"Short hop to the north coast" },
-    { id:"RET1", from:"BIO", to:"MAD", date:"Aug 21, 2026", dir:"back", leg:"Connection",    dur:"~1 hr",    note:"Morning flight south" },
-    { id:"RET2", from:"MAD", to:"CLT", date:"Aug 21, 2026", dir:"back", leg:"Transatlantic", dur:"~9 hrs",   note:"Daytime flight home" }
+    { id:"OUT1", from:"CLT", to:"MAD", date:"Aug 7, 2026",  dir:"out",  leg:"Transatlantic", dur:"~7.5 hrs", note:"AA 748 · 3:40 PM → 5:30 AM (+1) · conf QUWDMN" },
+    { id:"OUT2", from:"MAD", to:"BIO", date:"Aug 8, 2026",  dir:"out",  leg:"Connection",    dur:"~1 hr",    note:"AA 8618 op. Iberia · 7:25 → 8:30 AM" },
+    { id:"RET1", from:"BIO", to:"MAD", date:"Aug 21, 2026", dir:"back", leg:"Connection",    dur:"~1 hr",    note:"AA 8509 op. Iberia · 9:15 → 10:25 AM" },
+    { id:"RET2", from:"MAD", to:"CLT", date:"Aug 21, 2026", dir:"back", leg:"Transatlantic", dur:"~9 hrs",   note:"AA 749 · 1:00 → 4:20 PM · conf QUWDMN" }
   ];
 
   // Great-circle arc between two lon/lat points -> array of [lon,lat]
