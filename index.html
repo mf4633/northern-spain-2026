@@ -1,3321 +1,490 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-  <meta name="theme-color" content="#C8553D" media="(prefers-color-scheme: light)"/>
-  <meta name="theme-color" content="#0A0711" media="(prefers-color-scheme: dark)"/>
-  <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-  <meta name="apple-mobile-web-app-title" content="Flynns · España"/>
-  <meta name="format-detection" content="telephone=no"/>
-  <meta name="robots" content="noindex, nofollow"/>
-  <title>Eclipse 2026 · Flynn Family · Northern Spain</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Northern Spain · Flynn Family · August 2026</title>
 
-  <!-- Leaflet (keyless map — no API key required) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="astronomy.browser.min.js"></script>
+  <!-- Leaflet from cdnjs -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Josefin+Sans:wght@300;400;500;600&family=Caveat:wght@500;600;700&family=Fredoka:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Josefin+Sans:wght@200;300;400;600&display=swap" rel="stylesheet"/>
 
   <style>
-    /* ═══ THEME VARS ═══════════════════════════════════ */
-    body {
-      /* DAY theme (default) — warm parchment / Spanish sun */
-      --bg-1: #FBF2D8;
-      --bg-2: #F2DFB2;
-      --panel: #FFF8E4;
-      --panel-2: #F7E7C0;
-      --card: #FFFFFF;
-      --text: #2E1F14;
-      --text-hi: #1A1008;
-      --muted: #8F6F4D;
-      --border: rgba(200,85,61,0.28);
-      --border-hi: rgba(200,85,61,0.6);
-      --terra: #C8553D;
-      --sangria: #A8283A;
-      --saffron: #E8A13A;
-      --gold: #C8902A;
-      --gold-hi: #E8B93A;
-      --azulejo: #2E5B7E;
-      --azul-hi: #5590B5;
-      --olive: #6F8233;
-      --sand: #EFE0C3;
-      --corona: #E89B16;
-      --corona-hi: #FFD27A;
-      --umbra: #07060A;
-      --polaroid: #FFFDF4;
-      --shadow-sm: 0 2px 6px rgba(90,40,10,0.12);
-      --shadow-md: 0 6px 18px rgba(90,40,10,0.18);
-      --shadow-lg: 0 14px 32px rgba(90,40,10,0.22);
-      transition: background-color 0.7s ease, color 0.7s ease;
+    :root {
+      --crimson:  #8B1A2B;
+      --gold:     #C9943A;
+      --sand:     #E8D5B0;
+      --deep:     #0F0A06;
+      --panel:    #1A120A;
+      --card:     #231810;
+      --border:   rgba(201,148,58,0.25);
+      --text:     #EFE6D6;
+      --muted:    #9C8A72;
+      --accent:   #D4A853;
     }
-
-    body[data-theme="eclipse"] {
-      --bg-1: #0A0711;
-      --bg-2: #14081E;
-      --panel: #14101A;
-      --panel-2: #1C1624;
-      --card: #221A2A;
-      --text: #F2E8D4;
-      --text-hi: #FFF1C7;
-      --muted: #9C8A72;
-      --border: rgba(255,210,122,0.25);
-      --border-hi: rgba(255,210,122,0.6);
-      --terra: #D4684E;
-      --sangria: #C03A4A;
-      --saffron: #FFC863;
-      --gold: #FFD27A;
-      --gold-hi: #FFE9B8;
-      --corona: #FFC04A;
-      --corona-hi: #FFFBE0;
-      --polaroid: #E8DCC0;
-      --shadow-sm: 0 2px 6px rgba(0,0,0,0.5);
-      --shadow-md: 0 6px 18px rgba(0,0,0,0.6);
-      --shadow-lg: 0 14px 32px rgba(0,0,0,0.7);
-    }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; }
-
+    html, body { height: 100%; overflow: hidden; }
     body {
       font-family: 'Josefin Sans', sans-serif;
-      background:
-        radial-gradient(1200px 700px at 85% -10%, rgba(200,85,61,0.18), transparent 60%),
-        radial-gradient(900px 600px at -10% 110%, rgba(46,91,126,0.14), transparent 55%),
-        linear-gradient(180deg, var(--bg-1), var(--bg-2));
+      background: var(--deep);
       color: var(--text);
-      overflow: hidden;
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
-      position: relative;
     }
 
-    body[data-theme="eclipse"] {
-      background:
-        radial-gradient(900px 600px at 50% 30%, rgba(255,210,122,0.13), transparent 65%),
-        radial-gradient(1400px 900px at 70% 110%, rgba(40,18,60,0.5), transparent 60%),
-        linear-gradient(180deg, var(--bg-1), var(--bg-2));
-    }
-
-    /* subtle tile-dot texture */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        radial-gradient(circle at 1px 1px, rgba(200,85,61,0.06) 1px, transparent 1.5px);
-      background-size: 28px 28px;
-      pointer-events: none;
-      z-index: 0;
-    }
-    body[data-theme="eclipse"]::before {
-      background-image:
-        radial-gradient(circle at 1px 1px, rgba(255,210,122,0.05) 1px, transparent 1.5px);
-    }
-
-    /* ═══ HEADER ═══════════════════════════════════════ */
+    /* ── HEADER ── */
     header {
-      background:
-        linear-gradient(90deg, rgba(200,85,61,0.10) 0%, rgba(232,161,58,0.05) 40%, rgba(46,91,126,0.08) 100%),
-        linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
-      border-bottom: 2px solid var(--terra);
-      padding: 0 1.75rem;
-      padding-left: max(1.75rem, env(safe-area-inset-left));
-      padding-right: max(1.75rem, env(safe-area-inset-right));
-      height: 74px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 60px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-shrink: 0;
       position: relative;
-      z-index: 10;
-      box-shadow: var(--shadow-md);
+      z-index: 1000;
     }
-    body[data-theme="eclipse"] header {
-      border-bottom-color: var(--corona);
-      box-shadow: 0 2px 30px rgba(255,192,74,0.18), var(--shadow-md);
-    }
-
-    /* little tile accent row on header */
-    header::after {
+    header::before {
       content: '';
-      position: absolute;
-      left: 0; right: 0; bottom: -2px;
-      height: 2px;
-      background: repeating-linear-gradient(90deg,
-        var(--terra) 0 12px,
-        var(--saffron) 12px 24px,
-        var(--azulejo) 24px 36px);
-      opacity: 0.5;
-    }
-
-    .header-title {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .header-flag {
-      width: 28px; height: 20px;
-      border-radius: 2px;
-      overflow: hidden;
-      box-shadow: 0 0 0 1px rgba(0,0,0,0.2), 0 2px 6px rgba(0,0,0,0.2);
-      background: linear-gradient(to bottom,
-          #C8102E 0%, #C8102E 25%,
-          #FABD00 25%, #FABD00 75%,
-          #C8102E 75%, #C8102E 100%);
-      flex-shrink: 0;
-    }
-
-    .header-title h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-weight: 600;
-      font-size: 1.75rem;
-      letter-spacing: 0.01em;
-      color: var(--text-hi);
-      line-height: 1;
-    }
-    .header-title h1 em {
-      font-style: italic;
-      font-weight: 400;
-      color: var(--terra);
-    }
-    body[data-theme="eclipse"] .header-title h1 em { color: var(--corona-hi); }
-
-    .subline {
-      font-family: 'Caveat', cursive;
-      font-size: 1.2rem;
-      color: var(--sangria);
-      letter-spacing: 0.01em;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-    body[data-theme="eclipse"] .subline { color: var(--corona-hi); }
-
-    .sun-icon {
-      display: inline-block;
-      width: 16px; height: 16px;
-      border-radius: 50%;
-      background: radial-gradient(circle, #FFE58A 0%, #F4A628 70%, #D4891E 100%);
-      box-shadow:
-        0 0 0 1.5px #D4891E,
-        0 0 12px 2px rgba(244,166,40,0.6);
-      position: relative;
-    }
-    .sun-icon::after {
-      content: '';
-      position: absolute;
-      inset: -6px;
-      border-radius: 50%;
-      border: 1.5px dashed rgba(244,166,40,0.55);
-      animation: spin 16s linear infinite;
-    }
-    body[data-theme="eclipse"] .sun-icon {
-      background: #050408;
-      box-shadow:
-        0 0 0 1.5px var(--corona),
-        0 0 18px 4px rgba(255,210,122,0.7),
-        0 0 32px 10px rgba(255,210,122,0.3);
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .header-meta {
-      display: flex; align-items: center; gap: 0.5rem;
-    }
-
-    .badge {
-      font-size: 0.6rem;
-      font-weight: 600;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      padding: 0.38rem 0.75rem;
-      border: 1.5px solid var(--border);
-      color: var(--muted);
-      border-radius: 100px;
-      background: var(--card);
-      white-space: nowrap;
-      box-shadow: var(--shadow-sm);
-    }
-    .badge.active {
-      border-color: var(--terra);
-      color: var(--terra);
-      background: rgba(200,85,61,0.08);
-    }
-    .badge.countdown {
-      font-family: 'Fredoka', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 500;
-      letter-spacing: 0.03em;
-      text-transform: none;
-      padding: 0.3rem 0.9rem;
-      border-color: var(--sangria);
-      color: var(--sangria);
-      background: linear-gradient(90deg, rgba(168,40,58,0.08), rgba(232,161,58,0.08));
-    }
-    .badge.countdown b {
-      font-weight: 700;
-      color: var(--sangria);
-      margin-right: 0.2rem;
-    }
-    .badge.eclipse {
-      border-color: var(--corona);
-      color: #6a4400;
-      background:
-        radial-gradient(circle at 20% 50%, rgba(255,210,122,0.5), rgba(0,0,0,0) 60%),
-        rgba(255,245,210,0.8);
-      box-shadow: 0 0 0 1px rgba(255,192,74,0.35), 0 0 18px rgba(255,192,74,0.35);
-    }
-    .badge.eclipse b { color: var(--sangria); }
-    body[data-theme="eclipse"] .badge.eclipse {
-      background:
-        radial-gradient(circle at 20% 50%, rgba(255,210,122,0.35), rgba(0,0,0,0) 60%),
-        rgba(7,6,10,0.7);
-      color: var(--corona-hi);
-      box-shadow: 0 0 0 1px rgba(255,210,122,0.35), 0 0 22px rgba(255,210,122,0.45);
-    }
-
-    /* ═══ LAYOUT ═══════════════════════════════════════ */
-    .layout {
-      display: flex;
-      flex: 1;
-      overflow: hidden;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* ═══ SIDEBAR ══════════════════════════════════════ */
-    .sidebar {
-      width: 380px;
-      flex-shrink: 0;
-      background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
-      border-right: 1px solid var(--border);
-      overflow-y: auto;
-      overflow-x: hidden;
-      display: flex;
-      flex-direction: column;
-      box-shadow: inset -12px 0 24px -18px rgba(90,40,10,0.25);
-    }
-    .sidebar::-webkit-scrollbar { width: 6px; }
-    .sidebar::-webkit-scrollbar-track { background: transparent; }
-    .sidebar::-webkit-scrollbar-thumb {
-      background: var(--border); border-radius: 4px;
-    }
-
-    .sidebar-header {
-      padding: 1.1rem 1.4rem 0.9rem;
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      background: var(--panel);
-      z-index: 3;
-      backdrop-filter: blur(6px);
-    }
-    .sidebar-header .eyebrow {
-      font-size: 0.58rem;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 0.35rem;
-      display: flex; align-items: center; gap: 0.4rem;
-    }
-    .sidebar-header .eyebrow::before,
-    .sidebar-header .eyebrow::after {
-      content: '';
-      height: 1px;
-      background: var(--border);
-    }
-    .sidebar-header .eyebrow::before { width: 12px; }
-    .sidebar-header .eyebrow::after { flex: 1; }
-
-    .sidebar-header h2 {
-      font-family: 'Cormorant Garamond', serif;
-      font-weight: 500;
-      font-size: 1.4rem;
-      color: var(--text-hi);
-      line-height: 1.2;
-      font-style: italic;
-    }
-    .sidebar-header .handwritten {
-      font-family: 'Caveat', cursive;
-      font-size: 1.05rem;
-      color: var(--terra);
-      margin-top: 0.3rem;
-    }
-
-    /* ── CAST / POLAROIDS ── */
-    .cast {
-      padding: 0.95rem 1.25rem 0.8rem;
-      border-bottom: 1px solid var(--border);
-      background:
-        repeating-linear-gradient(45deg,
-          transparent 0 10px,
-          rgba(200,85,61,0.015) 10px 20px);
-    }
-    .cast-eyebrow {
-      font-size: 0.58rem;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 0.6rem;
-      text-align: center;
-    }
-    .polaroids {
-      display: flex;
-      justify-content: center;
-      gap: 0.25rem;
-    }
-    .polaroid {
-      --tilt: 0deg;
-      background: var(--polaroid);
-      padding: 5px 5px 18px;
-      border-radius: 1px;
-      box-shadow:
-        0 2px 4px rgba(0,0,0,0.15),
-        0 6px 16px rgba(0,0,0,0.18),
-        inset 0 0 0 1px rgba(0,0,0,0.04);
-      transform: rotate(var(--tilt));
-      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s, z-index 0s 0.25s;
-      position: relative;
-      flex: 1 1 0;
-      max-width: 100px;
-      cursor: pointer;
-    }
-    .polaroid:hover {
-      transform: rotate(0deg) translateY(-4px) scale(1.1);
-      box-shadow:
-        0 6px 10px rgba(0,0,0,0.2),
-        0 18px 34px rgba(0,0,0,0.28),
-        0 0 0 1px rgba(200,85,61,0.35);
-      z-index: 3;
-      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s, z-index 0s;
-    }
-    .polaroid-img {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      background-size: cover;
-      background-position: center;
-      background-color: #2A2018;
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
-    }
-    .polaroid figcaption {
-      font-family: 'Caveat', cursive;
-      font-size: 0.9rem;
-      color: #3A2A1E;
-      text-align: center;
-      margin-top: 3px;
-      line-height: 1;
-    }
-    .polaroid:nth-child(2)::before {
-      content: '';
-      position: absolute;
-      top: -8px; left: 50%;
-      transform: translateX(-50%) rotate(-3deg);
-      width: 34px; height: 14px;
-      background: rgba(239,224,195,0.6);
-      border-left: 1px dashed rgba(0,0,0,0.08);
-      border-right: 1px dashed rgba(0,0,0,0.08);
-      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(90deg,transparent,transparent 3px,rgba(201,148,58,0.03) 3px,rgba(201,148,58,0.03) 4px);
       pointer-events: none;
     }
-    .cast-note {
-      font-family: 'Caveat', cursive;
-      font-size: 1rem;
-      color: var(--terra);
-      text-align: center;
-      margin-top: 0.45rem;
+    .hdr-left { display: flex; align-items: baseline; gap: 1rem; }
+    .hdr-left h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300; font-size: 1.55rem;
+      letter-spacing: 0.04em; color: var(--sand);
     }
+    .hdr-left span {
+      font-size: 0.62rem; font-weight: 600;
+      letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase;
+    }
+    .hdr-right { display: flex; gap: 0.75rem; align-items: center; }
+    .badge {
+      font-size: 0.58rem; font-weight: 600; letter-spacing: 0.14em;
+      text-transform: uppercase; padding: 0.28rem 0.65rem;
+      border: 1px solid var(--border); color: var(--muted); border-radius: 2px;
+    }
+    .badge.gold { border-color: var(--gold); color: var(--gold); background: rgba(201,148,58,0.07); }
 
-    /* ── TIMELINE ── */
-    .timeline { padding: 0.4rem 0 1rem; flex: 1; }
+    /* ── LAYOUT ── */
+    .layout { display: flex; flex: 1; overflow: hidden; }
 
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 320px; flex-shrink: 0;
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .sb-head {
+      padding: 1.2rem 1.4rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .sb-head p {
+      font-size: 0.58rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--gold); margin-bottom: 0.25rem;
+    }
+    .sb-head h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300; font-size: 1.1rem; color: var(--sand); line-height: 1.3;
+    }
+    .timeline {
+      flex: 1; overflow-y: auto; overflow-x: hidden;
+      padding: 0.75rem 0 2rem;
+    }
+    .timeline::-webkit-scrollbar { width: 3px; }
+    .timeline::-webkit-scrollbar-track { background: var(--panel); }
+    .timeline::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ── STOP CARD ── */
     .stop {
-      display: flex;
-      position: relative;
-      cursor: pointer;
-      transition: background 0.2s;
+      display: flex; gap: 0;
+      cursor: pointer; transition: background 0.18s;
     }
-    .stop:hover { background: rgba(232,161,58,0.08); }
-    .stop.active {
-      background: linear-gradient(90deg, rgba(200,85,61,0.13), rgba(232,161,58,0.08) 60%, transparent);
-    }
-    body[data-theme="eclipse"] .stop.active {
-      background: linear-gradient(90deg, rgba(255,192,74,0.14), rgba(168,40,58,0.08) 60%, transparent);
-    }
+    .stop:hover { background: rgba(201,148,58,0.05); }
+    .stop.active { background: rgba(201,148,58,0.09); }
 
     .stop-line {
-      width: 46px;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding-top: 1.35rem;
+      width: 36px; flex-shrink: 0;
+      display: flex; flex-direction: column; align-items: center;
+      padding-top: 1.1rem;
     }
+    .stop-dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: var(--crimson); border: 2px solid var(--gold);
+      flex-shrink: 0; position: relative; z-index: 1;
+      transition: transform 0.18s, box-shadow 0.18s;
+    }
+    .stop.active .stop-dot, .stop:hover .stop-dot {
+      transform: scale(1.5); box-shadow: 0 0 7px var(--gold);
+    }
+    .stop-dot.blue { background: rgba(50,110,200,0.6); border-color: #7AAEEE; }
+    .stop-connector { width: 1px; flex: 1; background: var(--border); margin-top: 4px; min-height: 16px; }
 
-    .stop-num {
-      width: 26px; height: 26px;
-      border-radius: 50%;
-      background: var(--card);
-      border: 2px solid var(--terra);
-      color: var(--terra);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.95rem;
-      font-weight: 700;
-      flex-shrink: 0;
-      position: relative;
-      z-index: 1;
-      transition: all 0.25s;
-      box-shadow: 0 0 0 3px var(--panel), var(--shadow-sm);
-    }
-    .stop:hover .stop-num,
-    .stop.active .stop-num {
-      background: var(--terra);
-      color: #FFFDF4;
-      transform: scale(1.12) rotate(-4deg);
-      box-shadow: 0 0 0 3px var(--panel), 0 0 14px rgba(200,85,61,0.5);
-    }
-    .stop[data-kind="return"] .stop-num {
-      border-color: var(--azulejo);
-      color: var(--azulejo);
-    }
-    .stop[data-kind="return"]:hover .stop-num,
-    .stop[data-kind="return"].active .stop-num {
-      background: var(--azulejo);
-      color: #FFFDF4;
-      box-shadow: 0 0 0 3px var(--panel), 0 0 14px rgba(46,91,126,0.6);
-    }
-
-    .stop-connector {
-      width: 2px;
-      flex: 1;
-      background: repeating-linear-gradient(180deg,
-        var(--border) 0 6px,
-        transparent 6px 10px);
-      margin-top: 4px;
-      min-height: 18px;
-    }
-
-    .stop-content {
-      padding: 1.1rem 1.25rem 1.1rem 0.35rem;
-      flex: 1;
-      min-width: 0;
-    }
-
+    .stop-body { padding: 0.9rem 1.1rem 0.9rem 0.4rem; flex: 1; min-width: 0; }
     .stop-dates {
-      font-size: 0.6rem;
-      font-weight: 600;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 0.2rem;
+      font-size: 0.58rem; font-weight: 600; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--gold); margin-bottom: 0.2rem;
     }
-
     .stop-name {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 1.35rem;
-      font-weight: 600;
-      color: var(--text-hi);
-      margin-bottom: 0.15rem;
-      line-height: 1.15;
-      display: flex;
-      align-items: center;
-      gap: 0.45rem;
+      font-size: 1.1rem; color: var(--sand); margin-bottom: 0.15rem; line-height: 1.2;
     }
-    .stop-name .flag-dot { font-size: 1rem; line-height: 1; }
-
-    .skyline {
-      height: 18px;
-      width: auto;
-      opacity: 0.75;
-      flex-shrink: 0;
-      color: var(--azulejo);
-      margin-left: auto;
-    }
-    body[data-theme="eclipse"] .skyline { color: var(--corona-hi); }
-
-    .stop-sub {
-      font-size: 0.68rem;
-      color: var(--muted);
-      letter-spacing: 0.04em;
-      margin-bottom: 0.55rem;
-      font-style: italic;
-    }
-
-    .stop-tags {
-      display: flex; flex-wrap: wrap; gap: 0.3rem;
-      margin-bottom: 0.55rem;
-    }
+    .stop-sub { font-size: 0.6rem; color: var(--muted); letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+    .tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.45rem; }
     .tag {
-      font-size: 0.54rem;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      padding: 0.25rem 0.55rem;
-      border-radius: 100px;
-      white-space: nowrap;
+      font-size: 0.5rem; font-weight: 600; letter-spacing: 0.11em;
+      text-transform: uppercase; padding: 0.18rem 0.45rem; border-radius: 2px;
     }
-    .tag-booked  { background: rgba(111,130,51,0.15); color: #556B20; border: 1px solid rgba(111,130,51,0.4); }
-    .tag-drive   { background: rgba(232,161,58,0.14); color: #7A5010; border: 1px solid rgba(232,161,58,0.45); }
-    .tag-nights  { background: rgba(200,85,61,0.06); color: var(--muted); border: 1px solid var(--border); }
-    .tag-fly     { background: rgba(46,91,126,0.14); color: #1E4868; border: 1px solid rgba(46,91,126,0.4); }
-    .tag-eclipse {
-      background: radial-gradient(circle at 20% 50%, rgba(255,192,74,0.4), rgba(0,0,0,0) 70%), rgba(255,245,210,0.8);
-      color: #6A4400;
-      border: 1px solid var(--corona);
-      box-shadow: 0 0 12px rgba(255,192,74,0.35);
-    }
-    body[data-theme="eclipse"] .tag-booked  { background: rgba(176,200,120,0.15); color: #B8D080; border-color: rgba(176,200,120,0.4); }
-    body[data-theme="eclipse"] .tag-drive   { background: rgba(255,210,122,0.15); color: var(--gold-hi); border-color: rgba(255,210,122,0.45); }
-    body[data-theme="eclipse"] .tag-fly     { background: rgba(122,174,191,0.18); color: #9FD0E0; border-color: rgba(122,174,191,0.45); }
-    body[data-theme="eclipse"] .tag-eclipse {
-      background: radial-gradient(circle at 20% 50%, rgba(255,210,122,0.35), rgba(0,0,0,0) 60%), rgba(7,6,10,0.7);
-      color: var(--corona-hi);
-    }
+    .t-book { background: rgba(139,26,43,0.28); color: #E87A8A; border: 1px solid rgba(139,26,43,0.5); }
+    .t-drive { background: rgba(201,148,58,0.1); color: var(--gold); border: 1px solid var(--border); }
+    .t-night { background: rgba(201,148,58,0.05); color: var(--muted); border: 1px solid var(--border); }
+    .t-fly   { background: rgba(50,100,180,0.2); color: #7AAEEE; border: 1px solid rgba(50,100,180,0.4); }
 
-    .stop-highlights {
-      display: flex; flex-wrap: wrap;
-      gap: 0.35rem 0.7rem;
-      margin-bottom: 0.65rem;
+    .links { display: flex; flex-direction: column; gap: 0.28rem; }
+    .lnk {
+      font-size: 0.58rem; letter-spacing: 0.05em;
+      color: var(--accent); text-decoration: none;
+      display: flex; align-items: center; gap: 0.3rem;
+      opacity: 0.78; transition: opacity 0.15s;
     }
-    .highlight {
-      font-size: 0.7rem;
-      color: var(--text);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-    }
-    .highlight .h-ico { font-size: 0.9rem; line-height: 1; }
+    .lnk:hover { opacity: 1; }
+    .lnk::before { content: '→'; font-size: 0.65rem; }
 
-    .stop-links { display: flex; flex-direction: column; gap: 0.25rem; margin-top: 0.2rem; }
-    .stop-link {
-      font-size: 0.64rem;
-      letter-spacing: 0.03em;
-      color: var(--gold);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      transition: color 0.15s;
-    }
-    .stop-link:hover { color: var(--terra); }
-    .stop-link svg {
-      width: 10px; height: 10px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2;
-      flex-shrink: 0;
-    }
+    /* ── MAP ── */
+    #map-wrap { flex: 1; position: relative; }
+    #map { width: 100%; height: 100%; }
 
-    .eclipse-timing {
-      margin: 0.55rem 0 0.65rem;
-      padding: 0.65rem 0.75rem;
-      border-radius: 8px;
-      background:
-        radial-gradient(circle at 10% 20%, rgba(255,192,74,0.22), transparent 55%),
-        linear-gradient(135deg, rgba(255,245,210,0.9), rgba(255,236,190,0.65));
-      border: 1px solid rgba(232,155,22,0.45);
-      box-shadow: var(--shadow-sm);
+    /* Leaflet dark overrides */
+    .leaflet-tile { filter: brightness(0.82) saturate(0.6) hue-rotate(195deg); }
+    .leaflet-container { background: var(--deep); }
+    .leaflet-control-zoom a {
+      background: var(--panel) !important; color: var(--sand) !important;
+      border-color: var(--border) !important;
     }
-    body[data-theme="eclipse"] .eclipse-timing {
-      background:
-        radial-gradient(circle at 10% 20%, rgba(255,210,122,0.18), transparent 55%),
-        linear-gradient(135deg, rgba(34,26,42,0.95), rgba(20,16,26,0.9));
-      border-color: rgba(255,210,122,0.35);
+    .leaflet-control-zoom a:hover { background: var(--card) !important; }
+    .leaflet-control-attribution { display: none; }
+
+    /* Custom popup */
+    .leaflet-popup-content-wrapper {
+      background: rgba(15,10,6,0.95) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 3px !important;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.6) !important;
     }
-    .eclipse-timing-title {
+    .leaflet-popup-tip { background: rgba(15,10,6,0.95) !important; }
+    .leaflet-popup-content { margin: 0 !important; padding: 0 !important; }
+    .pop { padding: 0.9rem 1.1rem; font-family: 'Josefin Sans', sans-serif; }
+    .pop-name {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 0.82rem;
-      font-weight: 600;
-      font-style: italic;
-      color: var(--sangria);
-      margin-bottom: 0.45rem;
-      letter-spacing: 0.04em;
-    }
-    body[data-theme="eclipse"] .eclipse-timing-title { color: var(--corona-hi); }
-    .eclipse-timing-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.28rem 0.55rem;
-      font-size: 0.64rem;
-      letter-spacing: 0.03em;
-    }
-    .eclipse-timing-grid .lbl {
-      color: var(--muted);
-      text-transform: uppercase;
-      font-size: 0.58rem;
-    }
-    .eclipse-timing-grid .val {
-      color: var(--text-hi);
-      font-weight: 600;
-      text-align: right;
-    }
-    .eclipse-timing-grid .val.max {
-      color: var(--sangria);
-      font-size: 0.72rem;
-    }
-    body[data-theme="eclipse"] .eclipse-timing-grid .val.max { color: var(--corona-hi); }
-    .eclipse-timing-note {
-      margin-top: 0.45rem;
-      font-size: 0.62rem;
-      color: var(--muted);
-      font-style: italic;
-      line-height: 1.45;
-    }
-    body[data-theme="eclipse"] .eclipse-timing-note { color: #9C8A72; }
-
-    /* ═══ MAP ══════════════════════════════════════════ */
-    #map-container {
-      flex: 1;
-      position: relative;
-      overflow: hidden;
-    }
-    #viewDiv { width: 100%; height: 100%; }
-
-    /* vignette + warm tint over map */
-    #map-container::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background:
-        radial-gradient(ellipse at center, transparent 55%, var(--map-vignette, rgba(200,85,61,0.12)) 100%);
-      z-index: 3;
-      transition: background 0.7s ease;
-    }
-    body[data-theme="eclipse"] #map-container::after {
-      background:
-        radial-gradient(ellipse at 50% 40%, rgba(255,210,122,0.10) 0%, transparent 40%),
-        radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%);
-    }
-
-    /* compass corner */
-    .map-corner {
-      position: absolute;
-      top: 0.8rem;
-      left: 0.8rem;
-      z-index: 5;
-      font-family: 'Caveat', cursive;
-      color: var(--terra);
-      font-size: 1.05rem;
-      pointer-events: none;
-      background: var(--panel);
-      padding: 0.3rem 0.65rem;
-      border-radius: 100px;
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-sm);
-    }
-    body[data-theme="eclipse"] .map-corner {
-      color: var(--corona-hi);
-      background: rgba(20,16,26,0.8);
-      border-color: var(--border-hi);
-    }
-    .map-corner .rose {
-      display: inline-block;
-      margin-right: 0.25rem;
-      color: var(--gold);
-      font-size: 1.15rem;
-      transform: translateY(2px);
-    }
-
-    /* Postcard trip summary */
-    .map-overlay {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      background: var(--panel);
-      backdrop-filter: blur(8px);
-      border: 1.5px solid var(--border-hi);
-      border-radius: 4px;
-      padding: 0.85rem 1rem 0.95rem;
-      z-index: 5;
-      min-width: 200px;
-      box-shadow: var(--shadow-lg);
-      transition: background 0.7s ease, border-color 0.7s ease;
-    }
-    .map-overlay::before {
-      content: '';
-      position: absolute;
-      inset: 4px;
-      border: 1px dashed var(--border);
-      border-radius: 2px;
-      pointer-events: none;
-    }
-    .map-overlay h4 {
-      font-family: 'Cormorant Garamond', serif;
-      font-style: italic;
-      font-weight: 600;
-      font-size: 1.05rem;
-      color: var(--text-hi);
+      font-size: 1.1rem; font-weight: 300; color: var(--sand);
       margin-bottom: 0.15rem;
     }
-    .map-overlay .postmark {
-      font-family: 'Caveat', cursive;
-      font-size: 0.9rem;
-      color: var(--terra);
-      margin-bottom: 0.55rem;
+    .pop-sub { font-size: 0.58rem; color: var(--muted); letter-spacing: 0.06em; margin-bottom: 0.4rem; }
+    .pop-row { font-size: 0.62rem; color: var(--text); margin-bottom: 0.2rem; }
+    .pop-row strong { color: var(--gold); font-weight: 600; margin-right: 0.3rem; }
+    .pop-link {
+      display: inline-block; margin-top: 0.5rem;
+      font-size: 0.6rem; color: var(--accent); text-decoration: none; letter-spacing: 0.06em;
     }
-    body[data-theme="eclipse"] .map-overlay .postmark { color: var(--corona-hi); }
+    .pop-link:hover { text-decoration: underline; }
 
-    .stat-row {
-      display: flex; justify-content: space-between; align-items: baseline;
-      margin-bottom: 0.22rem;
-    }
-    .stat-label {
-      font-size: 0.6rem;
-      color: var(--muted);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-    .stat-val {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.05rem;
-      color: var(--text-hi);
-      font-weight: 600;
-    }
-    .overlay-divider {
-      border: none;
-      border-top: 1px dashed var(--border);
-      margin: 0.55rem 0;
-    }
-
-    .legend-entry { display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.22rem; }
-    .legend-dot {
-      width: 9px; height: 9px; border-radius: 50%;
-      border: 1.5px solid var(--gold);
-      flex-shrink: 0;
-    }
-    .legend-line {
-      width: 20px; height: 2px;
-      background: repeating-linear-gradient(90deg, var(--gold), var(--gold) 4px, transparent 4px, transparent 7px);
-      flex-shrink: 0;
-    }
-    .legend-plane {
-      width: 20px; height: 2px;
-      background: repeating-linear-gradient(90deg, var(--azulejo), var(--azulejo) 2px, transparent 2px, transparent 5px);
-      flex-shrink: 0;
-    }
-    .legend-label { font-size: 0.6rem; color: var(--muted); letter-spacing: 0.03em; }
-
-    /* ═══ DAY SLIDER ═══════════════════════════════════ */
-    .day-slider {
-      position: absolute;
-      left: 1.25rem;
-      right: 1.25rem;
-      bottom: 1rem;
-      z-index: 6;
-      background: var(--panel);
-      backdrop-filter: blur(10px);
-      border: 1.5px solid var(--border-hi);
-      border-radius: 6px;
-      padding: 0.75rem 1rem 0.6rem;
-      box-shadow: var(--shadow-lg);
-      transition: background 0.7s ease, border-color 0.7s ease;
-    }
-    body[data-theme="eclipse"] .day-slider {
-      box-shadow: 0 0 30px rgba(255,210,122,0.18), var(--shadow-lg);
-    }
-
-    .day-slider-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-      margin-bottom: 0.5rem;
-    }
-    .day-info {
-      display: flex;
-      align-items: baseline;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-    }
-    .day-chip {
-      font-family: 'Fredoka', sans-serif;
-      font-size: 0.7rem;
-      font-weight: 500;
-      color: #FFFDF4;
-      background: var(--terra);
-      padding: 0.28rem 0.65rem;
-      border-radius: 100px;
-      letter-spacing: 0.05em;
-    }
-    body[data-theme="eclipse"] .day-chip {
-      background: var(--corona);
-      color: #3A1F00;
-    }
-    .day-date {
-      font-family: 'Cormorant Garamond', serif;
-      font-style: italic;
-      font-weight: 600;
-      font-size: 1.05rem;
-      color: var(--text-hi);
-    }
-    .day-desc {
-      font-size: 0.75rem;
-      color: var(--muted);
-      letter-spacing: 0.03em;
-    }
-    .day-emoji { font-size: 1.1rem; line-height: 1; }
-
-    .day-controls { display: flex; gap: 0.3rem; }
-    .day-btn {
-      width: 30px; height: 30px;
-      border-radius: 50%;
-      border: 1.5px solid var(--border);
-      background: var(--card);
-      color: var(--terra);
-      cursor: pointer;
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.15s;
-      font-family: 'Fredoka', sans-serif;
-    }
-    .day-btn:hover {
-      background: var(--terra);
-      color: #FFFDF4;
-      border-color: var(--terra);
-      transform: scale(1.08);
-    }
-    .day-btn.playing {
-      background: var(--saffron);
-      color: #FFFDF4;
-      border-color: var(--saffron);
-    }
-
-    .day-range-wrap {
-      position: relative;
-      height: 30px;
-      display: flex;
-      align-items: center;
-    }
-
-    .day-range {
-      width: 100%;
-      -webkit-appearance: none;
-      appearance: none;
-      height: 8px;
-      background: linear-gradient(90deg,
-        var(--azulejo) 0%, var(--azul-hi) 7%,
-        var(--saffron) 14%, var(--saffron) 28%,
-        #0A0711 30%, #2A1A4A 35%, #0A0711 40%,
-        var(--terra) 45%, var(--terra) 85%,
-        var(--azulejo) 92%, var(--azulejo) 100%);
-      border-radius: 4px;
-      outline: none;
-      cursor: pointer;
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.25);
-    }
-    .day-range::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 22px; height: 22px;
-      border-radius: 50%;
-      background: radial-gradient(circle, #FFE58A 0%, #E8A13A 70%, #A8283A 100%);
-      border: 2px solid #FFFDF4;
-      cursor: grab;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.2);
-      transition: transform 0.15s;
-    }
-    .day-range::-webkit-slider-thumb:hover { transform: scale(1.15); }
-    .day-range::-moz-range-thumb {
-      width: 22px; height: 22px;
-      border-radius: 50%;
-      background: radial-gradient(circle, #FFE58A 0%, #E8A13A 70%, #A8283A 100%);
-      border: 2px solid #FFFDF4;
-      cursor: grab;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    }
-
-    .day-ticks {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 0.2rem;
-      padding: 0 10px;
-      font-size: 0.55rem;
-      font-weight: 600;
-      color: var(--muted);
-      letter-spacing: 0.04em;
-    }
-    .day-ticks span { flex: 1; text-align: center; position: relative; }
-    .day-ticks .eclipse-tick {
-      color: var(--sangria);
-      font-weight: 700;
-    }
-    body[data-theme="eclipse"] .day-ticks .eclipse-tick { color: var(--corona-hi); }
-
-    /* ═══ DUOLINGO CARD ═══════════════════════════════ */
-    .duo-card {
-      position: absolute;
-      top: 3.5rem;
-      left: 1rem;
-      z-index: 6;
-      background: #FFFFFF;
-      border: 2px solid #58CC02;
-      border-radius: 14px;
-      padding: 0.55rem 0.85rem 0.6rem 0.75rem;
-      box-shadow: 0 4px 14px rgba(88,204,2,0.25), 0 2px 8px rgba(0,0,0,0.12);
-      max-width: 230px;
-      min-width: 190px;
-      transition: background 0.7s, border-color 0.7s, transform 0.2s;
-      font-family: 'Fredoka', sans-serif;
-    }
-    body[data-theme="eclipse"] .duo-card {
-      background: #101910;
-      border-color: #58CC02;
-      box-shadow: 0 4px 14px rgba(88,204,2,0.3), 0 0 22px rgba(88,204,2,0.18);
-    }
-    .duo-card:hover { transform: translateY(-2px); }
-
-    .duo-eyebrow {
-      display: flex; align-items: center; gap: 0.35rem;
-      font-size: 0.58rem;
-      font-weight: 600;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: #58CC02;
-      margin-bottom: 0.22rem;
-    }
-    .duo-owl {
-      font-size: 1.15rem;
-      display: inline-block;
-      animation: owlBob 3s ease-in-out infinite;
-    }
-    @keyframes owlBob {
-      0%, 100% { transform: translateY(0) rotate(0); }
-      50% { transform: translateY(-3px) rotate(-5deg); }
-    }
-    .duo-phrase {
-      font-size: 0.95rem;
-      color: #2B2B2B;
-      font-weight: 500;
-      line-height: 1.25;
-      margin-bottom: 0.1rem;
-    }
-    body[data-theme="eclipse"] .duo-phrase { color: #F0FFD0; }
-    .duo-translation {
-      font-size: 0.72rem;
-      color: #6F6F6F;
-      font-style: italic;
-      line-height: 1.25;
-    }
-    body[data-theme="eclipse"] .duo-translation { color: #8BA070; }
-    .duo-streak {
-      position: absolute;
-      top: -10px; right: -10px;
-      background: #FF9600;
-      color: white;
-      font-size: 0.62rem;
-      font-weight: 600;
-      padding: 0.18rem 0.5rem;
-      border-radius: 100px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-      letter-spacing: 0.04em;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.2rem;
-    }
-
-    /* Cruzcampo / memory tag */
-    .tag-memory {
-      background: linear-gradient(90deg, rgba(255,150,0,0.16), rgba(200,50,60,0.16));
-      color: #8A3410;
-      border: 1px solid rgba(220,90,30,0.45);
-    }
-    body[data-theme="eclipse"] .tag-memory {
-      background: linear-gradient(90deg, rgba(255,150,0,0.22), rgba(220,60,70,0.22));
-      color: #FFBC7A;
-      border-color: rgba(255,150,0,0.55);
-    }
-
-    /* Animated vehicle overlay layer (DOM-based, aligned to map) */
-    .vehicle-layer {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 4;
-      overflow: hidden;
-    }
-    .vehicle {
-      position: absolute;
-      transform-origin: 50% 50%;
-      transition: opacity 0.4s ease;
-      font-size: 22px;
-      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.35));
-      will-change: left, top, transform;
-    }
-    .vehicle.hidden { opacity: 0; }
-
-    /* Responsive */
-    @media (max-width: 920px) {
-      body { overflow: auto; overflow-x: hidden; }
-      .layout { flex-direction: column; overflow: visible; }
-      .sidebar {
-        width: 100%;
-        max-height: none;
-        border-right: none;
-        border-bottom: 2px solid var(--terra);
-        box-shadow: none;
-      }
-      #map-container { flex: none; height: 55vh; min-height: 360px; }
-      .map-overlay { display: none; }
-      .day-slider { left: 0.5rem; right: 0.5rem; bottom: 0.5rem; padding: 0.5rem 0.6rem; }
-    }
-
-    @media (max-width: 600px) {
-      /* ── HEADER ── */
-      header {
-        height: auto;
-        padding: 0.6rem 0.75rem;
-        flex-wrap: wrap;
-        gap: 0.4rem 0.6rem;
-      }
-      .header-title { gap: 0.5rem; flex: 1 1 100%; }
-      .header-title h1 { font-size: 1.15rem; }
-      .subline { display: none; }
-      .header-meta {
-        flex: 1 1 100%;
-        flex-wrap: wrap;
-        gap: 0.3rem;
-      }
-      .badge {
-        font-size: 0.55rem;
-        padding: 0.25rem 0.55rem;
-      }
-      .badge.countdown { font-size: 0.68rem; padding: 0.22rem 0.6rem; }
-
-      /* ── SIDEBAR ── */
-      .sidebar-header { padding: 0.85rem 1rem 0.7rem; }
-      .sidebar-header h2 { font-size: 1.15rem; }
-      .sidebar-header .handwritten { font-size: 0.95rem; }
-      .cast { padding: 0.7rem 0.85rem 0.6rem; }
-      .polaroids { gap: 0.2rem; }
-      .polaroid { max-width: 85px; padding: 4px 4px 14px; }
-      .polaroid figcaption { font-size: 0.78rem; }
-      .cast-note { font-size: 0.8rem; margin-top: 0.4rem; }
-
-      /* ── STOP CARDS ── */
-      .stop-line { width: 38px; padding-top: 1.1rem; }
-      .stop-content { padding: 0.9rem 0.95rem 0.9rem 0.3rem; }
-      .stop-name { font-size: 0.95rem; flex-wrap: wrap; }
-      .skyline { width: 42px; }
-      .stop-sub { font-size: 0.72rem; }
-      .tag { font-size: 0.6rem; padding: 0.18rem 0.45rem; }
-      .highlight { font-size: 0.68rem; }
-      .stop-link { font-size: 0.72rem; }
-
-      /* ── MAP OVERLAYS ── */
-      #map-container { height: 48vh; min-height: 320px; }
-      .map-corner {
-        font-size: 0.85rem;
-        padding: 0.2rem 0.5rem;
-        top: 0.5rem; left: 0.5rem;
-      }
-      .duo-card {
-        top: 0.5rem;
-        bottom: auto;
-        left: 0.5rem;
-        right: 0.5rem;
-        max-width: none;
-        min-width: 0;
-        padding: 0.45rem 0.7rem 0.5rem 0.6rem;
-      }
-      .duo-phrase { font-size: 0.85rem; }
-      .duo-translation { font-size: 0.68rem; }
-      .duo-streak { font-size: 0.55rem; padding: 0.15rem 0.4rem; top: -8px; right: -6px; }
-
-      /* ── DAY SLIDER ── */
-      .day-slider {
-        left: 0.4rem; right: 0.4rem; bottom: 0.4rem;
-        padding: 0.45rem 0.55rem 0.4rem;
-      }
-      .day-slider-head { gap: 0.4rem; margin-bottom: 0.35rem; }
-      .day-info { gap: 0.4rem; }
-      .day-chip { font-size: 0.6rem; padding: 0.2rem 0.5rem; }
-      .day-date { font-size: 0.9rem; }
-      .day-desc {
-        font-size: 0.65rem;
-        flex: 1 1 100%;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .day-btn {
-        width: 40px; height: 40px;
-        font-size: 1rem;
-        touch-action: manipulation;
-      }
-      .day-controls { gap: 0.4rem; }
-      .day-range-wrap { height: 40px; }
-      .day-ticks { font-size: 0.5rem; padding: 0 4px; }
-      .stop-link { min-height: 36px; padding: 0.35rem 0; }
-    }
-
-    /* ═══ FOR THE KIDS 🛝 ══════════════════════════════ */
-    .kids-section {
-      margin: 0;
-      padding: 1rem 1.4rem 1.3rem;
-      border-top: 1px solid var(--border);
-      background:
-        radial-gradient(circle at 12% 0%, rgba(85,144,181,0.10), transparent 45%),
-        radial-gradient(circle at 90% 10%, rgba(232,161,58,0.10), transparent 45%);
-    }
-    .kids-head { margin-bottom: 0.85rem; }
-    .kids-eyebrow {
-      font-family: 'Caveat', cursive;
-      font-size: 1.35rem;
-      font-weight: 700;
-      color: var(--azulejo);
-      line-height: 1.1;
-      display: flex; align-items: center; gap: 0.4rem;
-    }
-    body[data-theme="eclipse"] .kids-eyebrow { color: var(--azul-hi); }
-    .kids-sub {
-      font-size: 0.72rem;
-      color: var(--muted);
-      margin-top: 0.15rem;
-      letter-spacing: 0.02em;
-    }
-    .kid-card {
-      display: flex;
-      gap: 0.7rem;
-      align-items: flex-start;
-      padding: 0.7rem 0.75rem;
-      margin-bottom: 0.6rem;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-left: 3px solid var(--azul-hi);
-      border-radius: 10px;
-      box-shadow: var(--shadow-sm);
-      cursor: pointer;
-      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .kid-card:hover, .kid-card:focus-visible { transform: translateY(-2px); box-shadow: var(--shadow-md); border-left-color: var(--saffron); outline: none; }
-    .kid-card:active { transform: scale(0.99); }
-    body[data-theme="eclipse"] .kid-card { border-left-color: var(--azul-hi); }
-    .kid-emoji {
-      font-size: 1.55rem;
-      line-height: 1;
-      flex-shrink: 0;
-      margin-top: 0.05rem;
-      filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
-    }
-    .kid-body { min-width: 0; flex: 1; }
-    .kid-name {
-      font-family: 'Cormorant Garamond', serif;
-      font-weight: 600;
-      font-size: 1.02rem;
-      color: var(--text-hi);
-      line-height: 1.15;
-    }
-    .kid-near {
-      font-size: 0.6rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--terra);
-      margin-top: 0.1rem;
-    }
-    body[data-theme="eclipse"] .kid-near { color: var(--saffron); }
-    .kid-note {
-      font-size: 0.74rem;
-      color: var(--text);
-      opacity: 0.9;
-      line-height: 1.4;
-      margin-top: 0.3rem;
-    }
-    .kid-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.4rem; }
-    .kid-tag {
-      font-size: 0.56rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      padding: 0.16rem 0.42rem;
-      border-radius: 100px;
-      background: rgba(85,144,181,0.13);
-      color: #1E4868;
-      border: 1px solid rgba(46,91,126,0.35);
-      white-space: nowrap;
-    }
-    .kid-tag.free { background: rgba(111,130,51,0.15); color: #556B20; border-color: rgba(111,130,51,0.4); }
-    .kid-tag.tip  { background: rgba(232,161,58,0.16); color: #7A5010; border-color: rgba(232,161,58,0.45); }
-    body[data-theme="eclipse"] .kid-tag { color: #9FD0E0; border-color: rgba(122,174,191,0.4); }
-    body[data-theme="eclipse"] .kid-tag.free { color: #B8D080; }
-    body[data-theme="eclipse"] .kid-tag.tip { color: var(--gold-hi); }
-    .kid-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
-    .kid-link {
-      font-size: 0.66rem;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-      color: var(--azulejo);
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.28rem;
-      min-height: 30px;
-    }
-    .kid-link.maps { color: var(--terra); }
-    .kid-link:hover { text-decoration: underline; }
-    body[data-theme="eclipse"] .kid-link { color: var(--azul-hi); }
-    body[data-theme="eclipse"] .kid-link.maps { color: var(--saffron); }
-
-    /* kid highlight chip reused inside stop cards */
-    .highlight.kid { color: var(--azulejo); font-weight: 600; }
-    body[data-theme="eclipse"] .highlight.kid { color: var(--azul-hi); }
-
-    /* ═══ ELLEN'S CORNER 🍺 ════════════════════════════ */
-    .ellen-corner {
-      margin: 0.9rem 0 0;
-      padding: 0.8rem 0.9rem;
-      border-radius: 10px;
-      background: linear-gradient(135deg, rgba(200,144,42,0.12), rgba(200,85,61,0.08));
-      border: 1px dashed rgba(200,144,42,0.5);
-    }
-    .ellen-title {
-      font-family: 'Caveat', cursive;
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: var(--terra);
-      display: flex; align-items: center; gap: 0.35rem;
-    }
-    body[data-theme="eclipse"] .ellen-title { color: var(--saffron); }
-    .ellen-sub { font-size: 0.68rem; color: var(--muted); margin: 0.15rem 0 0.5rem; }
-    .quest-list { display: flex; flex-direction: column; gap: 0.3rem; }
-    .quest-item {
-      display: flex; align-items: center; gap: 0.45rem;
-      font-size: 0.76rem; color: var(--text);
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-      min-height: 30px;
-    }
-    .quest-box {
-      width: 18px; height: 18px; flex-shrink: 0;
-      border-radius: 5px;
-      border: 1.5px solid var(--gold);
-      display: grid; place-items: center;
-      font-size: 0.7rem; color: transparent;
-      transition: background 0.15s, color 0.15s;
-    }
-    .quest-item.done .quest-box { background: var(--olive); border-color: var(--olive); color: #fff; }
-    .quest-item.done .quest-label { text-decoration: line-through; opacity: 0.6; }
-    .quest-label { line-height: 1.25; }
-
-    /* ═══ KIDS MAP TOGGLE 🛝 ═══════════════════════════ */
-    .kid-toggle {
-      position: absolute;
-      top: 0.75rem; right: 0.75rem;
-      z-index: 7;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 0.5rem 0.8rem;
-      font-family: 'Fredoka', sans-serif;
-      font-size: 0.8rem;
-      font-weight: 500;
-      color: var(--text-hi);
-      background: var(--panel);
-      border: 1.5px solid var(--azul-hi);
-      border-radius: 100px;
-      box-shadow: var(--shadow-md);
-      cursor: pointer;
-      transition: transform 0.15s, background 0.2s, box-shadow 0.2s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .kid-toggle:hover { transform: translateY(-1px); }
-    .kid-toggle:active { transform: scale(0.97); }
-    .kid-toggle.on {
-      background: var(--azulejo);
-      color: #FFF8E4;
-      border-color: var(--azulejo);
-    }
-    .kid-toggle .kt-count {
-      font-size: 0.62rem;
-      background: rgba(0,0,0,0.12);
-      border-radius: 100px;
-      padding: 0.05rem 0.4rem;
-    }
-    .kid-toggle.on .kt-count { background: rgba(255,255,255,0.22); }
-
-    /* ═══ SIDEBAR JUMP-NAV (mobile quick links) ════════ */
-    .jump-nav {
-      display: none;
-      gap: 0.4rem;
-      overflow-x: auto;
-      padding: 0.55rem 0.9rem;
-      background: var(--panel-2);
-      border-bottom: 1px solid var(--border);
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-    .jump-nav::-webkit-scrollbar { display: none; }
-    .jump-chip {
-      flex-shrink: 0;
-      font-size: 0.72rem;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      color: var(--text-hi);
-      background: var(--card);
-      border: 1px solid var(--border-hi);
-      border-radius: 100px;
-      padding: 0.4rem 0.75rem;
-      white-space: nowrap;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .jump-chip.kids { border-color: var(--azul-hi); color: var(--azulejo); }
-    body[data-theme="eclipse"] .jump-chip.kids { color: var(--azul-hi); }
-
-    @media (max-width: 920px) {
-      .kid-toggle { top: 0.6rem; right: 0.6rem; }
-    }
-    @media (max-width: 600px) {
-      .jump-nav {
-        display: flex;
-        position: sticky;
-        top: 0;
-        z-index: 4;
-        padding-left: max(0.9rem, env(safe-area-inset-left));
-        padding-right: max(0.9rem, env(safe-area-inset-right));
-      }
-      /* sidebar-header no longer needs to be sticky once we have the jump bar */
-      .sidebar-header { position: relative; }
-      .kids-section { padding: 0.9rem 1rem 1.2rem; }
-      .kid-card { padding: 0.65rem 0.7rem; }
-      .kid-name { font-size: 1rem; }
-      .kid-link { min-height: 34px; font-size: 0.72rem; }
-      .kid-toggle { font-size: 0.74rem; padding: 0.45rem 0.7rem; }
-      /* keep the day slider clear of the iPhone home indicator */
-      .day-slider { bottom: max(0.4rem, env(safe-area-inset-bottom)); }
-      .quest-item { min-height: 34px; }
-    }
-
-    /* ═══ SHARED SECTION HEADINGS ══════════════════════ */
-    .section-eyebrow {
-      font-family: 'Caveat', cursive;
-      font-size: 1.35rem;
-      font-weight: 700;
-      line-height: 1.1;
-      display: flex; align-items: center; gap: 0.4rem;
-    }
-    .section-sub {
-      font-size: 0.72rem;
-      color: var(--muted);
-      margin: 0.15rem 0 0.85rem;
-      letter-spacing: 0.02em;
-    }
-
-    /* ═══ RAINY-DAY BACKUPS ☔ ══════════════════════════ */
-    .rain-section {
-      padding: 1rem 1.4rem 1.3rem;
-      border-top: 1px solid var(--border);
-      background: radial-gradient(circle at 15% 0%, rgba(46,91,126,0.12), transparent 52%);
-    }
-    .rain-section .section-eyebrow { color: var(--azulejo); }
-    body[data-theme="eclipse"] .rain-section .section-eyebrow { color: var(--azul-hi); }
-    .rain-group { margin-bottom: 0.9rem; }
-    .rain-group-head {
-      font-family: 'Cormorant Garamond', serif;
-      font-style: italic; font-weight: 600;
-      font-size: 0.95rem; color: var(--terra);
-      margin-bottom: 0.45rem;
-      display: flex; align-items: center; gap: 0.35rem;
-    }
-    body[data-theme="eclipse"] .rain-group-head { color: var(--saffron); }
-    .rain-item {
-      display: block;
-      padding: 0.55rem 0.7rem;
-      margin-bottom: 0.4rem;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-left: 3px solid var(--azul-hi);
-      border-radius: 8px;
-      text-decoration: none;
-      color: var(--text);
-      box-shadow: var(--shadow-sm);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .rain-item:hover, .rain-item:focus-visible { transform: translateY(-1px); box-shadow: var(--shadow-md); outline: none; }
-    .rain-name {
-      font-weight: 600; font-size: 0.84rem; color: var(--text-hi);
-      display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between;
-    }
-    .rain-name .rain-go { font-size: 0.64rem; color: var(--azulejo); font-weight: 700; white-space: nowrap; letter-spacing: 0.03em; }
-    body[data-theme="eclipse"] .rain-name .rain-go { color: var(--azul-hi); }
-    .rain-note { font-size: 0.73rem; color: var(--text); opacity: 0.86; line-height: 1.4; margin-top: 0.22rem; }
-
-    /* ═══ LU & DONDI · PARALLEL ITINERARY 👵 ═══════════ */
-    .lu-section {
-      padding: 1rem 1.4rem 1.3rem;
-      border-top: 1px solid var(--border);
-      background: radial-gradient(circle at 85% 0%, rgba(168,40,58,0.10), transparent 52%);
-    }
-    .lu-section .section-eyebrow { color: var(--sangria); }
-    body[data-theme="eclipse"] .lu-section .section-eyebrow { color: var(--saffron); }
-    .lu-row {
-      display: block;
-      padding: 0.55rem 0.7rem;
-      margin-bottom: 0.4rem;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-left: 3px solid var(--sangria);
-      border-radius: 8px;
-      color: var(--text);
-      box-shadow: var(--shadow-sm);
-    }
-    .lu-when {
-      font-weight: 700; font-size: 0.7rem; letter-spacing: 0.04em;
-      color: var(--sangria); text-transform: uppercase;
-    }
-    body[data-theme="eclipse"] .lu-when { color: var(--saffron); }
-    .lu-what { font-weight: 600; font-size: 0.84rem; color: var(--text-hi); margin-top: 0.1rem; }
-    .lu-note { font-size: 0.73rem; color: var(--text); opacity: 0.86; line-height: 1.45; margin-top: 0.18rem; }
-    .lu-note a { color: var(--azulejo); font-weight: 600; text-decoration: none; }
-    body[data-theme="eclipse"] .lu-note a { color: var(--azul-hi); }
-    .lu-contacts { font-size: 0.73rem; line-height: 1.6; }
-    .lu-contacts a { color: inherit; text-decoration: none; font-weight: 600; }
-
-    /* ═══ DAY-TRIP PACKING 🎒 ══════════════════════════ */
-    .pack-section {
-      padding: 1rem 1.4rem 1.4rem;
-      border-top: 1px solid var(--border);
-      background: radial-gradient(circle at 85% 0%, rgba(232,161,58,0.13), transparent 52%);
-    }
-    .pack-section .section-eyebrow { color: var(--gold); }
-    body[data-theme="eclipse"] .pack-section .section-eyebrow { color: var(--gold-hi); }
-    .pack-trip {
-      margin-bottom: 0.5rem;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: var(--shadow-sm);
-    }
-    .pack-head {
-      display: flex; align-items: center; gap: 0.5rem; width: 100%;
-      padding: 0.65rem 0.8rem;
-      cursor: pointer; user-select: none;
-      background: transparent; border: none; text-align: left;
-      color: var(--text-hi);
-      font-family: 'Josefin Sans', sans-serif;
-      min-height: 46px;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .pack-emoji { font-size: 1.2rem; line-height: 1; flex-shrink: 0; }
-    .pack-title { flex: 1; font-weight: 600; font-size: 0.86rem; }
-    .pack-count {
-      font-size: 0.58rem; font-weight: 700; letter-spacing: 0.05em;
-      color: var(--muted); background: var(--panel-2);
-      padding: 0.14rem 0.48rem; border-radius: 100px;
-      white-space: nowrap;
-    }
-    .pack-count.full { color: #556B20; background: rgba(111,130,51,0.18); }
-    body[data-theme="eclipse"] .pack-count.full { color: #B8D080; background: rgba(176,200,120,0.18); }
-    .pack-chevron { transition: transform 0.2s ease; color: var(--muted); font-size: 0.8rem; }
-    .pack-trip.open .pack-chevron { transform: rotate(90deg); }
-    .pack-items { display: none; padding: 0 0.8rem 0.7rem; flex-direction: column; gap: 0.1rem; }
-    .pack-trip.open .pack-items { display: flex; }
-    .pack-check {
-      display: flex; align-items: flex-start; gap: 0.5rem;
-      font-size: 0.78rem; color: var(--text);
-      cursor: pointer; user-select: none;
-      padding: 0.35rem 0.2rem; min-height: 34px; line-height: 1.3;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .pack-box {
-      width: 17px; height: 17px; margin-top: 0.08rem; flex-shrink: 0;
-      border-radius: 5px; border: 1.5px solid var(--gold);
-      display: grid; place-items: center;
-      font-size: 0.62rem; color: transparent;
-      transition: background 0.15s, color 0.15s;
-    }
-    .pack-check.done .pack-box { background: var(--olive); border-color: var(--olive); color: #fff; }
-    .pack-check.done .pack-text { text-decoration: line-through; opacity: 0.55; }
-
-    @media (max-width: 600px) {
-      .rain-section, .pack-section { padding: 0.9rem 1rem 1.2rem; }
-      .rain-item { padding: 0.6rem 0.7rem; }
-      .pack-head { min-height: 48px; }
-      .pack-check { min-height: 38px; }
-    }
-
-    /* café/restaurant pick inside a kid card */
-    .kid-eat {
-      display: flex; align-items: flex-start; gap: 0.35rem;
-      margin-top: 0.5rem; padding: 0.4rem 0.55rem;
-      background: rgba(232,161,58,0.12);
-      border: 1px solid rgba(200,144,42,0.35);
-      border-radius: 8px;
-      font-size: 0.71rem; line-height: 1.35;
-      color: var(--text); text-decoration: none;
-      transition: background 0.15s;
-    }
-    .kid-eat:hover { background: rgba(232,161,58,0.2); }
-    .kid-eat b { color: var(--terra); }
-    body[data-theme="eclipse"] .kid-eat b { color: var(--saffron); }
-    .kid-eat-ico { font-size: 0.9rem; line-height: 1.2; flex-shrink: 0; }
-
-    /* per-list reset button */
-    .pack-reset {
-      align-self: flex-start;
-      margin-top: 0.35rem;
-      font-size: 0.64rem; font-weight: 600; letter-spacing: 0.03em;
-      color: var(--muted);
-      background: transparent;
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      padding: 0.25rem 0.6rem;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      transition: color 0.15s, border-color 0.15s;
-    }
-    .pack-reset:hover { color: var(--terra); border-color: var(--border-hi); }
-
-    /* trip tools (print) */
-    .trip-tools {
-      padding: 1.1rem 1.4rem 1.6rem;
-      border-top: 1px solid var(--border);
-      text-align: center;
-    }
-    .print-btn {
-      width: 100%;
-      padding: 0.7rem 1rem;
-      font-family: 'Fredoka', sans-serif;
-      font-size: 0.9rem; font-weight: 500;
-      color: #FFF8E4;
-      background: linear-gradient(135deg, var(--terra), var(--sangria));
-      border: none; border-radius: 100px;
-      box-shadow: var(--shadow-md);
-      cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .print-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-lg); }
-    .print-btn:active { transform: scale(0.98); }
-    .print-hint { font-size: 0.66rem; color: var(--muted); margin-top: 0.5rem; line-height: 1.4; }
-
-    /* ═══ PRINT SHEET ══════════════════════════════════ */
-    #print-sheet { display: none; }
-
-    @media print {
-      @page { size: A4; margin: 1cm; }
-      html, body { height: auto !important; overflow: visible !important; background: #fff !important; }
-      body > *:not(#print-sheet) { display: none !important; }
-      #print-sheet {
-        display: block;
-        color: #1A1008;
-        font-family: 'Josefin Sans', Arial, sans-serif;
-        font-size: 9.5px;
-        line-height: 1.4;
-      }
-      #print-sheet .ps-head { border-bottom: 2px solid #C8553D; padding-bottom: 4px; margin-bottom: 6px; }
-      #print-sheet h1 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 20px; font-style: italic; color: #A8283A; }
-      #print-sheet .ps-sub { font-size: 10px; color: #6A4A2A; margin-top: 1px; }
-      #print-sheet h2 {
-        font-family: 'Cormorant Garamond', Georgia, serif;
-        font-size: 12.5px; color: #2E5B7E;
-        margin: 8px 0 3px; border-bottom: 1px solid #ddd; padding-bottom: 1px;
-      }
-      #print-sheet .ps-eclipse {
-        background: #FFF3D6; border: 1px solid #E8A13A; border-radius: 5px;
-        padding: 4px 7px; margin: 4px 0;
-      }
-      #print-sheet table.ps-itin { width: 100%; border-collapse: collapse; }
-      #print-sheet table.ps-itin th {
-        text-align: left; font-size: 8px; text-transform: uppercase; letter-spacing: 0.05em;
-        color: #8F6F4D; border-bottom: 1px solid #C8553D; padding: 2px 4px;
-      }
-      #print-sheet table.ps-itin td { padding: 3px 4px; border-bottom: 1px solid #eee; vertical-align: top; }
-      #print-sheet td.pd { white-space: nowrap; font-weight: 600; }
-      #print-sheet .pr-muted { color: #8F6F4D; font-size: 8.5px; }
-      #print-sheet .ps-cols { display: flex; gap: 16px; }
-      #print-sheet .ps-cols > div { flex: 1; }
-      #print-sheet ul.ps-list { margin: 2px 0 0 14px; padding: 0; }
-      #print-sheet ul.ps-list li { margin-bottom: 1.5px; }
-      #print-sheet .ps-pack { columns: 2; column-gap: 16px; }
-      #print-sheet .ps-pack .pk { break-inside: avoid; margin-bottom: 4px; }
-      #print-sheet .ps-foot {
-        margin-top: 8px; border-top: 1px solid #C8553D; padding-top: 4px;
-        display: flex; justify-content: space-between; gap: 12px;
-        font-size: 8.5px; color: #4A3420;
-      }
-    }
-
-    /* ═══ LEAFLET MAP ══════════════════════════════════ */
-    #viewDiv { width: 100%; height: 100%; background: var(--bg-2); }
-    .leaflet-container { font-family: 'Josefin Sans', sans-serif; background: var(--bg-2); }
-    body[data-theme="eclipse"] .leaflet-container,
-    body[data-theme="eclipse"] #viewDiv { background: #0A0711; }
-    /* drop the zoom control below the "a la costa verde" corner badge */
-    .leaflet-top.leaflet-left { top: 3.2rem; }
-    .leaflet-bar a, .leaflet-bar a:hover {
-      background: var(--panel); color: var(--text-hi); border-bottom-color: var(--border);
-    }
-    body[data-theme="eclipse"] .leaflet-bar a { background: var(--panel-2); color: var(--text-hi); }
-    .leaflet-control-attribution {
-      font-size: 9px; background: rgba(255,248,228,0.72); color: #6A4A2A;
-    }
-    .leaflet-control-attribution a { color: #8A5A2A; }
-    body[data-theme="eclipse"] .leaflet-control-attribution { background: rgba(20,16,26,0.7); color: #9C8A72; }
-    body[data-theme="eclipse"] .leaflet-control-attribution a { color: #C9A96A; }
-
-    /* map text labels (divIcons, centred on their point) */
-    .map-label {
-      position: absolute; left: 0; top: 0;
-      white-space: nowrap; pointer-events: none;
-      font-family: 'Cormorant Garamond', serif; text-align: center;
-      will-change: transform;
-    }
-    .lbl-num { color: #FFFDF4; font-weight: 700; font-size: 11px;
-      text-shadow: 0 0 2px rgba(30,20,10,0.95), 0 0 2px rgba(30,20,10,0.95); }
-    .lbl-city { color: #1A1008; font-style: italic; font-weight: 600; font-size: 13px;
-      text-shadow: 0 1px 2px rgba(255,253,244,0.95), 0 0 3px rgba(255,253,244,0.9); }
-    body[data-theme="eclipse"] .lbl-city { color: #F2E8D4; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
-    .lbl-air { color: #1E4868; font-family: 'Josefin Sans', sans-serif; font-weight: 600; font-size: 11px;
-      text-shadow: 0 0 3px rgba(255,253,244,0.95); }
-    body[data-theme="eclipse"] .lbl-air { color: #9FD0E0; text-shadow: 0 0 3px rgba(0,0,0,0.85); }
-    .lbl-kid { color: #1E2C42; font-family: 'Josefin Sans', sans-serif; font-weight: 600; font-size: 9.5px;
-      text-shadow: 0 0 2px rgba(255,253,244,0.95); }
-    body[data-theme="eclipse"] .lbl-kid { color: #CFE0EC; text-shadow: 0 0 3px rgba(0,0,0,0.85); }
-    .lbl-emoji { font-size: 13px; line-height: 1; }
-    .lbl-totality { color: #A8283A; font-family: 'Josefin Sans', sans-serif; font-weight: 600; font-size: 10px;
-      letter-spacing: 0.05em; text-shadow: 0 0 3px rgba(255,253,244,0.95); }
-    body[data-theme="eclipse"] .lbl-totality { color: #FFC04A; text-shadow: 0 0 4px rgba(0,0,0,0.9); }
-
-    /* popups */
-    .leaflet-popup-content-wrapper { border-radius: 10px; box-shadow: 0 6px 18px rgba(90,40,10,0.28); }
-    .leaflet-popup-content { font-family: 'Josefin Sans', sans-serif; margin: 11px 13px; }
-    body[data-theme="eclipse"] .leaflet-popup-content-wrapper,
-    body[data-theme="eclipse"] .leaflet-popup-tip { background: #221A2A; color: #F2E8D4; }
+    /* Stats overlay */
+    .overlay {
+      position: absolute; bottom: 1.25rem; right: 1.25rem;
+      background: rgba(15,10,6,0.88); backdrop-filter: blur(8px);
+      border: 1px solid var(--border); border-radius: 3px;
+      padding: 0.9rem 1.1rem; z-index: 500; min-width: 170px;
+    }
+    .overlay-title {
+      font-size: 0.55rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 0.5rem;
+    }
+    .stat { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.22rem; }
+    .stat-l { font-size: 0.58rem; color: var(--muted); }
+    .stat-v { font-family: 'Cormorant Garamond', serif; font-size: 1rem; color: var(--sand); }
+    .overlay hr { border: none; border-top: 1px solid var(--border); margin: 0.55rem 0; }
+    .leg { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.2rem; }
+    .leg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .leg-line { width: 18px; height: 2px; border-top: 2px dashed var(--gold); flex-shrink: 0; }
+    .leg-l { font-size: 0.56rem; color: var(--muted); }
   </style>
 </head>
-<body data-theme="day">
+<body>
 
-<!-- ═══ HEADER ═══════════════════════════════════════════ -->
 <header>
-  <div class="header-title">
-    <div class="header-flag"></div>
-    <h1>Eclipse 2026 <em>· Flynns in España</em></h1>
-    <span class="subline"><span class="sun-icon" aria-hidden="true"></span> ¡chasing totality!</span>
+  <div class="hdr-left">
+    <h1>Northern Spain</h1>
+    <span>Flynn Family · Aug 8 – 21, 2026</span>
   </div>
-  <div class="header-meta">
-    <div class="badge countdown eclipse" id="countdown"><b>T-???</b> to totality</div>
-    <div class="badge active">5 Stops</div>
+  <div class="hdr-right">
+    <div class="badge gold">5 Stops</div>
     <div class="badge">13 Nights</div>
-    <div class="badge">~480 mi</div>
-    <div class="badge" style="cursor:pointer;" onclick="jumpTo('#kids-section')">🛝 7 Playgrounds</div>
+    <div class="badge">~14 hrs driving</div>
   </div>
 </header>
 
-<!-- ═══ MAIN LAYOUT ══════════════════════════════════════ -->
 <div class="layout">
 
-  <!-- ── SIDEBAR ───────────────────── -->
+  <!-- SIDEBAR -->
   <aside class="sidebar">
-    <!-- Quick jump-nav (mobile) -->
-    <nav class="jump-nav" aria-label="Jump to section">
-      <button class="jump-chip" onclick="jumpTo('#crew')">👋 Crew</button>
-      <button class="jump-chip" onclick="jumpTo('[data-stop=&quot;0&quot;]')">🇪🇸 Bilbao</button>
-      <button class="jump-chip" onclick="jumpTo('[data-stop=&quot;1&quot;]')">🌊 Hornedo</button>
-      <button class="jump-chip" onclick="jumpTo('[data-stop=&quot;2&quot;]')">⛪ Santiago</button>
-      <button class="jump-chip" onclick="jumpTo('[data-stop=&quot;3&quot;]')">🍎 Asturias</button>
-      <button class="jump-chip" onclick="jumpTo('[data-stop=&quot;4&quot;]')">⛰️ Potes</button>
-      <button class="jump-chip kids" onclick="jumpTo('#kids-section')">🛝 Kids</button>
-      <button class="jump-chip" onclick="jumpTo('#rain-section')">☔ Rain</button>
-      <button class="jump-chip" onclick="jumpTo('#pack-section')">🎒 Pack</button>
-    </nav>
-    <div class="sidebar-header">
-      <p class="eyebrow">Total Solar Eclipse · Aug 12, 2026</p>
-      <h2>The Green Coast &amp; the Path of Totality</h2>
-      <p class="handwritten">Basque · Cantabria · Galicia · Asturias · Picos</p>
+    <div class="sb-head">
+      <p>Itinerary</p>
+      <h2>Green Coast &amp; Cantabrian Mountains</h2>
     </div>
+    <div class="timeline" id="timeline">
 
-    <!-- Cast of Characters -->
-    <div class="cast" id="crew">
-      <p class="cast-eyebrow">The Crew</p>
-      <div class="polaroids">
-        <figure class="polaroid" style="--tilt:-4deg">
-          <div class="polaroid-img" style="background-image:url('flynn_fam.JPG');background-position:center 30%"></div>
-          <figcaption>the flynns</figcaption>
-        </figure>
-        <figure class="polaroid" style="--tilt:3deg">
-          <div class="polaroid-img" style="background-image:url('smith_fam.jpg')"></div>
-          <figcaption>the smiths</figcaption>
-        </figure>
-        <figure class="polaroid" style="--tilt:-2deg">
-          <div class="polaroid-img" style="background-image:url('nanu.jpg')"></div>
-          <figcaption>nanu ♡</figcaption>
-        </figure>
-      </div>
-      <p class="cast-note">three families · one eclipse · 🍺 one Cruzcampo quest</p>
-    </div>
-
-    <!-- Timeline (cartoon skylines inlined) -->
-    <div class="timeline">
-
-      <!-- STOP 1: BILBAO ARRIVAL -->
-      <div class="stop active" data-stop="0" onclick="focusStop(0)">
-        <div class="stop-line"><div class="stop-num">1</div><div class="stop-connector"></div></div>
-        <div class="stop-content">
-          <div class="stop-dates">Aug 8 · Sat</div>
-          <div class="stop-name">
-            <span class="flag-dot">🇪🇸</span> Bilbao
-            <!-- Guggenheim-ish skyline -->
-            <svg class="skyline" viewBox="0 0 58 18" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round">
-              <path d="M1 17 Q5 11 10 13 Q15 6 22 11 Q27 5 33 10 Q40 7 46 12 Q52 8 57 13 L57 17 Z" fill="currentColor" fill-opacity="0.18"/>
-              <path d="M18 13 L18 7 M38 12 L38 6"/>
-              <circle cx="52" cy="5" r="1.3" fill="currentColor"/>
-            </svg>
+      <div class="stop active" data-id="0" onclick="flyTo(0)">
+        <div class="stop-line">
+          <div class="stop-dot"></div>
+          <div class="stop-connector"></div>
+        </div>
+        <div class="stop-body">
+          <div class="stop-dates">Aug 8, 2026</div>
+          <div class="stop-name">Bilbao</div>
+          <div class="stop-sub">Basque Country · BIO Airport arrival</div>
+          <div class="tags">
+            <span class="tag t-fly">✈ Arrival</span>
+            <span class="tag t-night">1 night</span>
+            <span class="tag t-book">✓ Booked</span>
           </div>
-          <div class="stop-sub">Basque Country · BIO arrival</div>
-          <div class="stop-tags">
-            <span class="tag tag-fly">✈ Arrival</span>
-            <span class="tag tag-nights">1 night</span>
-            <span class="tag tag-memory">🍺 Ellen's Cruzcampo</span>
-            <span class="tag tag-booked">✓ Booked</span>
-          </div>
-          <div class="stop-highlights">
-            <span class="highlight"><span class="h-ico">🏛️</span>Guggenheim</span>
-            <span class="highlight"><span class="h-ico">🚡</span>Artxanda funicular</span>
-            <span class="highlight"><span class="h-ico">⚓</span>Itsasmuseum (shipping)?</span>
-            <span class="highlight"><span class="h-ico">🍷</span>Pintxos crawl</span>
-            <span class="highlight"><span class="h-ico">🌉</span>Casco Viejo</span>
-            <span class="highlight"><span class="h-ico">🍺</span>Cruzcampo for Ellen</span>
-            <span class="highlight kid"><span class="h-ico">🛝</span>Doña Casilda duck park</span>
-          </div>
-          <div class="stop-links">
-            <a class="stop-link" href="https://www.batimontsuites.com/" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-              Batimontsuites · night of 8/8 · booking #16081
-            </a>
+          <div class="links">
+            <a class="lnk" href="https://www.batimontsuites.com/" target="_blank">Batimontsuites · Night of 8/8</a>
           </div>
         </div>
       </div>
 
-      <!-- STOP 2: HORNEDO -->
-      <div class="stop" data-stop="1" onclick="focusStop(1)">
-        <div class="stop-line"><div class="stop-num">2</div><div class="stop-connector"></div></div>
-        <div class="stop-content">
-          <div class="stop-dates">Aug 9 – 13 · 4 nights</div>
-          <div class="stop-name">
-            <span class="flag-dot">🌊</span> Hornedo
-            <!-- Beach + sun + palm -->
-            <svg class="skyline" viewBox="0 0 58 18" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="8" cy="6" r="2.5" fill="currentColor" fill-opacity="0.35"/>
-              <path d="M26 15 Q28 10 30 15 M30 15 Q32 8 34 15" />
-              <path d="M42 15 L42 8 M42 8 Q39 6 37 8 M42 8 Q45 6 47 8" />
-              <path d="M0 15 Q10 13 20 15 T40 15 T58 15" fill="currentColor" fill-opacity="0.18"/>
-            </svg>
+      <div class="stop" data-id="1" onclick="flyTo(1)">
+        <div class="stop-line">
+          <div class="stop-dot"></div>
+          <div class="stop-connector"></div>
+        </div>
+        <div class="stop-body">
+          <div class="stop-dates">Aug 9 – 13, 2026</div>
+          <div class="stop-name">Hornedo</div>
+          <div class="stop-sub">Cantabria · ~1 hr from Bilbao</div>
+          <div class="tags">
+            <span class="tag t-drive">↗ 1 hr</span>
+            <span class="tag t-night">4 nights</span>
+            <span class="tag t-book">✓ Booked</span>
           </div>
-          <div class="stop-sub">Cantabria · inside the path of totality</div>
-          <div class="stop-tags">
-            <span class="tag tag-drive">↗ 1 hr</span>
-            <span class="tag tag-nights">4 nights</span>
-            <span class="tag tag-eclipse">☀ Eclipse Aug 12</span>
-            <span class="tag tag-booked">✓ Booked</span>
-          </div>
-          <div class="stop-highlights">
-            <span class="highlight" id="hornedo-totality-highlight"><span class="h-ico">🌒</span>Totality ~20:27 CEST</span>
-            <span class="highlight"><span class="h-ico">🏖️</span>Beaches</span>
-            <span class="highlight"><span class="h-ico">🏰</span>Santillana del Mar</span>
-            <span class="highlight"><span class="h-ico">🎨</span>Altamira caves</span>
-            <span class="highlight kid"><span class="h-ico">🦭</span>Santander: seals & mini-train</span>
-          </div>
-          <div class="eclipse-timing" id="hornedo-eclipse-timing">
-            <p class="eclipse-timing-title">☀ Eclipse at Hornedo</p>
-            <div class="eclipse-timing-grid" id="hornedo-timing-grid">
-              <span class="lbl">Partial begins</span><span class="val" id="ec-partial-begin">—</span>
-              <span class="lbl">Totality begins</span><span class="val" id="ec-total-begin">—</span>
-              <span class="lbl">Maximum</span><span class="val max" id="ec-peak">—</span>
-              <span class="lbl">Totality ends</span><span class="val" id="ec-total-end">—</span>
-              <span class="lbl">Partial ends</span><span class="val" id="ec-partial-end">—</span>
-              <span class="lbl">Totality duration</span><span class="val" id="ec-duration">—</span>
-            </div>
-            <p class="eclipse-timing-note" id="ec-centerline-note">Computing path…</p>
-          </div>
-          <div class="stop-links">
-            <a class="stop-link" href="https://www.airbnb.com/l/83UxgIHH" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-              Airbnb · 83UxgIHH
-            </a>
-            <a class="stop-link" href="https://www.airbnb.com/l/zjeqhYzv" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-              Join Lu's trip · Esmerelda Cottage
-            </a>
-            <a class="stop-link" href="https://www.airbnb.com/trips" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-              Your reservation · Airbnb Trips
-            </a>
+          <div class="links">
+            <a class="lnk" href="https://www.airbnb.com/l/83UxgIHH" target="_blank">Airbnb · 83UxgIHH</a>
           </div>
         </div>
       </div>
 
-      <!-- STOP 3: SANTIAGO -->
-      <div class="stop" data-stop="2" onclick="focusStop(2)">
-        <div class="stop-line"><div class="stop-num">3</div><div class="stop-connector"></div></div>
-        <div class="stop-content">
-          <div class="stop-dates">Aug 13 – 15 · 2 nights</div>
-          <div class="stop-name">
-            <span class="flag-dot">⛪</span> Santiago
-            <!-- Cathedral twin-tower silhouette -->
-            <svg class="skyline" viewBox="0 0 58 18" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round">
-              <path d="M4 17 L4 9 L6 7 L8 9 L8 17 Z" fill="currentColor" fill-opacity="0.15"/>
-              <path d="M6 7 L6 4"/>
-              <path d="M18 17 L18 6 L20 3 L22 6 L22 17 Z" fill="currentColor" fill-opacity="0.2"/>
-              <path d="M20 3 L20 1.5"/>
-              <path d="M32 17 L32 6 L34 3 L36 6 L36 17 Z" fill="currentColor" fill-opacity="0.2"/>
-              <path d="M34 3 L34 1.5"/>
-              <path d="M46 17 L46 9 L48 7 L50 9 L50 17 Z" fill="currentColor" fill-opacity="0.15"/>
-              <circle cx="27" cy="9" r="2.5" fill="currentColor" fill-opacity="0.3"/>
-              <path d="M24.5 9 L29.5 9 M27 6.5 L27 11.5"/>
-            </svg>
+      <div class="stop" data-id="2" onclick="flyTo(2)">
+        <div class="stop-line">
+          <div class="stop-dot"></div>
+          <div class="stop-connector"></div>
+        </div>
+        <div class="stop-body">
+          <div class="stop-dates">Aug 13 – 15, 2026</div>
+          <div class="stop-name">Santiago de Compostela</div>
+          <div class="stop-sub">Galicia · ~5 hrs from Hornedo</div>
+          <div class="tags">
+            <span class="tag t-drive">↗ 5 hrs</span>
+            <span class="tag t-night">2 nights</span>
+            <span class="tag t-book">✓ Booked</span>
           </div>
-          <div class="stop-sub">Galicia · ~5 hr drive</div>
-          <div class="stop-tags">
-            <span class="tag tag-drive">↗ 5 hrs</span>
-            <span class="tag tag-nights">2 nights</span>
-            <span class="tag tag-booked">✓ Booked</span>
-          </div>
-          <div class="stop-highlights">
-            <span class="highlight"><span class="h-ico">⛪</span>The Cathedral</span>
-            <span class="highlight"><span class="h-ico">🥟</span>Empanadas</span>
-            <span class="highlight"><span class="h-ico">🚶</span>Camino finish</span>
-            <span class="highlight kid"><span class="h-ico">🏰</span>Alameda playground</span>
-            <span class="highlight kid"><span class="h-ico">🦚</span>En route: Gijón park &amp; Playa de las Catedrales</span>
-          </div>
-          <div class="stop-links">
-            <a class="stop-link" href="https://www.airbnb.com/l/4yXzSmio" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-              Airbnb · 4yXzSmio
-            </a>
-            <a class="stop-link" href="https://www.airbnb.com/trips" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-              Your reservation · Airbnb Trips
-            </a>
+          <div class="links">
+            <a class="lnk" href="https://www.airbnb.com/l/4yXzSmio" target="_blank">Airbnb · 4yXzSmio</a>
           </div>
         </div>
       </div>
 
-      <!-- STOP 4: OVIEDO / GIJÓN -->
-      <div class="stop" data-stop="3" onclick="focusStop(3)">
-        <div class="stop-line"><div class="stop-num">4</div><div class="stop-connector"></div></div>
-        <div class="stop-content">
-          <div class="stop-dates">Aug 15 – 17 · 2 nights</div>
-          <div class="stop-name">
-            <span class="flag-dot">🍎</span> Oviedo / Gijón
-            <!-- apple + barrel + church -->
-            <svg class="skyline" viewBox="0 0 58 18" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round">
-              <circle cx="6" cy="10" r="3" fill="currentColor" fill-opacity="0.25"/>
-              <path d="M6 7 L6 5 M6 5 Q7 4 8 5"/>
-              <rect x="18" y="9" width="9" height="7" rx="1" fill="currentColor" fill-opacity="0.18"/>
-              <path d="M18 12 L27 12 M22.5 9 L22.5 16"/>
-              <path d="M36 16 L36 7 L39 4 L42 7 L42 16 Z" fill="currentColor" fill-opacity="0.2"/>
-              <path d="M39 4 L39 2"/>
-              <path d="M48 16 L48 10 L54 10 L54 16 Z" fill="currentColor" fill-opacity="0.15"/>
-            </svg>
+      <div class="stop" data-id="3" onclick="flyTo(3)">
+        <div class="stop-line">
+          <div class="stop-dot"></div>
+          <div class="stop-connector"></div>
+        </div>
+        <div class="stop-body">
+          <div class="stop-dates">Aug 15 – 17, 2026</div>
+          <div class="stop-name">Oviedo / Gijón</div>
+          <div class="stop-sub">Asturias · ~3 hrs from Santiago</div>
+          <div class="tags">
+            <span class="tag t-drive">↗ 3 hrs</span>
+            <span class="tag t-night">2 nights</span>
+            <span class="tag t-book">✓ Booked</span>
           </div>
-          <div class="stop-sub">Asturias · ~3 hr drive</div>
-          <div class="stop-tags">
-            <span class="tag tag-drive">↗ 3 hrs</span>
-            <span class="tag tag-nights">2 nights</span>
-            <span class="tag tag-booked">✓ Booked</span>
-          </div>
-          <div class="stop-highlights">
-            <span class="highlight"><span class="h-ico">🍏</span>Sidra country</span>
-            <span class="highlight"><span class="h-ico">🏖️</span>San Lorenzo</span>
-            <span class="highlight"><span class="h-ico">🧀</span>Cabrales</span>
-            <span class="highlight kid"><span class="h-ico">🐿️</span>San Francisco park (squirrels)</span>
-          </div>
-          <div class="stop-links">
-            <a class="stop-link" href="https://www.airbnb.com/l/ghFqElI3" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-              Airbnb · ghFqElI3
-            </a>
-            <a class="stop-link" href="https://www.airbnb.com/l/oJDvwaTk" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-              Join Lu's trip · C/ Argüelles 27
-            </a>
-            <a class="stop-link" href="https://www.airbnb.com/trips" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-              Your reservation · Airbnb Trips
-            </a>
+          <div class="links">
+            <a class="lnk" href="https://www.airbnb.com/l/ghFqElI3" target="_blank">Airbnb · ghFqElI3</a>
           </div>
         </div>
       </div>
 
-      <!-- STOP 5: POTES -->
-      <div class="stop" data-stop="4" onclick="focusStop(4)">
-        <div class="stop-line"><div class="stop-num">5</div><div class="stop-connector"></div></div>
-        <div class="stop-content">
-          <div class="stop-dates">Aug 17 – 21 · 4 nights</div>
-          <div class="stop-name">
-            <span class="flag-dot">⛰️</span> Potes
-            <!-- Mountain peaks + cable car -->
-            <svg class="skyline" viewBox="0 0 58 18" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round">
-              <path d="M0 17 L12 4 L22 13 L32 2 L44 12 L58 6 L58 17 Z" fill="currentColor" fill-opacity="0.2"/>
-              <path d="M0 17 L12 4 L22 13 L32 2 L44 12 L58 6"/>
-              <path d="M32 2 L32 5"/>
-              <circle cx="32" cy="1.5" r="0.7" fill="currentColor"/>
-              <line x1="18" y1="8" x2="50" y2="4" stroke-width="0.5"/>
-              <rect x="29" y="7" width="4" height="2.5" rx="0.5" fill="currentColor" fill-opacity="0.5"/>
-            </svg>
+      <div class="stop" data-id="4" onclick="flyTo(4)">
+        <div class="stop-line">
+          <div class="stop-dot"></div>
+          <div class="stop-connector"></div>
+        </div>
+        <div class="stop-body">
+          <div class="stop-dates">Aug 17 – 21, 2026</div>
+          <div class="stop-name">Potes</div>
+          <div class="stop-sub">Picos de Europa, Cantabria · ~2.5 hrs</div>
+          <div class="tags">
+            <span class="tag t-drive">↗ 2.5 hrs</span>
+            <span class="tag t-night">4 nights</span>
           </div>
-          <div class="stop-sub">Picos de Europa · ~2.5 hrs</div>
-          <div class="stop-tags">
-            <span class="tag tag-drive">↗ 2.5 hrs</span>
-            <span class="tag tag-nights">4 nights</span>
-            <span class="tag tag-booked">✓ Booked via Lu</span>
-          </div>
-          <div class="stop-highlights">
-            <span class="highlight kid"><span class="h-ico">🚠</span>Fuente Dé cable car</span>
-            <span class="highlight"><span class="h-ico">🥾</span>Picos hikes</span>
-            <span class="highlight"><span class="h-ico">🏞️</span>Lagos de Covadonga</span>
-            <span class="highlight"><span class="h-ico">🏰</span>Torre del Infantado</span>
-            <span class="highlight"><span class="h-ico">⛪</span>Iglesia de San Vicente</span>
-            <span class="highlight"><span class="h-ico">🚲</span>Iglesia de Santa María (Piasca? Lebeña?) · bikes?</span>
-            <span class="highlight"><span class="h-ico">🌉</span>Cangas de Onís Roman bridge</span>
-          </div>
-          <div class="stop-links">
-            <a class="stop-link" href="https://www.airbnb.com/l/GGRlNqA5" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-              Join Lu's trip · Finca Roja unit 1
-            </a>
-            <a class="stop-link" href="https://www.airbnb.com/l/nIC8oOVR" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-              Join Lu's trip · Finca Roja unit 2
-            </a>
-            <a class="stop-link" href="https://www.airbnb.com/l/Vt6ILuT7" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-              Airbnb · Vt6ILuT7
-            </a>
-            <a class="stop-link" href="https://www.airbnb.com/l/lrYUsLWP" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-              Airbnb · lrYUsLWP
-            </a>
-            <a class="stop-link" href="https://www.airbnb.com/l/eK3HUfJr" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-              Airbnb · eK3HUfJr
-            </a>
-            <a class="stop-link" href="https://www.airbnb.com/l/kzDpxenf" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-              Airbnb · kzDpxenf
-            </a>
-            <a class="stop-link" href="https://www.airbnb.com/l/BB6X03DH" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-              Airbnb · BB6X03DH
-            </a>
-            <a class="stop-link" href="https://www.alltrails.com/trail/spain/cantabria/mirador-el-cable-canal-de-jenduda-lagos-de-lloroza?sh=ogvqrj&amp;u=i&amp;utm_medium=trail_share&amp;utm_source=alltrails_virality" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-              AllTrails · Mirador El Cable → Lagos de Lloroza
-            </a>
-            <a class="stop-link" href="https://www.alltrails.com/trail/spain/cantabria/pr-pnpe-17-entorno-de-tresviso?sh=ogvqrj&amp;u=i&amp;utm_medium=trail_share&amp;utm_source=alltrails_virality" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-              AllTrails · PR-PNPE 17 · Entorno de Tresviso
-            </a>
-            <a class="stop-link" href="https://timeoffaroundtheworld.com/2025/07/03/fuente-de/" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-              Fuente Dé guide (blog)
-            </a>
+          <div class="links">
+            <a class="lnk" href="https://www.airbnb.com/l/lrYUsLWP" target="_blank">Airbnb · lrYUsLWP</a>
+            <a class="lnk" href="https://www.airbnb.com/l/eK3HUfJr" target="_blank">Airbnb · eK3HUfJr</a>
+            <a class="lnk" href="https://www.airbnb.com/l/kzDpxenf" target="_blank">Airbnb · kzDpxenf</a>
           </div>
         </div>
       </div>
 
-      <!-- STOP 6: BILBAO RETURN -->
-      <div class="stop" data-stop="5" data-kind="return" onclick="focusStop(5)">
-        <div class="stop-line"><div class="stop-num">✈</div></div>
-        <div class="stop-content">
-          <div class="stop-dates">Aug 20 eve – 21 am</div>
-          <div class="stop-name">
-            <span class="flag-dot">🛫</span> Bilbao · Departure
-            <svg class="skyline" viewBox="0 0 58 18" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 16 L54 16"/>
-              <path d="M30 16 Q32 8 42 7 L50 6 L52 5 L46 9 L34 11 Z" fill="currentColor" fill-opacity="0.3"/>
-              <path d="M40 10 L38 13 M43 10 L42 13"/>
-            </svg>
+      <div class="stop" data-id="5" onclick="flyTo(5)">
+        <div class="stop-line">
+          <div class="stop-dot blue"></div>
+        </div>
+        <div class="stop-body">
+          <div class="stop-dates">Aug 20 Eve – 21 AM</div>
+          <div class="stop-name">Bilbao</div>
+          <div class="stop-sub">Basque Country · ~2.5 hrs from Potes · Departure</div>
+          <div class="tags">
+            <span class="tag t-drive">↗ 2.5 hrs</span>
+            <span class="tag t-fly">✈ Morning flight</span>
+            <span class="tag t-book">✓ Booked</span>
           </div>
-          <div class="stop-sub">~2.5 hr drive · morning flight home</div>
-          <div class="stop-tags">
-            <span class="tag tag-drive">↗ 2.5 hrs</span>
-            <span class="tag tag-fly">✈ Morning flight</span>
-            <span class="tag tag-booked">✓ Booked</span>
-          </div>
-          <div class="stop-links">
-            <a class="stop-link" href="https://www.ihg.com/hotels/us/en/pay/confirmation?confirmationNumber=24950788" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-              Holiday Inn Express · IHG conf. #24950788
-            </a>
-            <a class="stop-link" href="https://maps.app.goo.gl/RhjwfYAJZyRQQsTh8?g_st=ic" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-              Hotel location (Google Maps)
-            </a>
+          <div class="links">
+            <a class="lnk" href="https://www.ihg.com/hotels/us/en/pay/confirmation?confirmationNumber=24950788" target="_blank">IHG · Conf. #24950788</a>
           </div>
         </div>
       </div>
 
     </div>
-
-    <!-- ── LU & DONDI · PARALLEL ITINERARY 👵 ── -->
-    <section class="lu-section" id="lu-section">
-      <div class="section-eyebrow">👵 Lu &amp; Dondi — parallel itinerary</div>
-      <p class="section-sub">From Lu's trip sheet — they run a day ahead of us on both ends, and swap Santiago for San Sebastián.</p>
-
-      <div class="lu-row">
-        <div class="lu-when">Contacts</div>
-        <div class="lu-contacts">
-          Lu <a href="tel:+18282312577">828-231-2577</a> ·
-          Ellen <a href="tel:+14063968033">406-396-8033</a> ·
-          Michael <a href="tel:+16318043470">631-804-3470</a> ·
-          Dondi <a href="tel:+18282796322">828-279-6322</a>
-        </div>
-      </div>
-
-      <div class="lu-row">
-        <div class="lu-when">Aug 6 → 7 · Thu–Fri</div>
-        <div class="lu-what">✈ Fly out — American Airlines, code AQXEWM</div>
-        <div class="lu-note">Asheville → Charlotte AA5973 (11:57a–1:09p) · Charlotte → Madrid AA748 (3:40p–5:30a, lands Fri 8/7) · Madrid → Bilbao AA8618 op. Iberia (7:25a–8:30a).</div>
-      </div>
-
-      <div class="lu-row">
-        <div class="lu-when">Aug 7 – 9 · 2 nights</div>
-        <div class="lu-what">🏨 Batimont, Bilbao — a day ahead of us</div>
-        <div class="lu-note">Hotel tel. <a href="tel:+34946022771">+34 946 022 771</a>. We arrive Sat 8/8 to the same hotel; Lisa Lindesmith &amp; Toni too.</div>
-      </div>
-
-      <div class="lu-row">
-        <div class="lu-when">Aug 8 · Sat</div>
-        <div class="lu-what">🚗 Alamo rental car pickup</div>
-        <div class="lu-note">Confirmation 2115445881 · 2-week rental.</div>
-      </div>
-
-      <div class="lu-row">
-        <div class="lu-when">Aug 9 – 13</div>
-        <div class="lu-what">🌊 Esmerelda Cottage, Hornedo — all 8 of us through the eclipse</div>
-        <div class="lu-note">Airbnb conf. HMZKW529AD · <a href="https://www.airbnb.com/l/zjeqhYzv" target="_blank" rel="noopener">join Lu's trip ↗</a>. Lisa &amp; Toni head back to Bilbao 8/13.</div>
-      </div>
-
-      <div class="lu-row">
-        <div class="lu-when">Aug 13 – 15</div>
-        <div class="lu-what">🌉 San Sebastián (while we're in Santiago)</div>
-        <div class="lu-note">Airbnb apt Kanpandegi Kalea 5, Bajo Derecha — bell tower, old town · conf. HMCPSBQME4.</div>
-      </div>
-
-      <div class="lu-row">
-        <div class="lu-when">Aug 15 – 17</div>
-        <div class="lu-what">🍎 Oviedo — everyone back together</div>
-        <div class="lu-note">Airbnb Calle de Argüelles 27, 3ºB · conf. HM2AAPQDE · <a href="https://www.airbnb.com/l/oJDvwaTk" target="_blank" rel="noopener">join Lu's trip ↗</a>.</div>
-      </div>
-
-      <div class="lu-row">
-        <div class="lu-when">Aug 17 – 20</div>
-        <div class="lu-what">⛰️ Potes — Finca Roja farm stay, all together</div>
-        <div class="lu-note">Diseminado Potes 18, apto 2 (Calle Albanes 2, apt 2) · confs HMAKT459FH + HMEAAF3TQS · join Lu's trips: <a href="https://www.airbnb.com/l/GGRlNqA5" target="_blank" rel="noopener">unit 1 ↗</a> · <a href="https://www.airbnb.com/l/nIC8oOVR" target="_blank" rel="noopener">unit 2 ↗</a>.</div>
-      </div>
-
-      <div class="lu-row">
-        <div class="lu-when">Aug 20 · Thu</div>
-        <div class="lu-what">🏨 Bilbao — Holiday Inn Express</div>
-        <div class="lu-note">cc #47287341.</div>
-      </div>
-
-      <div class="lu-row">
-        <div class="lu-when">Aug 21 · Fri</div>
-        <div class="lu-what">🛫 Home via Chicago (we go via Madrid–Charlotte)</div>
-        <div class="lu-note">Bilbao → Madrid AA8509 (9:15a–10:25a) · Madrid → Chicago AA8666 (11:45a–2:25p) · Chicago → Asheville AA4429 (6:16p–9:10p).</div>
-      </div>
-    </section>
-
-    <!-- ── FOR THE KIDS 🛝 (rendered by JS) ── -->
-    <section class="kids-section" id="kids-section">
-      <div class="kids-head">
-        <div class="kids-eyebrow">🛝 For the little ones</div>
-        <p class="kids-sub">Playgrounds, parks &amp; a cable car — tap any card to fly there on the map.</p>
-      </div>
-      <div id="kids-list"></div>
-
-      <!-- Ellen's Corner -->
-      <div class="ellen-corner">
-        <div class="ellen-title">🍺 Ellen's Cruzcampo Quest</div>
-        <p class="ellen-sub">One cold Cruzcampo in every province — tap to check them off. (Terraces near the playgrounds noted above 😉)</p>
-        <div class="quest-list" id="quest-list"></div>
-      </div>
-    </section>
-
-    <!-- ── RAINY-DAY BACKUPS ☔ (rendered by JS) ── -->
-    <section class="rain-section" id="rain-section">
-      <div class="section-eyebrow">☔ Rainy-day backups</div>
-      <p class="section-sub">The Green Coast earns its name — indoor winners near every base. Tap for directions.</p>
-      <div id="rain-list"></div>
-    </section>
-
-    <!-- ── DAY-TRIP PACKING 🎒 (rendered by JS) ── -->
-    <section class="pack-section" id="pack-section">
-      <div class="section-eyebrow">🎒 Day-trip packing</div>
-      <p class="section-sub">Tap a trip to open its checklist — ticks save on your phone.</p>
-      <div id="pack-list"></div>
-    </section>
-
-    <!-- ── TRIP TOOLS ── -->
-    <section class="trip-tools">
-      <button class="print-btn" type="button" onclick="printSheet()">🖨️ Print one-page trip sheet</button>
-      <p class="print-hint">On iPhone: tap, then <b>Share → Print</b> or “Save to Files” as a PDF.</p>
-      <a class="print-btn" style="display:inline-block; text-decoration:none; margin-top:0.6rem;" href="directions.html">🗺️ Reservations &amp; driving directions (printable)</a>
-      <p class="print-hint">One page per driving leg — reservation details, route map, and turn-by-turn directions.</p>
-      <a class="print-btn" style="display:inline-block; text-decoration:none; margin-top:0.6rem;" href="stays.html">🏡 The stays — photos &amp; what to look forward to</a>
-      <p class="print-hint">One page per Airbnb — pictures, the house, and the surrounds.</p>
-      <a class="print-btn" style="display:inline-block; text-decoration:none; margin-top:0.6rem;" href="checklist.html">✅ Travel folder checklist (printable)</a>
-      <p class="print-hint">Everything that goes in the folder — including the before-Friday errands.</p>
-    </section>
   </aside>
 
-  <!-- ── MAP ───────────────────── -->
-  <div id="map-container">
-    <div id="viewDiv"></div>
+  <!-- MAP -->
+  <div id="map-wrap">
+    <div id="map"></div>
 
-    <!-- Vehicle animation overlay -->
-    <div class="vehicle-layer">
-      <div class="vehicle hidden" id="car">🚗</div>
-      <div class="vehicle hidden" id="plane">✈️</div>
-    </div>
-
-    <div class="map-corner"><span class="rose">✦</span>a la costa verde</div>
-
-    <!-- Kids' spots toggle -->
-    <button class="kid-toggle on" id="kid-toggle" aria-pressed="true" title="Show / hide kids' playgrounds">
-      🛝 <span class="kt-label">Kids' spots</span> <span class="kt-count" id="kt-count">0</span>
-    </button>
-
-    <!-- Duolingo-style Palabra del día -->
-    <div class="duo-card" id="duo-card" title="Michael's Duolingo phrase of the day">
-      <div class="duo-streak">🔥 <span id="duo-streak-count">1</span>/14</div>
-      <div class="duo-eyebrow"><span class="duo-owl">🦉</span> Palabra del día</div>
-      <div class="duo-phrase" id="duo-phrase">¡Hola, España!</div>
-      <div class="duo-translation" id="duo-translation">Hello, Spain!</div>
-    </div>
-
-    <!-- Postcard overlay -->
-    <div class="map-overlay">
-      <h4>Trip at a Glance</h4>
-      <div class="postmark">~ ¡buen viaje! ~</div>
-      <div class="stat-row"><span class="stat-label">Duration</span><span class="stat-val">14 days</span></div>
-      <div class="stat-row"><span class="stat-label">Eclipse</span><span class="stat-val" style="color:var(--sangria);">Aug 12</span></div>
-      <div class="stat-row"><span class="stat-label">Stops</span><span class="stat-val">5 cities</span></div>
-      <div class="stat-row"><span class="stat-label">Drive total</span><span class="stat-val">~14 hrs</span></div>
-      <hr class="overlay-divider"/>
-      <div class="legend-entry"><div class="legend-dot" style="background:var(--terra)"></div><span class="legend-label">Accommodation</span></div>
-      <div class="legend-entry"><div class="legend-dot" style="background:var(--azul-hi);border-color:var(--azulejo)"></div><span class="legend-label">Airport</span></div>
-      <div class="legend-entry"><div class="legend-line"></div><span class="legend-label">Drive route</span></div>
-      <div class="legend-entry"><div class="legend-plane"></div><span class="legend-label">Flight · click for info</span></div>
-      <div class="legend-entry"><div class="legend-dot" style="background:rgba(255,192,74,0.35);border-color:var(--corona);box-shadow:0 0 6px rgba(255,192,74,0.5);"></div><span class="legend-label">Path of totality</span></div>
-      <div class="legend-entry"><div class="legend-dot" style="background:#FFFDF4;border-color:var(--azulejo);"></div><span class="legend-label">🛝 Kids' playgrounds</span></div>
-    </div>
-
-    <!-- Day slider -->
-    <div class="day-slider">
-      <div class="day-slider-head">
-        <div class="day-info">
-          <span class="day-chip" id="day-chip">Day 1</span>
-          <span class="day-emoji" id="day-emoji">✈</span>
-          <span class="day-date" id="day-date">Sat · Aug 8</span>
-          <span class="day-desc" id="day-desc">Charlotte → Madrid → Bilbao</span>
-        </div>
-        <div class="day-controls">
-          <button class="day-btn" id="day-prev" title="Previous day">‹</button>
-          <button class="day-btn" id="day-play" title="Play">▶</button>
-          <button class="day-btn" id="day-next" title="Next day">›</button>
-        </div>
+    <div class="overlay">
+      <div class="overlay-title">Trip at a Glance</div>
+      <div class="stat"><span class="stat-l">Duration</span><span class="stat-v">14 days</span></div>
+      <div class="stat"><span class="stat-l">Stops</span><span class="stat-v">5 cities</span></div>
+      <div class="stat"><span class="stat-l">Driving</span><span class="stat-v">~14 hrs</span></div>
+      <div class="stat"><span class="stat-l">Distance</span><span class="stat-v">~780 km</span></div>
+      <hr/>
+      <div class="leg">
+        <div class="leg-dot" style="background:var(--crimson);border:1.5px solid var(--gold)"></div>
+        <span class="leg-l">Accommodation stop</span>
       </div>
-      <div class="day-range-wrap">
-        <input type="range" min="1" max="14" value="1" class="day-range" id="day-range" />
+      <div class="leg">
+        <div class="leg-dot" style="background:rgba(50,100,180,0.5);border:1.5px solid #7AAEEE"></div>
+        <span class="leg-l">Departure point</span>
       </div>
-      <div class="day-ticks" id="day-ticks"></div>
+      <div class="leg">
+        <div class="leg-line"></div>
+        <span class="leg-l">Drive route</span>
+      </div>
     </div>
   </div>
 
 </div>
 
-<!-- ═══ PRINTABLE ONE-PAGE TRIP SHEET (populated by JS, shown only when printing) ═══ -->
-<div id="print-sheet" aria-hidden="true"></div>
-
 <script>
-  // ═══ ECLIPSE ASTRONOMY (astronomy-engine MoonShadow + GeoidIntersect) ═══
-  (function() {
-    const DEG = Math.PI / 180;
-    const RAD = 180 / Math.PI;
-    const R_EARTH = 6378.1366;
-    const R_SUN = 695700;
-    const KM_PER_AU = 149597870.7;
-    const EARTH_FLATTENING = 0.996647180302104;
-    const EARTH_FLATTENING_SQ = EARTH_FLATTENING * EARTH_FLATTENING;
-    const MOON_MEAN_RADIUS_KM = 1737.4;
-    const UMBRA_TOTAL_KM = 0.014;
-    const HORNEDO_LAT = 43.3872;
-    const HORNEDO_LON = -3.7478;
-    const CEST_OFFSET_H = 2;
+const stops = [
+  { id:0, name:"Bilbao",                  sub:"Basque Country",            dates:"Aug 8, 2026",       lat:43.2630, lon:-2.9350, note:"Land at BIO. Night at Batimontsuites.", link:"https://www.batimontsuites.com/",            blue:false },
+  { id:1, name:"Hornedo",                 sub:"Cantabria",                  dates:"Aug 9 – 13",        lat:43.3872, lon:-3.7478, note:"4 nights. ~1 hr from Bilbao.", link:"https://www.airbnb.com/l/83UxgIHH",             blue:false },
+  { id:2, name:"Santiago de Compostela", sub:"Galicia",                    dates:"Aug 13 – 15",       lat:42.8782, lon:-8.5448, note:"2 nights. ~5 hrs drive. Cathedral city.", link:"https://www.airbnb.com/l/4yXzSmio",      blue:false },
+  { id:3, name:"Oviedo / Gijón",         sub:"Asturias",                   dates:"Aug 15 – 17",       lat:43.3619, lon:-5.8494, note:"2 nights. ~3 hrs drive. Sidra country.", link:"https://www.airbnb.com/l/ghFqElI3",      blue:false },
+  { id:4, name:"Potes",                   sub:"Picos de Europa, Cantabria", dates:"Aug 17 – 21",       lat:43.1518, lon:-4.6206, note:"4 nights. Gateway to Picos de Europa.", link:"https://www.airbnb.com/l/lrYUsLWP",      blue:false },
+  { id:5, name:"Bilbao (Return)",         sub:"Basque Country",            dates:"Aug 20 Eve – 21 AM", lat:43.2780, lon:-2.9270, note:"~2.5 hrs from Potes. IHG hotel. Morning flight.", link:"https://www.ihg.com/hotels/us/en/pay/confirmation?confirmationNumber=24950788", blue:true }
+];
 
-    function dateToJD(d) { return d.getTime() / 86400000 + 2440587.5; }
+// ── Init map ──
+const map = L.map('map', {
+  center: [43.1, -5.6],
+  zoom: 7,
+  zoomControl: true
+});
 
-    function moonShadow(jd_ut) {
-      const date = new Date((jd_ut - 2440587.5) * 86400000);
-      const t = Astronomy.MakeTime(date);
-      const sun = Astronomy.GeoVector(Astronomy.Body.Sun, t, true);
-      const moon = Astronomy.GeoMoon(t);
-      const target = { x: -moon.x, y: -moon.y, z: -moon.z };
-      const dir = { x: moon.x - sun.x, y: moon.y - sun.y, z: moon.z - sun.z };
-      const u = (dir.x * target.x + dir.y * target.y + dir.z * target.z)
-              / (dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
-      const dx = u * dir.x - target.x;
-      const dy = u * dir.y - target.y;
-      const dz = u * dir.z - target.z;
-      const r = KM_PER_AU * Math.hypot(dx, dy, dz);
-      const k = R_SUN - (1 + u) * (R_SUN - MOON_MEAN_RADIUS_KM);
-      const p = -R_SUN + (1 + u) * (R_SUN + MOON_MEAN_RADIUS_KM);
-      return { jd: jd_ut, t, target, dir, u, r, k, p };
-    }
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 18,
+  attribution: '© OpenStreetMap contributors'
+}).addTo(map);
 
-    function geoidIntersect(shadow) {
-      const rot = Astronomy.Rotation_EQJ_EQD(shadow.t);
-      let v = Astronomy.RotateVector(rot, shadow.dir);
-      let e = Astronomy.RotateVector(rot, shadow.target);
-      v = { x: v.x * KM_PER_AU, y: v.y * KM_PER_AU, z: v.z * KM_PER_AU / EARTH_FLATTENING };
-      e = { x: e.x * KM_PER_AU, y: e.y * KM_PER_AU, z: e.z * KM_PER_AU / EARTH_FLATTENING };
-      const A = v.x * v.x + v.y * v.y + v.z * v.z;
-      const B = -2 * (v.x * e.x + v.y * e.y + v.z * e.z);
-      const C = e.x * e.x + e.y * e.y + e.z * e.z - R_EARTH * R_EARTH;
-      const radic = B * B - 4 * A * C;
-      if (radic <= 0) return null;
-      const u = (-B - Math.sqrt(radic)) / (2 * A);
-      const px = u * v.x - e.x;
-      const py = u * v.y - e.y;
-      const pz = (u * v.z - e.z) * EARTH_FLATTENING;
-      const proj = Math.hypot(px, py) * EARTH_FLATTENING_SQ;
-      const lat = proj === 0 ? (pz > 0 ? 90 : -90) : RAD * Math.atan(pz / proj);
-      const gast = Astronomy.SiderealTime(shadow.t);
-      let lon = (RAD * Math.atan2(py, px) - 15 * gast) % 360;
-      if (lon <= -180) lon += 360;
-      if (lon > 180) lon -= 360;
-      return { lat, lon, k: shadow.k, p: shadow.p, r: shadow.r };
-    }
+// ── Draw route line ──
+const coords = stops.map(s => [s.lat, s.lon]);
+L.polyline(coords, {
+  color: '#C9943A',
+  weight: 2.5,
+  opacity: 0.75,
+  dashArray: '7 6'
+}).addTo(map);
 
-    function localMoonShadow(date, observer) {
-      const t = Astronomy.MakeTime(date);
-      const ov = Astronomy.ObserverVector(t, observer, true);
-      const sun = Astronomy.GeoVector(Astronomy.Body.Sun, t, true);
-      const moon = Astronomy.GeoMoon(t);
-      const target = { x: ov.x - moon.x, y: ov.y - moon.y, z: ov.z - moon.z };
-      const dir = { x: moon.x - sun.x, y: moon.y - sun.y, z: moon.z - sun.z };
-      const dot = (dir.x * target.x + dir.y * target.y + dir.z * target.z)
-                / (dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
-      const dx = dot * dir.x - target.x;
-      const dy = dot * dir.y - target.y;
-      const dz = dot * dir.z - target.z;
-      const r = KM_PER_AU * Math.hypot(dx, dy, dz);
-      const k = R_SUN - (1 + dot) * (R_SUN - MOON_MEAN_RADIUS_KM);
-      return { r, k };
-    }
-
-    function computeCentralPath(jd0, spanH, stepSec) {
-      const points = [];
-      const start = jd0 - spanH / 24;
-      const end = jd0 + spanH / 24;
-      const step = stepSec / 86400;
-      for (let jd = start; jd <= end; jd += step) {
-        const sh = moonShadow(jd);
-        const hit = geoidIntersect(sh);
-        if (hit && hit.k > UMBRA_TOTAL_KM) {
-          points.push({ jd, lat: hit.lat, lon: hit.lon, k: hit.k, p: hit.p });
-        }
-      }
-      return { points };
-    }
-
-    function offsetKm(lat, lon, km, bearingDeg) {
-      const brg = bearingDeg * DEG;
-      const lat1 = lat * DEG;
-      const lon1 = lon * DEG;
-      const d = km / R_EARTH;
-      const lat2 = Math.asin(Math.sin(lat1) * Math.cos(d) + Math.cos(lat1) * Math.sin(d) * Math.cos(brg));
-      const lon2 = lon1 + Math.atan2(
-        Math.sin(brg) * Math.sin(d) * Math.cos(lat1),
-        Math.cos(d) - Math.sin(lat1) * Math.sin(lat2)
-      );
-      return { lat: lat2 * RAD, lon: lon2 * RAD };
-    }
-
-    function computeTotalityPath(jd0) {
-      const pathInfo = computeCentralPath(jd0, 3.0, 30);
-      const points = pathInfo.points.filter(p =>
-        p.lat >= 38 && p.lat <= 46 && p.lon >= -10 && p.lon <= 5
-      );
-      if (points.length < 2) return null;
-      const center = points.map(p => [p.lon, p.lat]);
-      const north = [];
-      const south = [];
-      points.forEach(p => {
-        const n = offsetKm(p.lat, p.lon, p.k, 0);
-        const s = offsetKm(p.lat, p.lon, p.k, 180);
-        north.push([n.lon, n.lat]);
-        south.push([s.lon, s.lat]);
-      });
-      const ring = north.concat(south.slice().reverse());
-      const mid = points[Math.floor(points.length / 2)];
-      return { center, north, south, ring, labelLon: mid.lon, labelLat: mid.lat };
-    }
-
-    function formatTimeCEST(d) {
-      const ms = d.getTime() + CEST_OFFSET_H * 3600000;
-      const t = new Date(ms);
-      const h = t.getUTCHours().toString().padStart(2, '0');
-      const m = t.getUTCMinutes().toString().padStart(2, '0');
-      const s = t.getUTCSeconds().toString().padStart(2, '0');
-      return h + ':' + m + ':' + s + ' CEST';
-    }
-
-    function formatTimeShortCEST(d) {
-      const ms = d.getTime() + CEST_OFFSET_H * 3600000;
-      const t = new Date(ms);
-      const h = t.getUTCHours().toString().padStart(2, '0');
-      const m = t.getUTCMinutes().toString().padStart(2, '0');
-      return h + ':' + m + ' CEST';
-    }
-
-    function formatDurationSec(sec) {
-      const s = Math.round(sec);
-      return s >= 60 ? Math.floor(s / 60) + 'm ' + (s % 60) + 's' : s + 's';
-    }
-
-    const hornedoObs = new Astronomy.Observer(HORNEDO_LAT, HORNEDO_LON, 0);
-    const hornedoEclipse = Astronomy.SearchLocalSolarEclipse(
-      new Date(Date.UTC(2026, 7, 10)), hornedoObs
-    );
-    const globalEclipse = Astronomy.SearchGlobalSolarEclipse(new Date(Date.UTC(2026, 7, 1)));
-    const peakDate = hornedoEclipse.peak.time.date;
-    const totalitySec = (hornedoEclipse.total_end.time.ut - hornedoEclipse.total_begin.time.ut) * 86400;
-    const axisDistKm = localMoonShadow(peakDate, hornedoObs).r;
-    const totalityPath = computeTotalityPath(dateToJD(globalEclipse.peak.date));
-
-    window.ECLIPSE_DATA = {
-      peak: peakDate,
-      hornedo: hornedoEclipse,
-      totalitySec,
-      axisDistKm,
-      path: totalityPath,
-      formatTimeCEST,
-      formatTimeShortCEST,
-      formatDurationSec
-    };
-
-    const ev = (e) => e ? e.time.date : null;
-    const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
-    setText('ec-partial-begin', formatTimeCEST(ev(hornedoEclipse.partial_begin)));
-    setText('ec-total-begin', formatTimeCEST(ev(hornedoEclipse.total_begin)));
-    setText('ec-peak', formatTimeCEST(ev(hornedoEclipse.peak)));
-    setText('ec-total-end', formatTimeCEST(ev(hornedoEclipse.total_end)));
-    setText('ec-partial-end', formatTimeCEST(ev(hornedoEclipse.partial_end)));
-    setText('ec-duration', formatDurationSec(totalitySec));
-    setText('ec-centerline-note',
-      Math.round(axisDistKm) + ' km from centerline — still total!');
-    const hi = document.getElementById('hornedo-totality-highlight');
-    if (hi) {
-      hi.innerHTML = '<span class="h-ico">🌒</span>Totality ' + formatTimeShortCEST(peakDate) + ' · ' + Math.round(totalitySec) + 's';
-    }
-  })();
-
-  // ═══ ECLIPSE COUNTDOWN ══════════════════════════════
-  (function() {
-    const eclipse = window.ECLIPSE_DATA.peak;
-    const el = document.getElementById('countdown');
-    function tick() {
-      const now = new Date();
-      const msLeft = eclipse - now;
-      const days = Math.ceil(msLeft / (1000*60*60*24));
-      if (days > 1) {
-        el.innerHTML = '<b>T-' + days + '</b> to totality';
-      } else if (days === 1) {
-        el.innerHTML = '<b>T-1</b> · ¡mañana!';
-      } else if (days === 0 && msLeft > 0) {
-        el.innerHTML = '<b>T-' + Math.ceil(msLeft/3600000) + 'h</b> to totality';
-      } else if (msLeft > -3*3600*1000) {
-        el.innerHTML = '<b>☀ Totality</b> happening';
-      } else {
-        el.innerHTML = '<b>Eclipse seen ✓</b>';
-      }
-    }
-    tick();
-    setInterval(tick, 60*1000);
-  })();
-
-  // ═══ DAY DATA ════════════════════════════════════════
-  // stopIdx: 0=Bilbao arrival, 1=Hornedo, 2=Santiago, 3=Oviedo, 4=Potes, 5=Bilbao return
-  const DAYS = [
-    { n:1,  date:"Aug 8",  dow:"Sat", emoji:"✈",  title:"Charlotte → Madrid → Bilbao", mode:"fly-out",  at:0 },
-    { n:2,  date:"Aug 9",  dow:"Sun", emoji:"🚗", title:"Drive to Hornedo",           mode:"drive",    from:0, to:1 },
-    { n:3,  date:"Aug 10", dow:"Mon", emoji:"🏖", title:"Hornedo · beach day",         mode:"stay",     at:1 },
-    { n:4,  date:"Aug 11", dow:"Tue", emoji:"🏰", title:"Altamira & Santillana",       mode:"stay",     at:1 },
-    { n:5,  date:"Aug 12", dow:"Wed", emoji:"🌑", title:"TOTAL SOLAR ECLIPSE",         mode:"eclipse",  at:1 },
-    { n:6,  date:"Aug 13", dow:"Thu", emoji:"🚗", title:"Drive to Santiago",           mode:"drive",    from:1, to:2 },
-    { n:7,  date:"Aug 14", dow:"Fri", emoji:"⛪", title:"Santiago de Compostela",      mode:"stay",     at:2 },
-    { n:8,  date:"Aug 15", dow:"Sat", emoji:"🚗", title:"Drive to Oviedo / Gijón",     mode:"drive",    from:2, to:3 },
-    { n:9,  date:"Aug 16", dow:"Sun", emoji:"🍏", title:"Asturias · sidra country",    mode:"stay",     at:3 },
-    { n:10, date:"Aug 17", dow:"Mon", emoji:"🚗", title:"Drive to Potes",              mode:"drive",    from:3, to:4 },
-    { n:11, date:"Aug 18", dow:"Tue", emoji:"🚠", title:"Fuente Dé · Picos",           mode:"stay",     at:4 },
-    { n:12, date:"Aug 19", dow:"Wed", emoji:"🏞", title:"Lagos de Covadonga",          mode:"stay",     at:4 },
-    { n:13, date:"Aug 20", dow:"Thu", emoji:"🚗", title:"Drive back to Bilbao",        mode:"drive",    from:4, to:5 },
-    { n:14, date:"Aug 21", dow:"Fri", emoji:"🛫", title:"Bilbao → Madrid → Charlotte", mode:"fly-back", at:5 }
-  ];
-
-  // ═══ DUOLINGO PHRASES (Michael's Palabra del día) ═════
-  const PHRASES = [
-    { es: "¡Hola, España!",             en: "Hello, Spain!" },
-    { es: "Vamos al norte.",            en: "Let's go north." },
-    { es: "¡A la playa!",               en: "To the beach!" },
-    { es: "Pinturas muy antiguas.",     en: "Very ancient paintings." },
-    { es: "La luna come el sol.",       en: "The moon eats the sun." },
-    { es: "¡Buen camino!",              en: "Good journey!" },
-    { es: "La catedral es preciosa.",   en: "The cathedral is lovely." },
-    { es: "Tengo hambre.",              en: "I'm hungry." },
-    { es: "Una sidra, por favor.",      en: "A cider, please." },
-    { es: "A las montañas.",            en: "To the mountains." },
-    { es: "¡Qué vista tan bonita!",     en: "What a beautiful view!" },
-    { es: "Los lagos son azules.",      en: "The lakes are blue." },
-    { es: "Una Cruzcampo para Ellen.",  en: "A Cruzcampo for Ellen." },
-    { es: "¡Hasta pronto, España!",     en: "See you soon, Spain!" }
-  ];
-
-  // ═══ FOR THE KIDS 🛝 — playgrounds & family stops ════
-  // Ordered roughly along the trip. Coords are approximate (good for map pins).
-  const KID_SPOTS = [
-    {
-      id:"casilda", emoji:"🦆", name:"Parque de Doña Casilda",
-      near:"Bilbao · day 1", lon:-2.9440, lat:43.2668,
-      note:"Bilbao's big \"Duck Park\" — a proper playground with swings, slides & climbing frames, a duck pond to feed, and fountains. 5 min from the Guggenheim.",
-      q:"Parque de Doña Casilda Iturrizar, Bilbao",
-      tags:[{t:"free",l:"Free"},{t:"",l:"Ducks 🦆"},{t:"tip",l:"Café terraces for Ellen"}],
-      eat:{ name:"El Globo (pintxos)", q:"El Globo Bilbao Calle Diputación", note:"pintxos & a cold caña a couple of blocks toward Gran Vía" }
-    },
-    {
-      id:"magdalena", emoji:"🦭", name:"Península de la Magdalena",
-      near:"Santander · en route to Hornedo", lon:-3.7690, lat:43.4636,
-      note:"Seaside park with a free mini-zoo (seals & penguins — feeding ~1 PM), a little tourist train, playgrounds, and gentle beaches. An easy detour on the way from Bilbao to the house.",
-      q:"Península de la Magdalena, Santander",
-      tags:[{t:"free",l:"Free park"},{t:"",l:"Seals & train"},{t:"tip",l:"~30 min from Hornedo"}],
-      eat:{ name:"Casa Lita", q:"Casa Lita Santander", note:"legendary pintxos & a seafront terrace on Paseo de Pereda, on the way in" }
-    },
-    {
-      id:"isabel", emoji:"🦚", name:"Parque de Isabel la Católica",
-      near:"Gijón · on the way to Santiago", lon:-5.6558, lat:43.5343,
-      note:"Gijón's greenest park and a perfect drive-break: huge playground for all ages (baby swings too), lakes with swans & geese, and peacocks strolling free. Great leg-stretch on the long push west.",
-      q:"Parque de Isabel la Católica, Gijón",
-      tags:[{t:"free",l:"Free"},{t:"",l:"Peacocks 🦚"},{t:"tip",l:"Big drive break"}],
-      eat:{ name:"Paseo de Begoña terraces", q:"Paseo de Begoña Gijón", note:"leafy café terraces (pour a sidra) a short walk from the park" }
-    },
-    {
-      id:"catedrales", emoji:"🏖️", name:"Playa de las Catedrales",
-      near:"Ribadeo · on the way to Santiago", lon:-7.1583, lat:43.5537,
-      note:"Natural cathedral-like rock arches you can walk under at low tide — pure magic for kids. Sits right on the Asturias→Galicia coast road toward Santiago.",
-      q:"Playa de las Catedrales, Ribadeo",
-      tags:[{t:"tip",l:"Low tide only"},{t:"tip",l:"Free reservation in summer"},{t:"",l:"Beach"}],
-      eat:{ name:"Restaurante As Catedrais", q:"Restaurante As Catedrais Ribadeo", note:"Galician seafood steps from the beach car park" }
-    },
-    {
-      id:"alameda", emoji:"🏰", name:"Parque da Alameda",
-      near:"Santiago de Compostela", lon:-8.5470, lat:42.8783,
-      note:"The city's favourite park, a short walk from the cathedral: a brand-new inclusive playground with a castle, zip-line, carousel & spiral slide, plus the famous \"As Marías\" statue and postcard cathedral views.",
-      q:"Parque da Alameda, Santiago de Compostela",
-      tags:[{t:"free",l:"Free"},{t:"",l:"Zip-line & castle"},{t:"tip",l:"Cathedral views"}],
-      eat:{ name:"Café Derby", q:"Café Derby Santiago de Compostela", note:"a historic coffee — or a cold Estrella Galicia — steps from the park" }
-    },
-    {
-      id:"sanfran", emoji:"🐿️", name:"Parque de San Francisco",
-      near:"Oviedo · Asturias base", lon:-5.8480, lat:43.3626,
-      note:"Oviedo's leafy central park — playground, peacocks and tame squirrels the kids can spot, right by the old town and its cider houses.",
-      q:"Parque de San Francisco, Oviedo",
-      tags:[{t:"free",l:"Free"},{t:"",l:"Squirrels 🐿️"},{t:"tip",l:"By the sidrerías"}],
-      eat:{ name:"Calle Gascona", q:"Calle Gascona Oviedo", note:"the \"cider boulevard\" a block away — sidra poured tableside" }
-    },
-    {
-      id:"fuentede", emoji:"🚠", name:"Teleférico de Fuente Dé",
-      near:"Picos de Europa · from Potes", lon:-4.8140, lat:43.1468,
-      note:"The big adventure: a cable car that soars 750 m up a sheer cliff to a 1,823 m mirador in under 4 minutes. Jaw-dropping for kids and grown-ups. Go early — summer queues build fast.",
-      q:"Teleférico de Fuente Dé",
-      tags:[{t:"tip",l:"Go early — queues"},{t:"",l:"Tickets ~€19 adult"},{t:"tip",l:"Bring layers up top"}],
-      eat:{ name:"Parador de Fuente Dé", q:"Parador de Fuente Dé", note:"big mountain-view terrace by the base (café El Cable waits at the top)" }
-    }
-  ];
-
-  // Ellen's Cruzcampo Quest — one per province
-  const QUEST = [
-    "Basque Country (Bilbao) 🇪🇸",
-    "Cantabria (Hornedo / Santander) 🌊",
-    "Galicia (Santiago) ⛪",
-    "Asturias (sidra country) 🍏",
-    "Picos de Europa (Potes) ⛰️"
-  ];
-
-  // ── Render the kids list ──
-  (function renderKids() {
-    const list = document.getElementById('kids-list');
-    if (!list) return;
-    const enc = s => encodeURIComponent(s);
-    KID_SPOTS.forEach(k => {
-      const card = document.createElement('div');
-      card.className = 'kid-card';
-      card.setAttribute('role', 'button');
-      card.setAttribute('tabindex', '0');
-      card.dataset.lon = k.lon;
-      card.dataset.lat = k.lat;
-      const tags = k.tags.map(t => '<span class="kid-tag ' + (t.t||'') + '">' + t.l + '</span>').join('');
-      const eat = k.eat ? (
-        '<a class="kid-eat" href="https://www.google.com/maps/search/?api=1&query=' + enc(k.eat.q) + '" target="_blank" rel="noopener">' +
-          '<span class="kid-eat-ico">☕</span>' +
-          '<span><b>' + k.eat.name + '</b> — ' + k.eat.note + '</span>' +
-        '</a>') : '';
-      card.innerHTML =
-        '<div class="kid-emoji">' + k.emoji + '</div>' +
-        '<div class="kid-body">' +
-          '<div class="kid-name">' + k.name + '</div>' +
-          '<div class="kid-near">' + k.near + '</div>' +
-          '<div class="kid-note">' + k.note + '</div>' +
-          '<div class="kid-tags">' + tags + '</div>' +
-          eat +
-          '<div class="kid-actions">' +
-            '<a class="kid-link maps" href="https://www.google.com/maps/search/?api=1&query=' + enc(k.q) + '" target="_blank" rel="noopener">📍 Directions</a>' +
-            '<span class="kid-link">🗺️ Show on map</span>' +
-          '</div>' +
-        '</div>';
-      const go = (e) => {
-        // don't hijack taps on the real directions link
-        if (e.target.closest('a')) return;
-        if (typeof window.focusPoint === 'function') window.focusPoint(k.lon, k.lat, 13);
-        if (window.matchMedia('(max-width: 920px)').matches) {
-          const mc = document.getElementById('map-container');
-          if (mc) mc.scrollIntoView({ behavior:'smooth', block:'start' });
-        }
-      };
-      card.addEventListener('click', go);
-      card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(e); } });
-      list.appendChild(card);
-    });
-  })();
-
-  // ── Ellen's quest (persisted locally) ──
-  (function renderQuest() {
-    const wrap = document.getElementById('quest-list');
-    if (!wrap) return;
-    let done = {};
-    try { done = JSON.parse(localStorage.getItem('cruzcampoQuest') || '{}'); } catch (e) {}
-    QUEST.forEach((label, i) => {
-      const item = document.createElement('div');
-      item.className = 'quest-item' + (done[i] ? ' done' : '');
-      item.innerHTML = '<span class="quest-box">✓</span><span class="quest-label">' + label + '</span>';
-      item.addEventListener('click', () => {
-        const isDone = item.classList.toggle('done');
-        done[i] = isDone;
-        try { localStorage.setItem('cruzcampoQuest', JSON.stringify(done)); } catch (e) {}
-      });
-      wrap.appendChild(item);
-    });
-  })();
-
-  // ═══ RAINY-DAY BACKUPS ☔ — indoor wins near each base ═
-  const RAIN_BACKUPS = [
-    { base:"Bilbao", emoji:"🏛️", items:[
-      { name:"Guggenheim Museum", q:"Guggenheim Museum Bilbao",
-        note:"Gehry's titanium ship full of modern art — kids' trails inside and the giant flower Puppy dog out front." },
-      { name:"Itsasmuseum (Maritime)", q:"Itsasmuseum Bilbao",
-        note:"Boats, cranes and river history down by the estuary — hands-on and mostly undercover." },
-      { name:"Azkuna Zentroa", q:"Azkuna Zentroa Bilbao",
-        note:"Old wine warehouse turned culture house: quirky pillars, a library, cafés and a glass-bottom rooftop pool." }
-    ]},
-    { base:"Hornedo · Cantabria", emoji:"🌊", items:[
-      { name:"Altamira Museum & Neocueva", q:"Museo de Altamira Santillana del Mar",
-        note:"Walk a full-size replica of the \"Sistine Chapel of cave art\" — warm, dry and unmissable near Santillana." },
-      { name:"Museo Marítimo del Cantábrico", q:"Museo Marítimo del Cantábrico Santander",
-        note:"Santander's aquarium with seals and a walk-through tank, plus seafaring history upstairs." },
-      { name:"El Soplao show cave", q:"Cueva El Soplao",
-        note:"Jaw-dropping cave with a little mine-train ride in — bring a jacket, it's cool inside." }
-    ]},
-    { base:"Santiago · Galicia", emoji:"⛪", items:[
-      { name:"Cathedral, Museum & rooftops", q:"Catedral de Santiago de Compostela",
-        note:"Duck out of the rain into the crypt and museum, or take the guided rooftop walk for the big city view." },
-      { name:"Museo do Pobo Galego", q:"Museo do Pobo Galego Santiago",
-        note:"Galician folk life housed around a famous triple-helix spiral staircase kids love to climb." },
-      { name:"Cidade da Cultura", q:"Cidade da Cultura de Galicia Santiago",
-        note:"Vast modernist hilltop complex with exhibitions and sheltered space to roam." }
-    ]},
-    { base:"Oviedo · Gijón · Asturias", emoji:"🍎", items:[
-      { name:"MUJA — Jurassic Museum 🦕", q:"Museo del Jurásico de Asturias MUJA Colunga",
-        note:"Dinosaurs! Full skeletons and real coastal footprints at Colunga — the top rainy-day pick for kids." },
-      { name:"Acuario de Gijón", q:"Acuario de Gijón",
-        note:"60+ tanks from local rivers to tropical reefs, sharks and a glass tunnel." },
-      { name:"Museo del Ferrocarril", q:"Museo del Ferrocarril de Asturias Gijón",
-        note:"Gijón's railway museum — real steam engines and carriages to clamber around." }
-    ]},
-    { base:"Potes · Picos", emoji:"⛰️", items:[
-      { name:"El Soplao show cave", q:"Cueva El Soplao",
-        note:"~1 hr from Potes: the region's best cave for the days the peaks (and Fuente Dé) are lost in cloud." },
-      { name:"Sto. Toribio de Liébana", q:"Monasterio de Santo Toribio de Liébana",
-        note:"Holy-year monastery holding a fragment of the True Cross, just minutes above Potes." },
-      { name:"Cabárceno Nature Park", q:"Parque de la Naturaleza de Cabárceno",
-        note:"Drive-through animal park — bears, elephants, giraffes — that still works in drizzle." }
-    ]}
-  ];
-
-  // ═══ DAY-TRIP PACKING 🎒 — checkable, saved locally ═══
-  const PACKING = [
-    { id:"eclipse", emoji:"🌑", title:"Eclipse day · Aug 12", items:[
-      "Certified eclipse glasses — one per person (ISO 12312-2)",
-      "Phone + power bank for the long evening",
-      "Camera + tripod (solar filter if zooming the sun)",
-      "Warm layer — the air cools right before totality",
-      "Head-lamp or red-light torch for the dark",
-      "Snacks, water & a picnic blanket or chairs",
-      "Totality times saved offline (signal jams up)",
-      "Something to keep kids busy in the partial phase"
-    ]},
-    { id:"beach", emoji:"🏖️", title:"Beach day · Green Coast", items:[
-      "Swimsuits & quick-dry towels",
-      "Reef/water shoes — some coves are pebbly",
-      "Reef-safe sunscreen + sun hats",
-      "Bucket, spade & a ball",
-      "Windbreak or pop-up shade (Cantabrian breeze)",
-      "A dry change of clothes per kid",
-      "Cash for the beach chiringuito"
-    ]},
-    { id:"fuentede", emoji:"🚠", title:"Fuente Dé cable car", items:[
-      "Warm layers — ~1,800 m and windy up top",
-      "Sturdy shoes for the mirador trails",
-      "Cable-car tickets booked / arrive early",
-      "Water & snacks (little on offer up there)",
-      "Sunglasses & sunscreen (strong at altitude)",
-      "Motion-sickness remedy for the mountain road",
-      "Fully charged phone for the photos"
-    ]},
-    { id:"covadonga", emoji:"🏞️", title:"Lagos de Covadonga", items:[
-      "Rain jacket + warm layer (weather turns fast)",
-      "Hiking shoes — trails get muddy",
-      "Check if the shuttle-bus rule is on & bring cash",
-      "Water & a picnic (few facilities at the lakes)",
-      "Sunscreen even under cloud",
-      "Binoculars for cows, chamois & vultures"
-    ]},
-    { id:"catedrales", emoji:"🌊", title:"Playa de las Catedrales", items:[
-      "Free entry reservation confirmation (summer)",
-      "Low-tide time checked — arches only show then",
-      "Water shoes for slippery rock",
-      "Camera — this is the photo of the trip",
-      "Light rain shell (Galician sky)"
-    ]},
-    { id:"santiago", emoji:"⛪", title:"Santiago old town", items:[
-      "Umbrella or rain shell — Spain's rainiest city",
-      "Comfy shoes for the granite streets",
-      "Shoulders covered for the cathedral",
-      "Cash for the covered Mercado de Abastos",
-      "Refillable water bottle"
-    ]},
-    { id:"playground", emoji:"🛝", title:"Any playground stop", items:[
-      "Snacks & water",
-      "Wipes & hand sanitiser",
-      "A spare change of clothes",
-      "A ball or bubbles",
-      "Plasters & small first-aid basics"
-    ]}
-  ];
-
-  // ── Render rainy-day backups ──
-  (function renderRain() {
-    const wrap = document.getElementById('rain-list');
-    if (!wrap) return;
-    const enc = s => encodeURIComponent(s);
-    RAIN_BACKUPS.forEach(g => {
-      const grp = document.createElement('div');
-      grp.className = 'rain-group';
-      grp.innerHTML = '<div class="rain-group-head">' + g.emoji + ' ' + g.base + '</div>';
-      g.items.forEach(it => {
-        const a = document.createElement('a');
-        a.className = 'rain-item';
-        a.href = 'https://www.google.com/maps/search/?api=1&query=' + enc(it.q);
-        a.target = '_blank';
-        a.rel = 'noopener';
-        a.innerHTML =
-          '<div class="rain-name"><span>' + it.name + '</span><span class="rain-go">📍 Map</span></div>' +
-          '<div class="rain-note">' + it.note + '</div>';
-        grp.appendChild(a);
-      });
-      wrap.appendChild(grp);
-    });
-  })();
-
-  // ── Render packing checklists (accordion, persisted) ──
-  (function renderPack() {
-    const wrap = document.getElementById('pack-list');
-    if (!wrap) return;
-    let state = {};
-    try { state = JSON.parse(localStorage.getItem('packState') || '{}'); } catch (e) {}
-    PACKING.forEach((trip, ti) => {
-      const box = document.createElement('div');
-      box.className = 'pack-trip' + (ti === 0 ? ' open' : '');
-      const countId = 'pack-count-' + ti;
-
-      const head = document.createElement('button');
-      head.type = 'button';
-      head.className = 'pack-head';
-      head.setAttribute('aria-expanded', ti === 0 ? 'true' : 'false');
-      head.innerHTML =
-        '<span class="pack-emoji">' + trip.emoji + '</span>' +
-        '<span class="pack-title">' + trip.title + '</span>' +
-        '<span class="pack-count" id="' + countId + '"></span>' +
-        '<span class="pack-chevron">▸</span>';
-      head.addEventListener('click', () => {
-        const open = box.classList.toggle('open');
-        head.setAttribute('aria-expanded', open ? 'true' : 'false');
-      });
-      box.appendChild(head);
-
-      const items = document.createElement('div');
-      items.className = 'pack-items';
-
-      const updateCount = () => {
-        let done = 0;
-        trip.items.forEach((_, i) => { if (state[ti + ':' + i]) done++; });
-        const el = document.getElementById(countId);
-        if (el) {
-          el.textContent = done + '/' + trip.items.length;
-          el.classList.toggle('full', done === trip.items.length);
-        }
-      };
-
-      const rows = [];
-      trip.items.forEach((label, i) => {
-        const key = ti + ':' + i;
-        const row = document.createElement('div');
-        row.className = 'pack-check' + (state[key] ? ' done' : '');
-        row.innerHTML = '<span class="pack-box">✓</span><span class="pack-text">' + label + '</span>';
-        row.addEventListener('click', () => {
-          const d = row.classList.toggle('done');
-          state[key] = d;
-          try { localStorage.setItem('packState', JSON.stringify(state)); } catch (e) {}
-          updateCount();
-        });
-        rows.push(row);
-        items.appendChild(row);
-      });
-
-      const reset = document.createElement('button');
-      reset.type = 'button';
-      reset.className = 'pack-reset';
-      reset.textContent = '↺ Reset this list';
-      reset.addEventListener('click', () => {
-        rows.forEach((row, i) => { row.classList.remove('done'); delete state[ti + ':' + i]; });
-        try { localStorage.setItem('packState', JSON.stringify(state)); } catch (e) {}
-        updateCount();
-      });
-      items.appendChild(reset);
-
-      box.appendChild(items);
-      wrap.appendChild(box);
-      updateCount();
-    });
-  })();
-
-  // ═══ PRINTABLE ONE-PAGE TRIP SHEET 🖨️ ══════════════
-  const ITINERARY = [
-    { d:"Aug 8",     place:"Bilbao",                region:"Basque Country",  stay:"Batimontsuites #16081 · 1 night", drive:"Fly in → BIO" },
-    { d:"Aug 9–13",  place:"Hornedo",               region:"Cantabria",       stay:"Airbnb 83UxgIHH · 4 nights",  drive:"~1 hr · ☀ ECLIPSE Aug 12" },
-    { d:"Aug 13–15", place:"Santiago de Compostela",region:"Galicia",         stay:"Airbnb HM2X9PDABX · R. Presidente Salvador Allende 2, 3ºA · 2 nights", drive:"~5 hr drive" },
-    { d:"Aug 15–17", place:"Oviedo / Gijón",        region:"Asturias",        stay:"Airbnb ghFqElI3 · 2 nights",  drive:"~3 hr drive" },
-    { d:"Aug 17–21", place:"Potes",                 region:"Picos de Europa", stay:"Finca Roja farm stay via Lu (HMAKT459FH + HMEAAF3TQS) · 4 nights", drive:"~2.5 hr drive" },
-    { d:"Aug 20–21", place:"Bilbao (return)",       region:"Basque Country",  stay:"Holiday Inn Express (IHG #24950788) · 1 night", drive:"~2.5 hr · fly home Aug 21" }
-  ];
-
-  function buildPrintSheet() {
-    const sheet = document.getElementById('print-sheet');
-    if (!sheet) return;
-    const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
-
-    const itinRows = ITINERARY.map(r =>
-      '<tr><td class="pd">' + esc(r.d) + '</td><td><b>' + esc(r.place) + '</b><br><span class="pr-muted">' + esc(r.region) + '</span></td>' +
-      '<td>' + esc(r.stay) + '</td><td>' + esc(r.drive) + '</td></tr>'
-    ).join('');
-
-    // eclipse line — prefer the live computed values if present
-    const gv = id => { const el = document.getElementById(id); const t = el && el.textContent.trim(); return (t && t !== '—') ? t : null; };
-    const tBegin = gv('ec-total-begin'), tDur = gv('ec-duration');
-    const eclipseLine = (tBegin && tDur)
-      ? ('Totality begins <b>' + esc(tBegin) + '</b> · lasts <b>' + esc(tDur) + '</b> at Hornedo (CEST)')
-      : 'Totality ~<b>20:27 CEST</b> · ~<b>1¾ min</b> at Hornedo — confirm on the site';
-
-    const kids = KID_SPOTS.map(k => '<li><b>' + esc(k.name) + '</b> — ' + esc(k.near.split('·')[0].trim()) + '</li>').join('');
-    const rain = RAIN_BACKUPS.map(g =>
-      '<li><b>' + esc(g.base) + ':</b> ' + g.items.map(i => esc(i.name)).join(' · ') + '</li>'
-    ).join('');
-    const pack = PACKING.map(t =>
-      '<div class="pk"><b>' + esc(t.emoji + ' ' + t.title) + '</b><br>' + t.items.map(esc).join(' · ') + '</div>'
-    ).join('');
-    const quest = QUEST.map(q => '☐ ' + esc(q)).join('  ·  ');
-
-    sheet.innerHTML =
-      '<div class="ps-head">' +
-        '<h1>Flynn Family · Northern Spain</h1>' +
-        '<div class="ps-sub">Aug 8 – 21, 2026 · Total Solar Eclipse Aug 12 · ¡chasing totality!</div>' +
-      '</div>' +
-      '<div class="ps-eclipse">🌑 <b>Eclipse Day — Wed Aug 12:</b> ' + eclipseLine + '. Certified eclipse glasses for everyone; save times offline.</div>' +
-      '<h2>Itinerary</h2>' +
-      '<table class="ps-itin"><thead><tr><th>Dates</th><th>Base</th><th>Stay</th><th>Getting there</th></tr></thead><tbody>' + itinRows + '</tbody></table>' +
-      '<h2>👵 Lu &amp; Dondi (parallel)</h2><ul class="ps-list">' +
-        '<li>Out Aug 6 (AA code AQXEWM): AVL→CLT AA5973 · CLT→MAD AA748 · MAD→BIO AA8618 — Batimont Bilbao Aug 7–9 (tel +34 946 022 771)</li>' +
-        '<li>Hornedo with us Aug 9–13 (HMZKW529AD) · San Sebastián Aug 13–15: Kanpandegi Kalea 5, Bajo Dcha (HMCPSBQME4)</li>' +
-        '<li>Oviedo Aug 15–17: C/ Argüelles 27, 3ºB (HM2AAPQDE) · Potes Aug 17–20: Finca Roja, Diseminado Potes 18 apto 2</li>' +
-        '<li>Home Aug 21 via Chicago: BIO→MAD AA8509 · MAD→ORD AA8666 · ORD→AVL AA4429 · Alamo car conf 2115445881 (pickup 8/8, 2 wks)</li>' +
-        '<li>Lu 828-231-2577 · Dondi 828-279-6322 · Lisa &amp; Toni: same hotel 8/8, leave Hornedo for Bilbao 8/13</li>' +
-      '</ul>' +
-      '<div class="ps-cols">' +
-        '<div><h2>🛝 Playgrounds & kid stops</h2><ul class="ps-list">' + kids + '</ul></div>' +
-        '<div><h2>☔ Rainy-day backups</h2><ul class="ps-list">' + rain + '</ul></div>' +
-      '</div>' +
-      '<h2>🎒 Day-trip packing</h2><div class="ps-pack">' + pack + '</div>' +
-      '<div class="ps-foot">' +
-        '<div>🍺 Ellen\'s Cruzcampo quest: ' + quest + '</div>' +
-        '<div>📞 Emergencies: <b>112</b> · 🇪🇸 flynns in españa</div>' +
-      '</div>';
-  }
-  buildPrintSheet();
-
-  window.printSheet = function() {
-    buildPrintSheet(); // refresh (picks up computed eclipse times if ready)
-    window.print();
-  };
-
-  // ── Jump-nav helper (mobile) ──
-  window.jumpTo = function(sel) {
-    const el = document.querySelector(sel);
-    if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
-  };
-
-  // ═══ TICKS ═══════════════════════════════════════════
-  (function() {
-    const wrap = document.getElementById('day-ticks');
-    DAYS.forEach(d => {
-      const el = document.createElement('span');
-      el.textContent = d.date.replace('Aug ', '');
-      if (d.mode === 'eclipse') el.className = 'eclipse-tick';
-      wrap.appendChild(el);
-    });
-  })();
-</script>
-
-<script>
-(function () {
-  // ══════════════════════════════════════════════════════
-  //  LEAFLET MAP  (keyless — CARTO / OpenStreetMap tiles)
-  // ══════════════════════════════════════════════════════
-
-  // ── colour helpers ──
-  const TERRA=[200,85,61], SANGRIA=[168,40,58], AZULEJO=[46,91,126], CREAM=[255,253,244];
-  const rgb = (c,a) => (a==null) ? 'rgb('+c[0]+','+c[1]+','+c[2]+')' : 'rgba('+c[0]+','+c[1]+','+c[2]+','+a+')';
-  const toLL = arr => arr.map(p => [p[1], p[0]]);   // [lon,lat] -> [lat,lon]
-
-  // ── STOPS ──
-  const stops = [
-    { id:0, name:"Bilbao",                sub:"Basque Country",            dates:"Aug 8, 2026",
-      lat:43.2630, lon:-2.9350, nights:1, kind:"arrival",
-      note:"Land at BIO. First night at Batimontsuites (#16081). Guggenheim, Artxanda funicular, maybe the Itsasmuseum. Pintxos for dinner?",
-      link:"https://www.batimontsuites.com/" },
-    { id:1, name:"Hornedo",               sub:"Cantabria",                 dates:"Aug 9 – 13",
-      lat:43.3872, lon:-3.7478, nights:4, kind:"stay",
-      note:"Home base on the Green Coast. Beaches, Santillana del Mar, Altamira caves. Eclipse day!",
-      link:"https://www.airbnb.com/l/83UxgIHH" },
-    { id:2, name:"Santiago de Compostela",sub:"Galicia",                   dates:"Aug 13 – 15",
-      lat:42.8782, lon:-8.5448, nights:2, kind:"stay",
-      note:"End of the Camino. Cathedral, old town, empanadas galegas.",
-      link:"https://www.airbnb.com/l/4yXzSmio" },
-    { id:3, name:"Oviedo / Gijón",        sub:"Asturias",                  dates:"Aug 15 – 17",
-      lat:43.3619, lon:-5.8494, nights:2, kind:"stay",
-      note:"Sidra country. San Lorenzo beach, Cabrales cheese.",
-      link:"https://www.airbnb.com/l/ghFqElI3" },
-    { id:4, name:"Potes",                 sub:"Picos de Europa, Cantabria",dates:"Aug 17 – 21",
-      lat:43.1518, lon:-4.6206, nights:4, kind:"stay",
-      note:"Mountain base — Finca Roja farm stay, booked via Lu. Fuente Dé cable car, Torre del Infantado, Roman bridge at Cangas de Onís, Lagos de Covadonga, hikes.",
-      link:"https://www.airbnb.com/l/lrYUsLWP" },
-    { id:5, name:"Bilbao (Return)",       sub:"Basque Country",            dates:"Aug 20 – 21",
-      lat:43.2800, lon:-2.9200, nights:1, kind:"return",
-      note:"Drive back. Holiday Inn Express near the airport. Morning flight home.",
-      link:"https://www.ihg.com/hotels/us/en/pay/confirmation?confirmationNumber=24950788" }
-  ];
-  const driveRoute = stops.map(s => [s.lon, s.lat]);
-
-  // ── AIRPORTS & FLIGHTS ──
-  const AIRPORTS = {
-    CLT: { code:"CLT", lon:-80.9431, lat:35.2140, name:"Charlotte Douglas Intl", city:"Charlotte, NC" },
-    MAD: { code:"MAD", lon:-3.5626,  lat:40.4719, name:"Madrid-Barajas",         city:"Madrid" },
-    BIO: { code:"BIO", lon:-2.9106,  lat:43.3011, name:"Bilbao Airport",         city:"Bilbao" }
-  };
-  const FLIGHTS = [
-    { id:"OUT1", from:"CLT", to:"MAD", date:"Aug 7, 2026",  dir:"out",  leg:"Transatlantic", dur:"~7.5 hrs", note:"AA 748 · 3:40 PM → 5:30 AM (+1) · conf QUWDMN" },
-    { id:"OUT2", from:"MAD", to:"BIO", date:"Aug 8, 2026",  dir:"out",  leg:"Connection",    dur:"~1 hr",    note:"AA 8618 op. Iberia · 7:25 → 8:30 AM" },
-    { id:"RET1", from:"BIO", to:"MAD", date:"Aug 21, 2026", dir:"back", leg:"Connection",    dur:"~1 hr",    note:"AA 8509 op. Iberia · 9:15 → 10:25 AM" },
-    { id:"RET2", from:"MAD", to:"CLT", date:"Aug 21, 2026", dir:"back", leg:"Transatlantic", dur:"~9 hrs",   note:"AA 749 · 1:00 → 4:20 PM · conf QUWDMN" }
-  ];
-
-  // Great-circle arc between two lon/lat points -> array of [lon,lat]
-  function gcArc(lon1, lat1, lon2, lat2, steps) {
-    const toRad = Math.PI/180, toDeg = 180/Math.PI;
-    const p1 = lat1*toRad, l1 = lon1*toRad, p2 = lat2*toRad, l2 = lon2*toRad;
-    const d = 2*Math.asin(Math.sqrt(
-      Math.pow(Math.sin((p2-p1)/2),2) + Math.cos(p1)*Math.cos(p2)*Math.pow(Math.sin((l2-l1)/2),2)));
-    const pts = [];
-    for (let i=0; i<=steps; i++) {
-      const f = i/steps;
-      const A = Math.sin((1-f)*d)/Math.sin(d), B = Math.sin(f*d)/Math.sin(d);
-      const x = A*Math.cos(p1)*Math.cos(l1) + B*Math.cos(p2)*Math.cos(l2);
-      const y = A*Math.cos(p1)*Math.sin(l1) + B*Math.cos(p2)*Math.sin(l2);
-      const z = A*Math.sin(p1) + B*Math.sin(p2);
-      pts.push([Math.atan2(y,x)*toDeg, Math.atan2(z, Math.sqrt(x*x+y*y))*toDeg]);
-    }
-    return pts;
-  }
-
-  // ── MAP ──
-  const map = L.map('viewDiv', {
-    zoomControl: false,
-    minZoom: 3, maxZoom: 14,
-    zoomSnap: 0.5,
-    worldCopyJump: true
-  }).setView([43.1, -5.5], 7);
-  L.control.zoom({ position: 'topleft' }).addTo(map);
-
-  // stacking panes
-  [['eclipsePane',405],['flightPane',410],['routePane',415],['circlePane',430],['labelPane',640]]
-    .forEach(([n,z]) => { map.createPane(n); map.getPane(n).style.zIndex = z; });
-
-  // ── basemaps (keyless) ──
-  const attr = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
-  const dayTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-    { subdomains:'abcd', maxZoom:19, attribution:attr });
-  const eclipseTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    { subdomains:'abcd', maxZoom:19, attribution:attr });
-  let currentTiles = dayTiles.addTo(map);
-
-  // ── text-label helper (divIcon centred on the point) ──
-  function lbl(lat, lon, cls, text, dy, rot) {
-    const t = 'translate(-50%,-50%) translateY(' + (dy||0) + 'px)' + (rot ? ' rotate(' + rot + 'deg)' : '');
-    return L.marker([lat,lon], { interactive:false, keyboard:false, pane:'labelPane',
-      icon: L.divIcon({ className:'', iconSize:[0,0],
-        html:'<span class="map-label ' + cls + '" style="transform:' + t + '">' + text + '</span>' }) }).addTo(map);
-  }
-  const popOpts = { closeButton:true, autoPan:true, maxWidth:240 };
-
-  // ═══ FLIGHT PATHS ═════════════════════════════════
-  FLIGHTS.forEach(f => {
-    const a = AIRPORTS[f.from], b = AIRPORTS[f.to];
-    const pts = toLL(gcArc(a.lon, a.lat, b.lon, b.lat, 64));
-    const ret = f.dir === "back";
-    L.polyline(pts, { pane:'flightPane', color:rgb(ret?[85,144,181]:AZULEJO), opacity:0.15, weight:8, lineCap:'round', lineJoin:'round' }).addTo(map);
-    L.polyline(pts, { pane:'flightPane', color:rgb(ret?[85,144,181]:AZULEJO, ret?0.9:0.95), weight:ret?1.8:2.2, dashArray:ret?'10 8':'6 6', lineCap:'round' })
-      .addTo(map)
-      .bindPopup(
-        '<div style="font-family:\'Josefin Sans\',sans-serif;font-size:12px;line-height:1.6;">' +
-        '<div style="font-weight:600;font-size:13px;">✈ ' + a.code + ' → ' + b.code + ' · ' + f.leg + '</div>' +
-        '<div style="color:#C8553D;letter-spacing:0.1em;text-transform:uppercase;font-size:10px;margin:4px 0 6px;">' + (ret?'Return leg':'Outbound leg') + ' · ' + f.date + '</div>' +
-        '<div><strong>From:</strong> ' + a.name + ' (' + a.code + ')</div>' +
-        '<div><strong>To:</strong> ' + b.name + ' (' + b.code + ')</div>' +
-        '<div><strong>Duration:</strong> ' + f.dur + '</div>' +
-        '<div style="margin-top:8px;opacity:0.85;font-style:italic;">' + f.note + '</div></div>', popOpts);
+// ── Custom icon factory ──
+function makeIcon(blue, num) {
+  const bg   = blue ? 'rgba(50,100,180,0.7)' : '#8B1A2B';
+  const ring = blue ? '#7AAEEE' : '#C9943A';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
+    <circle cx="14" cy="14" r="11" fill="${bg}" stroke="${ring}" stroke-width="2"/>
+    <circle cx="14" cy="14" r="5" fill="${ring}" opacity="0.4"/>
+    <text x="14" y="18" text-anchor="middle" font-family="Josefin Sans,sans-serif" font-size="8" font-weight="600" fill="#EFE6D6">${num}</text>
+  </svg>`;
+  return L.divIcon({
+    html: svg,
+    className: '',
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+    popupAnchor: [0, -16]
   });
-  Object.values(AIRPORTS).forEach(a => {
-    L.circleMarker([a.lat, a.lon], { pane:'circlePane', radius:4.5, color:rgb(AZULEJO), weight:2, fillColor:'#FFFDF4', fillOpacity:1 })
-      .addTo(map)
-      .bindPopup('<div style="font-family:\'Josefin Sans\',sans-serif;font-size:12px;"><b>✈ ' + a.name + ' (' + a.code + ')</b><br>' + a.city + '</div>', popOpts);
-    lbl(a.lat, a.lon, 'lbl-air', a.code, -16);
+}
+
+// ── Markers ──
+const markers = [];
+stops.forEach(function(s, i) {
+  const m = L.marker([s.lat, s.lon], { icon: makeIcon(s.blue, i+1) })
+    .addTo(map)
+    .bindPopup(`
+      <div class="pop">
+        <div class="pop-name">${s.name}</div>
+        <div class="pop-sub">${s.sub}</div>
+        <div class="pop-row"><strong>Dates</strong>${s.dates}</div>
+        <div class="pop-row">${s.note}</div>
+        <a class="pop-link" href="${s.link}" target="_blank">→ View booking</a>
+      </div>
+    `, { minWidth: 200, maxWidth: 260 });
+
+  m.on('click', function() {
+    setActive(i);
+    document.querySelector('[data-id="'+i+'"]').scrollIntoView({ behavior:'smooth', block:'nearest' });
   });
 
-  // ═══ DRIVE ROUTE ══════════════════════════════════
-  const realRoutes = new Array(stops.length - 1).fill(null);
-  const routeGlow = L.polyline(toLL(driveRoute), { pane:'routePane', color:rgb(TERRA), opacity:0.18, weight:7, lineCap:'round', lineJoin:'round' }).addTo(map);
-  const routeMain = L.polyline(toLL(driveRoute), { pane:'routePane', color:rgb(TERRA), opacity:0.95, weight:2.4, dashArray:'6 6', lineCap:'round' }).addTo(map);
+  markers.push(m);
+});
 
-  async function fetchOSRMRoute(a, b) {
-    const url = 'https://router.project-osrm.org/route/v1/driving/' +
-      a.lon + ',' + a.lat + ';' + b.lon + ',' + b.lat + '?overview=full&geometries=geojson';
-    try {
-      const r = await fetch(url);
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      const data = await r.json();
-      if (!data.routes || !data.routes.length) return null;
-      return data.routes[0].geometry.coordinates; // [[lon,lat], ...]
-    } catch (e) { console.warn('OSRM fetch failed', a.name, '→', b.name, e); return null; }
-  }
-  function combinedRouteCoords() {
-    const combined = [];
-    for (let i = 0; i < stops.length - 1; i++) {
-      const seg = realRoutes[i] || [[stops[i].lon, stops[i].lat], [stops[i+1].lon, stops[i+1].lat]];
-      seg.forEach((p, idx) => { if (i === 0 || idx > 0) combined.push(p); });
-    }
-    return combined;
-  }
-  function refreshRouteGeometry() {
-    const ll = toLL(combinedRouteCoords());
-    routeGlow.setLatLngs(ll); routeMain.setLatLngs(ll);
-  }
-  (async function loadAllRealRoutes() {
-    const results = await Promise.all(stops.slice(0, -1).map((a, i) => fetchOSRMRoute(a, stops[i+1])));
-    results.forEach((r, i) => { realRoutes[i] = r; });
-    refreshRouteGeometry();
-    if (typeof DAYS !== 'undefined' && typeof currentDay === 'number') {
-      const d = DAYS[currentDay - 1];
-      if (d && d.mode === 'drive') animateAlong(driveSegment(d.from, d.to), carEl, 4000);
-    }
-  })();
-  // shimmer
-  let dashIdx = 0;
-  setInterval(() => { dashIdx = (dashIdx + 1) % 2; routeMain.setStyle({ dashArray: dashIdx === 0 ? '6 6' : '10 6' }); }, 700);
+// ── Fly to stop ──
+function flyTo(id) {
+  const s = stops[id];
+  map.flyTo([s.lat, s.lon], 10, { duration: 1.2, easeLinearity: 0.25 });
+  markers[id].openPopup();
+  setActive(id);
+}
+window.flyTo = flyTo;
 
-  // ═══ PATH OF TOTALITY ═════════════════════════════
-  const ED = window.ECLIPSE_DATA || {};
-  const eclipsePath = ED.path;
-  const totalityCenter = eclipsePath ? eclipsePath.center : [[-6.75, 43.68], [-3.5, 43.2]];
-  const ring = eclipsePath ? eclipsePath.ring : totalityCenter;
+function setActive(id) {
+  document.querySelectorAll('.stop').forEach(function(el) { el.classList.remove('active'); });
+  document.querySelector('[data-id="'+id+'"]').classList.add('active');
+}
 
-  const totalityGlow = L.polygon(toLL(ring), { pane:'eclipsePane', color:rgb([232,155,22],0.55), weight:0.8, dashArray:'4 4', fillColor:rgb([255,192,74]), fillOpacity:0.14 }).addTo(map);
-  const totalityBand = L.polygon(toLL(ring), { pane:'eclipsePane', stroke:false, fillColor:rgb([255,192,74]), fillOpacity:0.10 }).addTo(map);
-  const totalityCenterLine = L.polyline(toLL(totalityCenter), { pane:'eclipsePane', color:rgb(SANGRIA,0.7), weight:1.3, dashArray:'16 6 2 6' }).addTo(map);
-  lbl(eclipsePath ? eclipsePath.labelLat : 43.4, eclipsePath ? eclipsePath.labelLon : -4.5, 'lbl-totality', 'PATH OF TOTALITY · 12 AUG 2026', 0, -10);
-
-  // ═══ STOP MARKERS ═════════════════════════════════
-  const stopGraphics = [];
-  stops.forEach((s, i) => {
-    const base = s.kind === "return" ? AZULEJO : TERRA;
-    const halo = L.circleMarker([s.lat, s.lon], { pane:'circlePane', interactive:false, radius:13, stroke:true, color:rgb(base,0.4), weight:1, fillColor:rgb(base), fillOpacity:0.14 }).addTo(map);
-    L.circleMarker([s.lat, s.lon], { pane:'circlePane', interactive:false, radius:10, color:rgb(base,0.7), weight:1.3, fill:false }).addTo(map);
-    L.circleMarker([s.lat, s.lon], { pane:'circlePane', radius:6.5, color:rgb(CREAM), weight:2, fillColor:rgb(base), fillOpacity:0.95 })
-      .addTo(map)
-      .on('click', () => activateStop(i, true))
-      .bindPopup(
-        '<div style="font-family:\'Josefin Sans\',sans-serif;font-size:12px;line-height:1.6;">' +
-        '<div style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:600;font-size:15px;">' + s.name + '</div>' +
-        '<div style="color:#C8553D;margin:4px 0 6px;letter-spacing:0.1em;text-transform:uppercase;font-size:10px;">' + s.sub + '</div>' +
-        '<div><strong>Dates:</strong> ' + s.dates + '</div>' +
-        '<div><strong>Nights:</strong> ' + s.nights + '</div>' +
-        '<div style="margin-top:6px;opacity:0.85;">' + s.note + '</div>' +
-        '<a href="' + s.link + '" target="_blank" rel="noopener" style="color:#C8902A;font-size:11px;display:inline-block;margin-top:8px;">→ view booking</a></div>', popOpts);
-    lbl(s.lat, s.lon, 'lbl-num', s.kind === "return" ? "✈" : String(i+1), -1);
-    lbl(s.lat, s.lon, 'lbl-city', s.name, 15);
-    stopGraphics.push({ halo, base });
-  });
-  // halo pulse
-  let pulseT = 0;
-  setInterval(() => {
-    pulseT += 0.12;
-    stopGraphics.forEach((sg, i) => {
-      const phase = Math.sin(pulseT + i*0.6);
-      sg.halo.setRadius(13 + phase*3);
-      sg.halo.setStyle({ fillOpacity: 0.10 + (phase+1)*0.06 });
-    });
-  }, 80);
-
-  function activateStop(id, scroll) {
-    document.querySelectorAll('.stop').forEach(el => el.classList.remove('active'));
-    const el = document.querySelector('[data-stop="' + id + '"]');
-    if (el) { el.classList.add('active'); if (scroll) el.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
-  }
-
-  window.focusStop = function(id) {
-    const s = stops[id];
-    map.flyTo([s.lat, s.lon], 10, { duration: 0.9 });
-    activateStop(id, false);
-  };
-
-  // ═══ KIDS' PLAYGROUND MARKERS 🛝 ═══════════════════
-  const kidGroup = L.layerGroup();
-  (typeof KID_SPOTS !== 'undefined' ? KID_SPOTS : []).forEach(k => {
-    L.circleMarker([k.lat, k.lon], { pane:'circlePane', interactive:false, radius:13, color:rgb(AZULEJO,0.4), weight:1, fillColor:rgb([85,144,181]), fillOpacity:0.16 }).addTo(kidGroup);
-    L.circleMarker([k.lat, k.lon], { pane:'circlePane', radius:10, color:rgb(AZULEJO,0.9), weight:1.6, fillColor:rgb(CREAM), fillOpacity:0.96 })
-      .addTo(kidGroup)
-      .bindPopup(
-        '<div style="font-family:\'Josefin Sans\',sans-serif;font-size:12px;line-height:1.6;">' +
-        '<div style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:600;font-size:15px;">' + k.emoji + ' ' + k.name + '</div>' +
-        '<div style="color:#2E5B7E;margin:4px 0 6px;letter-spacing:0.1em;text-transform:uppercase;font-size:10px;">' + k.near + '</div>' +
-        '<div style="opacity:0.9;">' + k.note + '</div>' +
-        '<a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(k.q) + '" target="_blank" rel="noopener" style="color:#C8553D;font-size:11px;display:inline-block;margin-top:8px;">📍 open in Maps</a></div>', popOpts);
-    const em = L.marker([k.lat, k.lon], { interactive:false, keyboard:false, pane:'labelPane',
-      icon: L.divIcon({ className:'', iconSize:[0,0], html:'<span class="map-label lbl-emoji" style="transform:translate(-50%,-50%)">' + k.emoji + '</span>' }) });
-    const nm = L.marker([k.lat, k.lon], { interactive:false, keyboard:false, pane:'labelPane',
-      icon: L.divIcon({ className:'', iconSize:[0,0], html:'<span class="map-label lbl-kid" style="transform:translate(-50%,-50%) translateY(-13px)">' + k.name + '</span>' }) });
-    kidGroup.addLayer(em); kidGroup.addLayer(nm);
-  });
-  kidGroup.addTo(map);
-
-  window.focusPoint = function(lon, lat, zoom) {
-    if (!map.hasLayer(kidGroup)) map.addLayer(kidGroup);
-    syncKidToggle(true);
-    map.flyTo([lat, lon], zoom || 13, { duration: 0.9 });
-  };
-
-  // toggle
-  const kidToggleBtn = document.getElementById('kid-toggle');
-  const kidCountEl = document.getElementById('kt-count');
-  if (kidCountEl && typeof KID_SPOTS !== 'undefined') kidCountEl.textContent = KID_SPOTS.length;
-  function syncKidToggle(on) {
-    if (!kidToggleBtn) return;
-    kidToggleBtn.classList.toggle('on', on);
-    kidToggleBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
-  }
-  if (kidToggleBtn) kidToggleBtn.addEventListener('click', () => {
-    const on = !map.hasLayer(kidGroup);
-    if (on) map.addLayer(kidGroup); else map.removeLayer(kidGroup);
-    syncKidToggle(on);
-  });
-
-  // ═══ VEHICLE ANIMATION (DOM overlay) ══════════════
-  const carEl = document.getElementById('car');
-  const planeEl = document.getElementById('plane');
-  let vehicleAnim = null;
-
-  function stopVehicleAnim() {
-    if (vehicleAnim) { cancelAnimationFrame(vehicleAnim.raf); vehicleAnim = null; }
-    carEl.classList.add('hidden'); planeEl.classList.add('hidden');
-  }
-  function animateAlong(points, el, loopMs, opts) {
-    opts = opts || {};
-    stopVehicleAnim();
-    el.classList.remove('hidden');
-    const start = performance.now();
-    const obj = { raf: 0 };
-    const seg = (p,q) => Math.hypot(q[0]-p[0], q[1]-p[1]);
-    const totals = [0];
-    for (let i=1;i<points.length;i++) totals.push(totals[i-1] + seg(points[i-1], points[i]));
-    const totalLen = totals[totals.length-1] || 1;
-    function tick(now) {
-      const raw = ((now - start) % loopMs) / loopMs;
-      const dd = raw * totalLen;
-      let i = 1; while (i < totals.length && totals[i] < dd) i++;
-      if (i >= totals.length) i = totals.length - 1;
-      const f = (dd - totals[i-1]) / Math.max(1e-6, totals[i] - totals[i-1]);
-      const p = points[i-1], q = points[i];
-      const lon = p[0] + (q[0]-p[0])*f, lat = p[1] + (q[1]-p[1])*f;
-      const sp = map.latLngToContainerPoint([lat, lon]);
-      if (sp) {
-        const heading = Math.atan2(q[1]-p[1], q[0]-p[0]) * 180 / Math.PI;
-        el.style.left = (sp.x - 12) + 'px';
-        el.style.top  = (sp.y - 12) + 'px';
-        el.style.transform = opts.flip === false ? '' :
-          'rotate(' + (-heading) + 'deg)' + (Math.cos(heading*Math.PI/180) < 0 ? ' scaleY(-1)' : '');
-      }
-      obj.raf = requestAnimationFrame(tick);
-    }
-    obj.raf = requestAnimationFrame(tick);
-    vehicleAnim = obj;
-  }
-  function driveSegment(fromStop, toStop) {
-    const lo = Math.min(fromStop, toStop), reversed = fromStop > toStop, real = realRoutes[lo];
-    if (real && real.length > 1) return reversed ? real.slice().reverse() : real.slice();
-    const n = 40, pts = [], a = stops[fromStop], b = stops[toStop];
-    for (let i=0;i<=n;i++){ const f=i/n; pts.push([a.lon+(b.lon-a.lon)*f, a.lat+(b.lat-a.lat)*f]); }
-    return pts;
-  }
-  function flightPath(dir) {
-    const legs = dir === "out" ? [["CLT","MAD"],["MAD","BIO"]] : [["BIO","MAD"],["MAD","CLT"]];
-    const pts = [];
-    legs.forEach(([f,t], li) => {
-      const a = AIRPORTS[f], b = AIRPORTS[t];
-      gcArc(a.lon,a.lat, b.lon,b.lat, 40).forEach((p,i) => { if (li===0 || i>0) pts.push(p); });
-    });
-    return pts;
-  }
-
-  // ═══ THEME / DAY STATE ════════════════════════════
-  const rangeEl = document.getElementById('day-range');
-  const prevBtn = document.getElementById('day-prev');
-  const nextBtn = document.getElementById('day-next');
-  const playBtn = document.getElementById('day-play');
-  const chipEl  = document.getElementById('day-chip');
-  const emojiEl = document.getElementById('day-emoji');
-  const dateEl  = document.getElementById('day-date');
-  const descEl  = document.getElementById('day-desc');
-
-  let currentDay = 1, playing = false, playTimer = null;
-
-  function setTheme(name) {
-    document.body.setAttribute('data-theme', name);
-    if (name === 'eclipse') {
-      if (map.hasLayer(dayTiles)) { map.removeLayer(dayTiles); eclipseTiles.addTo(map); currentTiles = eclipseTiles; eclipseTiles.bringToBack(); }
-      totalityGlow.setStyle({ fillColor:rgb([255,210,122]), fillOpacity:0.22, color:rgb([255,210,122],0.8), weight:1 });
-      totalityBand.setStyle({ fillColor:rgb([255,210,122]), fillOpacity:0.18 });
-      totalityCenterLine.setStyle({ color:rgb([255,241,199],0.9) });
-    } else {
-      if (map.hasLayer(eclipseTiles)) { map.removeLayer(eclipseTiles); dayTiles.addTo(map); currentTiles = dayTiles; dayTiles.bringToBack(); }
-      totalityGlow.setStyle({ fillColor:rgb([255,192,74]), fillOpacity:0.14, color:rgb([232,155,22],0.55), weight:0.8 });
-      totalityBand.setStyle({ fillColor:rgb([255,192,74]), fillOpacity:0.10 });
-      totalityCenterLine.setStyle({ color:rgb(SANGRIA,0.7) });
-    }
-  }
-
-  function applyDay(n) {
-    currentDay = n;
-    const d = DAYS[n-1];
-    chipEl.textContent = 'Day ' + d.n;
-    emojiEl.textContent = d.emoji;
-    dateEl.textContent = d.dow + ' · ' + d.date;
-    if (d.mode === 'eclipse' && window.ECLIPSE_DATA) {
-      const ec = window.ECLIPSE_DATA, h = ec.hornedo, ev = (e) => e ? ec.formatTimeShortCEST(e.time.date) : '—';
-      descEl.textContent = 'Partial ' + ev(h.partial_begin) + ' · Totality ' + ev(h.total_begin) + '–' + ev(h.total_end) +
-        ' · Max ' + ev(h.peak) + ' · ' + Math.round(ec.totalitySec) + 's · ' + Math.round(ec.axisDistKm) + ' km off centerline';
-    } else { descEl.textContent = d.title; }
-
-    const p = PHRASES[n-1];
-    const phraseEl = document.getElementById('duo-phrase'), transEl = document.getElementById('duo-translation'), streakEl = document.getElementById('duo-streak-count');
-    if (p && phraseEl) phraseEl.textContent = p.es;
-    if (p && transEl)  transEl.textContent  = p.en;
-    if (streakEl) streakEl.textContent = n;
-
-    setTheme(d.mode === 'eclipse' ? 'eclipse' : 'day');
-
-    document.querySelectorAll('.stop').forEach(el => el.classList.remove('active'));
-    let targetStop = null;
-    if (d.mode === 'stay' || d.mode === 'eclipse') targetStop = d.at;
-    else if (d.mode === 'drive') targetStop = d.to;
-    else if (d.mode === 'fly-out') targetStop = 0;
-    else if (d.mode === 'fly-back') targetStop = 5;
-    if (targetStop !== null) { const el = document.querySelector('[data-stop="' + targetStop + '"]'); if (el) el.classList.add('active'); }
-
-    if (d.mode === 'fly-out' || d.mode === 'fly-back') {
-      map.flyTo([40, -40], 3, { duration: 0.9 });
-      animateAlong(flightPath(d.mode === 'fly-out' ? 'out' : 'back'), planeEl, 8000);
-    } else if (d.mode === 'drive') {
-      const a = stops[d.from], b = stops[d.to];
-      map.flyTo([(a.lat+b.lat)/2, (a.lon+b.lon)/2], 8, { duration: 0.9 });
-      animateAlong(driveSegment(d.from, d.to), carEl, 4000);
-    } else if (d.mode === 'stay' || d.mode === 'eclipse') {
-      const s = stops[d.at];
-      map.flyTo([s.lat, s.lon], d.mode === 'eclipse' ? 9 : 10, { duration: 0.9 });
-      stopVehicleAnim();
-    } else { stopVehicleAnim(); }
-
-    rangeEl.value = n;
-  }
-
-  rangeEl.addEventListener('input', (e) => applyDay(parseInt(e.target.value, 10)));
-  prevBtn.addEventListener('click', () => { if (currentDay > 1) applyDay(currentDay - 1); });
-  nextBtn.addEventListener('click', () => { if (currentDay < 14) applyDay(currentDay + 1); });
-  playBtn.addEventListener('click', () => {
-    playing = !playing;
-    if (playing) {
-      playBtn.textContent = '❚❚'; playBtn.classList.add('playing');
-      playTimer = setInterval(() => { applyDay(currentDay >= 14 ? 1 : currentDay + 1); }, 2200);
-    } else { playBtn.textContent = '▶'; playBtn.classList.remove('playing'); clearInterval(playTimer); }
-  });
-
-  map.whenReady(() => { setTimeout(() => applyDay(1), 400); });
-})();
+// ── Initial fit ──
+setTimeout(function() {
+  map.fitBounds(L.latLngBounds(stops.map(s => [s.lat, s.lon])), { padding: [60, 60] });
+}, 100);
 </script>
 
 </body>
