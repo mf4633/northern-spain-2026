@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El Eclipse · 12 de agosto · The Flynn Family Plan</title>
+<meta property="og:title" content="El Eclipse — tomorrow evening, 8:28 PM">
+<meta property="og:description" content="Where we're watching the total solar eclipse, when to look, and the one rule about glasses.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cielo:#1B2140;      /* deep dusk indigo */
+    --cielo-2:#2A3158;
+    --horizonte:#E8A24B;  /* low-sun amber */
+    --brasa:#C4502A;      /* ember accent */
+    --paramo:#F5EAD8;     /* parchment cards */
+    --tinta:#2A2320;      /* card text */
+    --corona:#FFF6E3;     /* pale corona */
+    --dim:#9BA3C7;        /* muted on indigo */
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--cielo);color:var(--corona);font-family:'Karla',sans-serif;
+       font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:640px;margin:0 auto;padding:0 20px}
+  h1,h2,.time{font-family:'Marcellus',serif;font-weight:400}
+  a{color:var(--horizonte)}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--horizonte);outline-offset:3px}
+
+  /* ---- HERO: the sunset horizon ---- */
+  .hero{position:relative;overflow:hidden;text-align:center;
+        background:linear-gradient(to bottom,var(--cielo) 0%,var(--cielo-2) 38%,
+                   #6B4A63 62%,#C4713F 82%,var(--horizonte) 100%);
+        padding:64px 20px 0}
+  .hero .eyebrow{letter-spacing:.28em;text-transform:uppercase;font-size:12px;color:var(--dim)}
+  .hero h1{font-size:clamp(40px,11vw,64px);letter-spacing:.04em;margin:10px 0 6px;color:var(--corona)}
+  .hero p.lede{max-width:34ch;margin:0 auto;color:#EAD9C4}
+  .sky{position:relative;height:190px;margin-top:26px}
+  .sun{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);
+       width:118px;height:118px;border-radius:50%;
+       background:radial-gradient(circle at 45% 40%, #FFEFC9 0%, #F6C25E 55%, #E8A24B 100%);
+       box-shadow:0 0 46px 14px rgba(246,194,94,.55)}
+  .moon{position:absolute;top:0;left:0;width:118px;height:118px;border-radius:50%;
+        background:var(--cielo);animation:cross 42s ease-in-out infinite}
+  @keyframes cross{
+    0%{transform:translateX(-130%)}
+    46%{transform:translateX(0)}
+    54%{transform:translateX(0)}
+    100%{transform:translateX(130%)}
+  }
+  .horizon{position:absolute;left:0;right:0;bottom:0;height:26px;background:var(--cielo);
+           clip-path:polygon(0 62%,10% 46%,22% 58%,37% 40%,52% 55%,66% 42%,80% 56%,92% 44%,100% 58%,100% 100%,0 100%)}
+  @media (prefers-reduced-motion: reduce){.moon{animation:none;transform:translateX(-18%)}}
+
+  section{padding:44px 0}
+  .eyebrow{font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--horizonte)}
+  h2{font-size:30px;letter-spacing:.03em;margin:8px 0 18px}
+
+  /* ---- schedule rail: a true timed sequence ---- */
+  .rail{border-left:2px solid var(--brasa);margin-left:6px;padding-left:22px}
+  .stop{position:relative;padding:0 0 26px}
+  .stop::before{content:'';position:absolute;left:-29px;top:6px;width:12px;height:12px;
+                border-radius:50%;background:var(--cielo);border:2px solid var(--brasa)}
+  .stop.total::before{background:var(--horizonte);border-color:var(--horizonte);
+                      box-shadow:0 0 14px 3px rgba(232,162,75,.55)}
+  .time{font-size:22px;color:var(--horizonte)}
+  .stop.total .time{font-size:28px}
+  .stop p{color:#D9DCEF;max-width:44ch}
+  .stop strong{color:var(--corona)}
+  .fine{font-size:13px;color:var(--dim);margin-top:4px}
+
+  /* ---- plan cards ---- */
+  .card{background:var(--paramo);color:var(--tinta);border-radius:10px;
+        padding:20px 20px 18px;margin:0 0 16px;box-shadow:0 2px 0 rgba(0,0,0,.25)}
+  .card .tag{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--brasa);font-weight:700}
+  .card h3{font-family:'Marcellus',serif;font-weight:400;font-size:23px;margin:4px 0 8px}
+  .card p{font-size:15.5px;line-height:1.5;color:#4A413A}
+  .card a.go{display:inline-block;margin-top:12px;background:var(--brasa);color:#fff;
+             text-decoration:none;font-weight:700;font-size:14px;letter-spacing:.04em;
+             padding:9px 16px;border-radius:6px}
+  .card a.go:hover{background:#A83F20}
+
+  .rule{background:var(--cielo-2);border-radius:10px;padding:20px;margin-top:6px}
+  .rule h3{font-family:'Marcellus',serif;font-weight:400;font-size:22px;color:var(--horizonte);margin-bottom:8px}
+  .rule p{color:#D9DCEF}
+  ul.bring{list-style:none;margin-top:10px}
+  ul.bring li{padding:7px 0;border-bottom:1px solid rgba(155,163,199,.2);color:#D9DCEF}
+  ul.bring li:last-child{border-bottom:none}
+  ul.bring b{color:var(--corona)}
+
+  .totalidad{background:linear-gradient(to bottom,var(--cielo),#10142B 60%,var(--cielo));text-align:center}
+  .totalidad p{max-width:40ch;margin:0 auto 14px;color:#D9DCEF}
+  .blacksun{width:84px;height:84px;border-radius:50%;background:#0C0F22;margin:6px auto 22px;
+            box-shadow:0 0 34px 10px rgba(255,246,227,.35), 0 0 4px 2px rgba(255,246,227,.7)}
+
+  footer{padding:36px 20px 48px;text-align:center;color:var(--dim);font-size:14px}
+  footer .fam{font-family:'Marcellus',serif;font-size:17px;color:var(--corona);letter-spacing:.06em}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="eyebrow">Miércoles · 12 de agosto · 2026</div>
+  <h1>El Eclipse</h1>
+  <p class="lede">Tomorrow evening at 8:28, the moon covers the sun over northern Spain — and we'll be standing in its shadow.</p>
+  <div class="sky" aria-hidden="true">
+    <div class="sun"><div class="moon"></div></div>
+    <div class="horizon"></div>
+  </div>
+</header>
+
+<section class="wrap" id="cita">
+  <div class="eyebrow">La cita · the schedule</div>
+  <h2>One evening, four moments</h2>
+  <div class="rail">
+    <div class="stop">
+      <div class="time">7:30 PM</div>
+      <p><strong>We're parked and settled.</strong> The show starts soon after, and the good spots will be claimed — this is a hard arrival time, not a suggestion.</p>
+    </div>
+    <div class="stop">
+      <div class="time">~7:35 PM</div>
+      <p><strong>First bite.</strong> The moon starts crossing the sun. <strong>Glasses on</strong> for every look from here forward. The light slowly turns strange — watch the shadows sharpen.</p>
+    </div>
+    <div class="stop total">
+      <div class="time">8:27 – 8:29 PM</div>
+      <p><strong>TOTALITY.</strong> The sun goes out. <strong>Glasses OFF</strong> — this part is safe and meant for bare eyes. About a minute and a half. Look up, look around, don't fuss with phones.</p>
+    </div>
+    <div class="stop">
+      <div class="time">8:30 PM</div>
+      <p><strong>The sun returns — glasses back ON</strong> the instant the first sliver reappears. The partial phase runs another ~40 minutes as the sun sets.</p>
+    </div>
+  </div>
+  <p class="fine">Times are for the Aguilar de Campoo area and shift by a minute or two with location — Michael has the exact second for wherever we land.</p>
+</section>
+
+<section class="wrap" id="plan">
+  <div class="eyebrow">El plan · where we watch</div>
+  <h2>Three spots, one decision</h2>
+
+  <div class="card">
+    <div class="tag">Plan A</div>
+    <h3>Mirador del Embalse de Aguilar</h3>
+    <p>A viewpoint above a reservoir where the water stretches away exactly where the sun will be — low in the west, nothing in the way. We'll watch the moon's shadow race up the lake toward us.</p>
+    <a class="go" href="https://maps.google.com/?cid=11686694151064110628">Open in Maps</a>
+  </div>
+
+  <div class="card">
+    <div class="tag">Plan B</div>
+    <h3>The Castle of Aguilar</h3>
+    <p>A ruined medieval castle on a crag above town — big views in every direction and a thousand-year-old front-row seat. More people, more drama.</p>
+    <a class="go" href="https://maps.google.com/?cid=13627559790023847024">Open in Maps</a>
+  </div>
+
+  <div class="card">
+    <div class="tag">Plan C</div>
+    <h3>Herrera de Pisuerga</h3>
+    <p>Twenty-five minutes further south onto open plateau — our escape hatch if clouds spill over the mountains late in the day.</p>
+    <a class="go" href="https://maps.google.com/?cid=16271980928197978881">Open in Maps</a>
+  </div>
+
+  <div class="rule">
+    <h3>Why we might drive in the afternoon</h3>
+    <p>The coast where we're staying often grows evening cloud off the sea — and this eclipse happens low in the sky at sunset, right where that cloud lives. Michael checks the satellite around 5:30. If the coast looks chancy, we take the pretty drive south over the mountains to the sunny side. Two hours in the car beats missing ninety seconds we came for.</p>
+  </div>
+</section>
+
+<section class="wrap" id="seguridad">
+  <div class="eyebrow">Seguridad · the one rule</div>
+  <h2>Glasses, always — except totality</h2>
+  <div class="rule">
+    <p><strong style="color:var(--corona)">Never look at the sun without eclipse glasses</strong> during the partial phases — not squinting, not "just a second," not through a phone camera. The only exception is the ~90 seconds of totality itself, when the sun is fully covered: then glasses come <em>off</em>, because the corona is faint and completely safe. Michael will call it out loud both ways. Kids' glasses get a grown-up check before every look.</p>
+    <ul class="bring">
+      <li><b>Eclipse glasses</b> — one pair each, ISO-certified, no scratches</li>
+      <li><b>A warm layer</b> — the temperature genuinely drops when the sun goes out</li>
+      <li><b>Water & snacks</b> — we'll be out from 7:30 to about 9:15</li>
+      <li><b>Something to sit on</b> — blanket or camp chairs</li>
+      <li><b>Charged phones</b> — for after; during totality, just watch</li>
+    </ul>
+  </div>
+</section>
+
+<section class="totalidad">
+  <div class="wrap">
+    <div class="eyebrow">La totalidad</div>
+    <h2>What it's actually like</h2>
+    <div class="blacksun" aria-hidden="true"></div>
+    <p>In the last minute, the light goes silver and wrong, like the world through smoked glass. The temperature falls. Birds go quiet.</p>
+    <p>Then the last bead of sun winks out and there's a black circle in the sky wearing a white crown, with sunset colors on every horizon at once. People gasp. Some cry. It's the best thing the sky does.</p>
+    <p>And because it's sunset, we get one more gift: the sun comes back just in time to set. Vamos a verlo juntos.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="fam">The Flynn Family · Cantabria → Castilla</div>
+  agosto 2026 · miércoles we chase the shadow
+</footer>
+
+</body>
+</html>
