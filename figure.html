@@ -1,0 +1,433 @@
+<title>Atelier Figure</title>
+<style>
+  :root {
+    --bg: #ece7df;
+    --bg-deep: #ddd6ca;
+    --ink: #221f1c;
+    --ink-soft: #6c655c;
+    --line: #cbc2b4;
+    --panel: rgba(255, 252, 247, 0.82);
+    --accent: #8c2f39;
+    --accent-ink: #ffffff;
+    --scene-bg: 0xece7df;
+    --scene-floor: 0xd9d1c4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #17161a;
+      --bg-deep: #0f0e11;
+      --ink: #efe9e0;
+      --ink-soft: #9b948b;
+      --line: #35323a;
+      --panel: rgba(28, 27, 32, 0.84);
+      --accent: #d9636f;
+      --accent-ink: #17161a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #17161a;
+    --bg-deep: #0f0e11;
+    --ink: #efe9e0;
+    --ink-soft: #9b948b;
+    --line: #35323a;
+    --panel: rgba(28, 27, 32, 0.84);
+    --accent: #d9636f;
+    --accent-ink: #17161a;
+  }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Karla", "Helvetica Neue", Arial, sans-serif;
+    overflow: hidden;
+  }
+  #stage { position: absolute; inset: 0; }
+  #stage canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+  .hud {
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 0;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    pointer-events: none;
+  }
+  .hud h1 {
+    margin: 0;
+    font-family: "Bodoni Moda", "Didot", "Times New Roman", serif;
+    font-weight: 500;
+    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+    letter-spacing: 0.01em;
+    line-height: 1;
+    text-wrap: balance;
+  }
+  .hud p {
+    margin: 6px 0 0;
+    color: var(--ink-soft);
+    font-size: 0.85rem;
+    max-width: 34ch;
+  }
+  .panel {
+    position: absolute;
+    left: 16px; right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    background: var(--panel);
+    border: 1px solid var(--line);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px 20px;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  .group { display: flex; flex-direction: column; gap: 6px; }
+  .label {
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .swatches { display: flex; gap: 6px; flex-wrap: wrap; }
+  .sw {
+    width: 24px; height: 24px; border-radius: 50%;
+    border: 2px solid transparent; cursor: pointer; padding: 0;
+    outline-offset: 2px;
+  }
+  .sw[aria-pressed="true"] { border-color: var(--ink); }
+  .sw:focus-visible { outline: 2px solid var(--accent); }
+  .toggles { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tg {
+    font: inherit; font-size: 0.8rem;
+    padding: 6px 10px;
+    border: 1px solid var(--line); border-radius: 999px;
+    background: transparent; color: var(--ink); cursor: pointer;
+  }
+  .tg[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .hint {
+    position: absolute; right: 16px;
+    top: calc(16px + env(safe-area-inset-top, 0px));
+    font-size: 0.72rem; color: var(--ink-soft); text-align: right;
+    pointer-events: none;
+  }
+  @media (max-width: 560px) { .hint { display: none; } .hud p { display: none; } }
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@500&family=Karla:wght@400;500&display=swap">
+
+<div id="stage"></div>
+<div class="hud">
+  <div>
+    <h1>Atelier Figure</h1>
+    <p>A stylised female figure built from lathe and primitive geometry, on a turntable.</p>
+  </div>
+</div>
+<div class="hint">drag to orbit · scroll or pinch to zoom</div>
+
+<div class="panel" role="group" aria-label="Figure options">
+  <div class="group">
+    <span class="label">Dress</span>
+    <div class="swatches" id="dressSw"></div>
+  </div>
+  <div class="group">
+    <span class="label">Hair</span>
+    <div class="swatches" id="hairSw"></div>
+  </div>
+  <div class="group">
+    <span class="label">Skin</span>
+    <div class="swatches" id="skinSw"></div>
+  </div>
+  <div class="group">
+    <span class="label">View</span>
+    <div class="toggles">
+      <button class="tg" id="spinBtn" aria-pressed="true">Turntable</button>
+      <button class="tg" id="wireBtn" aria-pressed="false">Wireframe</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+  const stage = document.getElementById('stage');
+  const dark = matchMedia('(prefers-color-scheme: dark)').matches &&
+               document.documentElement.dataset.theme !== 'light' ||
+               document.documentElement.dataset.theme === 'dark';
+
+  // ---------- renderer / scene ----------
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
+  stage.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(dark ? 0x17161a : 0xece7df);
+  scene.fog = new THREE.Fog(scene.background, 6, 14);
+
+  const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 50);
+
+  // ---------- lights ----------
+  scene.add(new THREE.HemisphereLight(dark ? 0x9aa0b8 : 0xfff4e6, dark ? 0x1a1820 : 0x8a7a68, 0.55));
+  const key = new THREE.SpotLight(0xfff1e0, 1.35, 0, Math.PI / 5, 0.5, 1);
+  key.position.set(2.4, 4.2, 2.6);
+  key.castShadow = true;
+  key.shadow.mapSize.set(2048, 2048);
+  key.shadow.bias = -0.0004;
+  scene.add(key);
+  const fill = new THREE.DirectionalLight(0xcfd8ff, 0.35);
+  fill.position.set(-3, 2, 1.5);
+  scene.add(fill);
+  const rim = new THREE.DirectionalLight(0xffffff, 0.6);
+  rim.position.set(-1.5, 3, -3);
+  scene.add(rim);
+
+  // ---------- materials ----------
+  const skinMat = new THREE.MeshStandardMaterial({ color: 0xd9a98a, roughness: 0.62, metalness: 0 });
+  const dressMat = new THREE.MeshPhysicalMaterial({ color: 0x8c2f39, roughness: 0.38, metalness: 0.05, clearcoat: 0.35, clearcoatRoughness: 0.4, sheen: 0.6, sheenColor: new THREE.Color(0xffc6c6) });
+  const hairMat = new THREE.MeshStandardMaterial({ color: 0x2a1a14, roughness: 0.55, metalness: 0.08 });
+  const lipMat = new THREE.MeshStandardMaterial({ color: 0x9c3a4a, roughness: 0.4 });
+  const eyeMat = new THREE.MeshStandardMaterial({ color: 0x1b1b22, roughness: 0.3 });
+  const shoeMat = new THREE.MeshStandardMaterial({ color: 0x1a1517, roughness: 0.25, metalness: 0.2 });
+  const allMats = [skinMat, dressMat, hairMat, lipMat, eyeMat, shoeMat];
+
+  const figure = new THREE.Group();
+  scene.add(figure);
+
+  function add(mesh, parent) {
+    mesh.castShadow = true; mesh.receiveShadow = true;
+    (parent || figure).add(mesh);
+    return mesh;
+  }
+
+  // Smooth profile through control points (Catmull-Rom) → lathe
+  function lathe(points, mat, opts) {
+    opts = opts || {};
+    const curve = new THREE.CatmullRomCurve3(points.map(p => new THREE.Vector3(p[0], p[1], 0)));
+    const pts = curve.getPoints(opts.res || 48).map(v => new THREE.Vector2(Math.max(0, v.x), v.y));
+    const geo = new THREE.LatheGeometry(pts, opts.seg || 64);
+    const m = new THREE.Mesh(geo, mat);
+    m.scale.z = opts.depth || 1;
+    return m;
+  }
+
+  // Capsule between two points, built from cylinder + spheres (r128 has no CapsuleGeometry)
+  function limb(a, b, rA, rB, mat) {
+    const va = new THREE.Vector3(...a), vb = new THREE.Vector3(...b);
+    const dir = vb.clone().sub(va); const len = dir.length();
+    const g = new THREE.Group();
+    const cyl = new THREE.Mesh(new THREE.CylinderGeometry(rB, rA, len, 24, 1, true), mat);
+    cyl.position.y = len / 2;
+    add(cyl, g);
+    add(new THREE.Mesh(new THREE.SphereGeometry(rA, 24, 16), mat), g);
+    const sb = add(new THREE.Mesh(new THREE.SphereGeometry(rB, 24, 16), mat), g);
+    sb.position.y = len;
+    g.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
+    g.position.copy(va);
+    figure.add(g);
+    return g;
+  }
+
+  // ---------- body ----------
+  // Torso + hips + fitted dress as one lathe, elliptical in plan (depth 0.66)
+  const bodyProfile = [
+    [0.055, 1.46],  // neck base
+    [0.16,  1.40],  // shoulders
+    [0.155, 1.30],
+    [0.165, 1.22],  // bust line
+    [0.13,  1.13],
+    [0.105, 1.05],  // waist
+    [0.135, 0.97],
+    [0.185, 0.88],  // hips
+    [0.19,  0.80],
+    [0.175, 0.68],
+    [0.17,  0.58],
+    [0.19,  0.50],  // hem flare
+    [0.0,   0.49]
+  ];
+  const torso = add(lathe(bodyProfile, dressMat, { depth: 0.66 }));
+
+  // Bust, under the same dress fabric
+  [-1, 1].forEach(s => {
+    const b = add(new THREE.Mesh(new THREE.SphereGeometry(0.075, 32, 24), dressMat));
+    b.position.set(s * 0.075, 1.225, 0.075);
+    b.scale.set(1, 0.95, 0.85);
+  });
+
+  // Neckline skin: upper chest + neck
+  const chest = add(lathe([[0.05, 1.50], [0.13, 1.40], [0.12, 1.34], [0.0, 1.33]], skinMat, { depth: 0.6 }));
+  const neck = add(new THREE.Mesh(new THREE.CylinderGeometry(0.052, 0.06, 0.16, 32), skinMat));
+  neck.position.y = 1.47;
+
+  // Head
+  const head = add(new THREE.Mesh(new THREE.SphereGeometry(0.105, 48, 32), skinMat));
+  head.position.set(0, 1.63, 0.01);
+  head.scale.set(0.92, 1.12, 1);
+  // Jaw taper
+  const jaw = add(new THREE.Mesh(new THREE.SphereGeometry(0.085, 32, 24), skinMat));
+  jaw.position.set(0, 1.575, 0.02);
+  jaw.scale.set(0.9, 0.85, 0.95);
+
+  // Eyes and lips (kept minimal, mannequin-like)
+  [-1, 1].forEach(s => {
+    const e = add(new THREE.Mesh(new THREE.SphereGeometry(0.012, 16, 12), eyeMat));
+    e.position.set(s * 0.036, 1.645, 0.095);
+    e.scale.set(1.3, 0.7, 0.6);
+  });
+  const lips = add(new THREE.Mesh(new THREE.SphereGeometry(0.02, 16, 12), lipMat));
+  lips.position.set(0, 1.57, 0.093);
+  lips.scale.set(1.3, 0.45, 0.6);
+
+  // Hair: cap + long fall behind, with a side sweep
+  const cap = add(new THREE.Mesh(new THREE.SphereGeometry(0.118, 48, 32, 0, Math.PI * 2, 0, Math.PI * 0.62), hairMat));
+  cap.position.set(0, 1.66, -0.005);
+  cap.scale.set(0.98, 1.1, 1.02);
+  const fall = add(lathe([[0.06, 1.70], [0.13, 1.60], [0.15, 1.45], [0.14, 1.30], [0.12, 1.16], [0.0, 1.12]], hairMat, { depth: 0.55 }));
+  fall.position.z = -0.045;
+  const sweep = add(new THREE.Mesh(new THREE.SphereGeometry(0.05, 24, 16), hairMat));
+  sweep.position.set(0.065, 1.69, 0.07);
+  sweep.scale.set(1.2, 0.8, 1);
+
+  // ---------- pose: contrapposto, one hand on hip ----------
+  // Arms
+  const shL = [-0.175, 1.385, 0.0], shR = [0.175, 1.385, 0.0];
+  // Left arm: hand on hip
+  limb(shL, [-0.29, 1.12, 0.03], 0.045, 0.036, skinMat);
+  limb([-0.29, 1.12, 0.03], [-0.19, 0.92, 0.06], 0.036, 0.03, skinMat);
+  const handL = add(new THREE.Mesh(new THREE.SphereGeometry(0.038, 20, 14), skinMat));
+  handL.position.set(-0.185, 0.905, 0.075); handL.scale.set(0.9, 1.3, 0.55);
+  // Right arm: relaxed, slightly away from body
+  limb(shR, [0.245, 1.11, -0.02], 0.045, 0.036, skinMat);
+  limb([0.245, 1.11, -0.02], [0.27, 0.85, 0.02], 0.036, 0.03, skinMat);
+  const handR = add(new THREE.Mesh(new THREE.SphereGeometry(0.038, 20, 14), skinMat));
+  handR.position.set(0.272, 0.815, 0.025); handR.scale.set(0.9, 1.4, 0.55);
+
+  // Legs (weight on left leg, right knee softened forward)
+  const hipL = [-0.085, 0.86, 0.0], hipR = [0.085, 0.86, 0.0];
+  const kneeL = [-0.075, 0.46, 0.0], kneeR = [0.095, 0.47, 0.06];
+  const ankL = [-0.07, 0.10, -0.01], ankR = [0.10, 0.10, 0.03];
+  limb(hipL, kneeL, 0.085, 0.058, skinMat);
+  limb(kneeL, ankL, 0.058, 0.036, skinMat);
+  limb(hipR, kneeR, 0.085, 0.058, skinMat);
+  limb(kneeR, ankR, 0.058, 0.036, skinMat);
+
+  // Heels
+  function shoe(ankle, yaw) {
+    const g = new THREE.Group();
+    const sole = add(new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.025, 0.22), shoeMat), g);
+    sole.position.set(0, 0.012, 0.06);
+    sole.rotation.x = 0.28;
+    const toe = add(new THREE.Mesh(new THREE.SphereGeometry(0.036, 20, 14), shoeMat), g);
+    toe.position.set(0, 0.02, 0.165); toe.scale.set(1.05, 0.45, 1);
+    const heel = add(new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.012, 0.075, 12), shoeMat), g);
+    heel.position.set(0, 0.038, -0.035);
+    const foot = add(new THREE.Mesh(new THREE.SphereGeometry(0.036, 20, 14), skinMat), g);
+    foot.position.set(0, 0.075, 0.02); foot.scale.set(1, 0.9, 1.6);
+    g.position.set(ankle[0], 0.0, ankle[2] - 0.02);
+    g.rotation.y = yaw;
+    figure.add(g);
+  }
+  shoe(ankL, 0.08);
+  shoe(ankR, -0.22);
+
+  // ---------- turntable + floor ----------
+  const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.66, 0.05, 96), new THREE.MeshStandardMaterial({ color: dark ? 0x26242b : 0xd9d1c4, roughness: 0.9 }));
+  disc.position.y = -0.025; disc.receiveShadow = true;
+  figure.add(disc);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.64, 0.006, 12, 120), new THREE.MeshStandardMaterial({ color: dark ? 0xd9636f : 0x8c2f39, roughness: 0.5 }));
+  ring.rotation.x = Math.PI / 2; ring.position.y = 0.004;
+  figure.add(ring);
+  const floor = new THREE.Mesh(new THREE.CircleGeometry(8, 64), new THREE.MeshStandardMaterial({ color: dark ? 0x121116 : 0xe3dcd0, roughness: 1 }));
+  floor.rotation.x = -Math.PI / 2; floor.position.y = -0.05; floor.receiveShadow = true;
+  scene.add(floor);
+
+  // ---------- orbit camera (pointer drag + wheel + pinch) ----------
+  const target = new THREE.Vector3(0, 0.88, 0);
+  let theta = 0.45, phi = 1.25, radius = 4.4;
+  let spinning = true;
+  function placeCamera() {
+    phi = Math.min(Math.max(phi, 0.35), 1.55);
+    radius = Math.min(Math.max(radius, 2.2), 8);
+    camera.position.set(
+      target.x + radius * Math.sin(phi) * Math.sin(theta),
+      target.y + radius * Math.cos(phi),
+      target.z + radius * Math.sin(phi) * Math.cos(theta)
+    );
+    camera.lookAt(target);
+  }
+  const el = renderer.domElement;
+  const pointers = new Map();
+  let lastPinch = 0;
+  el.addEventListener('pointerdown', e => { pointers.set(e.pointerId, [e.clientX, e.clientY]); el.setPointerCapture(e.pointerId); });
+  el.addEventListener('pointerup', e => pointers.delete(e.pointerId));
+  el.addEventListener('pointercancel', e => pointers.delete(e.pointerId));
+  el.addEventListener('pointermove', e => {
+    if (!pointers.has(e.pointerId)) return;
+    const prev = pointers.get(e.pointerId);
+    if (pointers.size === 1) {
+      theta -= (e.clientX - prev[0]) * 0.008;
+      phi   -= (e.clientY - prev[1]) * 0.006;
+    }
+    pointers.set(e.pointerId, [e.clientX, e.clientY]);
+    if (pointers.size === 2) {
+      const [a, b] = [...pointers.values()];
+      const d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+      if (lastPinch) radius *= lastPinch / d;
+      lastPinch = d;
+    } else lastPinch = 0;
+  });
+  el.addEventListener('wheel', e => { e.preventDefault(); radius *= 1 + Math.sign(e.deltaY) * 0.08; }, { passive: false });
+
+  // ---------- UI ----------
+  function swatches(id, colors, mat, initial) {
+    const box = document.getElementById(id);
+    colors.forEach((c, i) => {
+      const b = document.createElement('button');
+      b.className = 'sw'; b.type = 'button';
+      b.style.background = '#' + c.toString(16).padStart(6, '0');
+      b.setAttribute('aria-label', 'Colour ' + (i + 1));
+      b.setAttribute('aria-pressed', c === initial ? 'true' : 'false');
+      b.id = id + '-' + i;
+      b.addEventListener('click', () => {
+        mat.color.setHex(c);
+        box.querySelectorAll('.sw').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+      });
+      box.appendChild(b);
+    });
+  }
+  swatches('dressSw', [0x8c2f39, 0x1b1b22, 0x1f3a5f, 0x2e5c3a, 0xf1e4d2, 0xb98a2b], dressMat, 0x8c2f39);
+  swatches('hairSw',  [0x2a1a14, 0x0f0d0c, 0x6b3a1e, 0xb8862f, 0xe4c78e, 0x7a1f2b], hairMat, 0x2a1a14);
+  swatches('skinSw',  [0xf3d9c4, 0xe6bfa1, 0xd9a98a, 0xb8794f, 0x8a5533, 0x5a3520], skinMat, 0xd9a98a);
+
+  const spinBtn = document.getElementById('spinBtn');
+  spinBtn.addEventListener('click', () => { spinning = !spinning; spinBtn.setAttribute('aria-pressed', String(spinning)); });
+  const wireBtn = document.getElementById('wireBtn');
+  let wire = false;
+  wireBtn.addEventListener('click', () => {
+    wire = !wire; wireBtn.setAttribute('aria-pressed', String(wire));
+    allMats.forEach(m => { m.wireframe = wire; m.needsUpdate = true; });
+  });
+
+  // ---------- resize / loop ----------
+  function resize() {
+    const w = stage.clientWidth, h = stage.clientHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h; camera.updateProjectionMatrix();
+  }
+  addEventListener('resize', resize); resize();
+
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let last = performance.now();
+  function tick(now) {
+    const dt = Math.min((now - last) / 1000, 0.05); last = now;
+    if (spinning && !reduced) figure.rotation.y += dt * 0.35;
+    placeCamera();
+    renderer.render(scene, camera);
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+</script>
