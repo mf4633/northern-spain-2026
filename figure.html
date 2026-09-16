@@ -169,7 +169,7 @@
   });
   const kitMat = new THREE.MeshPhysicalMaterial({ color: 0x1b2a4a, roughness: 0.62, metalness: 0, sheen: new THREE.Color(0x2b3550), envMapIntensity: 0.8 });
   const hairMat = new THREE.MeshPhysicalMaterial({ color: 0x6b3a1e, roughness: 0.5, metalness: 0.08, clearcoat: 0.15, clearcoatRoughness: 0.5, envMapIntensity: 0.9 });
-  const lipMat = new THREE.MeshPhysicalMaterial({ color: 0xb8767a, roughness: 0.45, clearcoat: 0.25, clearcoatRoughness: 0.4 });
+  const lipMat = new THREE.MeshPhysicalMaterial({ color: 0xc99088, roughness: 0.5, clearcoat: 0.2, clearcoatRoughness: 0.45 });
   const shoeMat = new THREE.MeshPhysicalMaterial({ color: 0x1b2a4a, roughness: 0.5, metalness: 0.05, clearcoat: 0.2, clearcoatRoughness: 0.4 });
   const whiteMat = new THREE.MeshPhysicalMaterial({ color: 0xf2f0ec, roughness: 0.55, metalness: 0 });
   const scleraMat = new THREE.MeshPhysicalMaterial({ color: 0xf2eee9, roughness: 0.2, clearcoat: 1, clearcoatRoughness: 0.1 });
@@ -235,12 +235,12 @@ roughnessFactor = clamp(roughnessFactor + uRough * (fbm(vObj * uScale * 0.6 + 3.
   // ellipsoid: c centre, r radii, k blend radius, rot euler [x,y,z], core = internal group it also feeds
   function ell(g, c, r, k, rot, core) {
     const R = Math.max(r[0], r[1], r[2]), pad = R + k + 0.03;
-    prims.push({ t: 0, g, core: core === undefined ? -1 : core, k, c, r, m: rotInv(rot),
+    prims.push({ t: 0, g, post: postPhase, core: core === undefined ? -1 : core, k, c, r, m: rotInv(rot),
       bb: [c[0] - pad, c[0] + pad, c[1] - pad, c[1] + pad, c[2] - pad, c[2] + pad] });
   }
   function cap(g, a, b, ra, rb, k, core) {
     const R = Math.max(ra, rb), pad = R + k + 0.03;
-    prims.push({ t: 1, g, core: core === undefined ? -1 : core, k, a, b, ra, rb,
+    prims.push({ t: 1, g, post: postPhase, core: core === undefined ? -1 : core, k, a, b, ra, rb,
       bb: [Math.min(a[0], b[0]) - pad, Math.max(a[0], b[0]) + pad, Math.min(a[1], b[1]) - pad, Math.max(a[1], b[1]) + pad, Math.min(a[2], b[2]) - pad, Math.max(a[2], b[2]) + pad] });
   }
   function chain(g, pts, r0, r1, k) { // capsule chain with linearly tapering radius
@@ -249,32 +249,82 @@ roughnessFactor = clamp(roughnessFactor + uRough * (fbm(vObj * uScale * 0.6 + 3.
       cap(g, pts[i], pts[i + 1], ra, rb, k);
     }
   }
-  function carve(c, r, k, rot) { // ellipsoidal subtraction from the skin
-    subs.push({ t: 0, c, r: Array.isArray(r) ? r : [r, r, r], k, m: rotInv(rot) });
+  // Carves subtract from a group. Stage 1 carves run before the "post" prims (so lids can refill hollows),
+  // stage 2 carves run after them (eye openings, creases, nostrils, the mouth line).
+  function carve(c, r, k, rot, stage, g) {
+    r = Array.isArray(r) ? r : [r, r, r];
+    const pad = Math.max(r[0], r[1], r[2]) + k + 0.03;
+    subs.push({ t: 0, c, r, k, m: rotInv(rot), stage: stage || 1, g: g === undefined ? SKIN : g,
+      bb: [c[0] - pad, c[0] + pad, c[1] - pad, c[1] + pad, c[2] - pad, c[2] + pad] });
   }
+  function carveCap(a, b, r, k, stage, g) {
+    const pad = r + k + 0.03;
+    subs.push({ t: 1, a, b, ra: r, rb: r, k, stage: stage || 1, g: g === undefined ? SKIN : g,
+      bb: [Math.min(a[0], b[0]) - pad, Math.max(a[0], b[0]) + pad, Math.min(a[1], b[1]) - pad, Math.max(a[1], b[1]) + pad, Math.min(a[2], b[2]) - pad, Math.max(a[2], b[2]) + pad] });
+  }
+  const inBox = (bb, x, y, z) => !(x < bb[0] || x > bb[1] || y < bb[2] || y > bb[3] || z < bb[4] || z > bb[5]);
+  let postPhase = false; // prims added while true are blended in after the stage-1 carves
+  function post(fn) { postPhase = true; fn(); postPhase = false; }
 
-  // ---------- head ----------
+  // ---------- head: skull ----------
   ell(SKIN, [0, 1.624, 0.0], [0.078, 0.103, 0.09], 0.02);            // cranium
   ell(SKIN, [0, 1.644, -0.022], [0.08, 0.086, 0.086], 0.02);         // back of skull
-  ell(SKIN, [0, 1.552, 0.02], [0.05, 0.04, 0.06], 0.02);             // jaw
-  ell(SKIN, [0, 1.518, 0.06], [0.027, 0.018, 0.02], 0.012);          // chin
-  ell(SKIN, [-0.05, 1.592, 0.048], [0.022, 0.018, 0.022], 0.035);    // cheekbones
-  ell(SKIN, [0.05, 1.592, 0.048], [0.022, 0.018, 0.022], 0.035);
-  ell(SKIN, [-0.044, 1.578, 0.056], [0.022, 0.02, 0.017], 0.03);     // cheeks
-  ell(SKIN, [0.044, 1.578, 0.056], [0.022, 0.02, 0.017], 0.03);
-  ell(SKIN, [0, 1.64, 0.078], [0.056, 0.01, 0.016], 0.014);          // brow ridge
-  cap(SKIN, [0, 1.628, 0.088], [0, 1.576, 0.1], 0.008, 0.011, 0.012); // nose bridge
-  ell(SKIN, [0, 1.567, 0.104], [0.011, 0.01, 0.011], 0.01);          // nose tip
-  ell(SKIN, [-0.011, 1.562, 0.095], [0.008, 0.007, 0.008], 0.008);   // nostrils
-  ell(SKIN, [0.011, 1.562, 0.095], [0.008, 0.007, 0.008], 0.008);
-  ell(SKIN, [-0.075, 1.6, -0.008], [0.01, 0.031, 0.02], 0.01);       // ears
-  ell(SKIN, [0.075, 1.6, -0.008], [0.01, 0.031, 0.02], 0.01);
-  ell(SKIN, [-0.031, 1.617, 0.08], [0.02, 0.011, 0.009], 0.012);     // eyelid mass over the eyeballs
-  ell(SKIN, [0.031, 1.617, 0.08], [0.02, 0.011, 0.009], 0.012);
-  carve([-0.031, 1.612, 0.088], [0.0148, 0.0058, 0.013], 0.004, [0, 0, 0.08]);  // almond eye openings
-  carve([0.031, 1.612, 0.088], [0.0148, 0.0058, 0.013], 0.004, [0, 0, -0.08]);
-  ell(LIPS, [0, 1.5465, 0.086], [0.024, 0.0035, 0.006], 0.004);      // lips
-  ell(LIPS, [0, 1.539, 0.085], [0.022, 0.004, 0.006], 0.004);
+  ell(SKIN, [0, 1.665, 0.058], [0.05, 0.035, 0.032], 0.03);          // frontal bossing
+  ell(SKIN, [0, 1.641, 0.074], [0.05, 0.009, 0.012], 0.026);         // brow ridge
+  ell(SKIN, [-0.03, 1.643, 0.082], [0.022, 0.006, 0.007], 0.014);    // superciliary arches
+  ell(SKIN, [0.03, 1.643, 0.082], [0.022, 0.006, 0.007], 0.014);
+  // ---------- head: mandible, chin, cheeks ----------
+  ell(SKIN, [0, 1.55, 0.015], [0.052, 0.036, 0.06], 0.02);           // mandible body
+  for (const sg of [-1, 1]) {
+    cap(SKIN, [sg * 0.012, 1.512, 0.062], [sg * 0.056, 1.56, -0.005], 0.009, 0.009, 0.025); // jawline to the gonion
+    cap(SKIN, [sg * 0.056, 1.56, -0.005], [sg * 0.064, 1.60, -0.012], 0.008, 0.008, 0.035);  // ramus up to the ear
+    ell(SKIN, [sg * 0.05, 1.595, 0.047], [0.018, 0.014, 0.02], 0.03);                     // cheekbone
+    ell(SKIN, [sg * 0.04, 1.575, 0.06], [0.02, 0.018, 0.014], 0.03);                      // cheek
+    carve([sg * 0.062, 1.565, 0.03], [0.01, 0.011, 0.013], 0.04);                         // faint hollow under the cheekbone
+    carve([sg * 0.08, 1.645, 0.03], [0.008, 0.018, 0.018], 0.04);                         // temple
+    carve([sg * 0.033, 1.612, 0.106], [0.026, 0.018, 0.016], 0.025);                      // orbital hollow
+    carveCap([sg * 0.017, 1.558, 0.093], [sg * 0.03, 1.535, 0.082], 0.0015, 0.008);       // faint nasolabial fold
+    carve([sg * 0.026, 1.542, 0.083], 0.003, 0.005);                                      // mouth corner
+  }
+  ell(SKIN, [0, 1.517, 0.062], [0.024, 0.016, 0.018], 0.012);        // chin
+  // ---------- head: nose ----------
+  cap(SKIN, [0, 1.628, 0.089], [0, 1.578, 0.101], 0.008, 0.01, 0.012); // dorsum
+  ell(SKIN, [0, 1.568, 0.105], [0.011, 0.009, 0.01], 0.008);         // tip
+  ell(SKIN, [-0.012, 1.562, 0.094], [0.0085, 0.007, 0.008], 0.008);  // alae
+  ell(SKIN, [0.012, 1.562, 0.094], [0.0085, 0.007, 0.008], 0.008);
+  cap(SKIN, [0, 1.561, 0.104], [0, 1.556, 0.093], 0.004, 0.004, 0.006); // columella
+  carve([-0.007, 1.5555, 0.096], [0.004, 0.0035, 0.006], 0.002, [0.3, 0, 0], 2); // nostrils
+  carve([0.007, 1.5555, 0.096], [0.004, 0.0035, 0.006], 0.002, [-0.3, 0, 0], 2);
+  // ---------- head: ears ----------
+  for (const sg of [-1, 1]) {
+    ell(SKIN, [sg * 0.076, 1.6, -0.008], [0.008, 0.031, 0.02], 0.01);                     // auricle
+    chain(SKIN, [[sg * 0.078, 1.626, 0.006], [sg * 0.081, 1.632, -0.008], [sg * 0.081, 1.614, -0.027], [sg * 0.079, 1.585, -0.024]], 0.003, 0.0028, 0.004); // helix
+    ell(SKIN, [sg * 0.076, 1.575, -0.008], [0.006, 0.007, 0.007], 0.006);                 // lobe
+    carve([sg * 0.08, 1.6, -0.006], [0.0045, 0.011, 0.008], 0.003, null, 2);              // concha
+  }
+  // ---------- head: eyes (lids refill the orbital hollow, then the openings are cut) ----------
+  post(() => {
+    for (const sg of [-1, 1]) {
+      ell(SKIN, [sg * 0.031, 1.616, 0.081], [0.021, 0.012, 0.009], 0.01);                     // eyelid mass
+      cap(SKIN, [sg * 0.016, 1.603, 0.088], [sg * 0.044, 1.606, 0.079], 0.002, 0.0018, 0.005);  // lower lid ridge
+      cap(SKIN, [sg * 0.006, 1.556, 0.093], [sg * 0.007, 1.549, 0.09], 0.0015, 0.0015, 0.004);  // philtrum ridges
+    }
+  });
+  carve([-0.031, 1.612, 0.089], [0.0148, 0.0058, 0.013], 0.003, [0, 0, 0.08], 2);   // almond eye openings
+  carve([0.031, 1.612, 0.089], [0.0148, 0.0058, 0.013], 0.003, [0, 0, -0.08], 2);
+  carveCap([-0.014, 1.6235, 0.091], [-0.046, 1.624, 0.082], 0.0012, 0.002, 2);      // upper lid creases
+  carveCap([0.014, 1.6235, 0.091], [0.046, 1.624, 0.082], 0.0012, 0.002, 2);
+  carveCap([0, 1.556, 0.095], [0, 1.549, 0.092], 0.0015, 0.003, 2);                 // philtrum groove
+  // ---------- head: mouth ----------
+  ell(LIPS, [-0.008, 1.5465, 0.0865], [0.015, 0.0035, 0.006], 0.004);   // upper lip, two peaks give the cupid's bow
+  ell(LIPS, [0.008, 1.5465, 0.0865], [0.015, 0.0035, 0.006], 0.004);
+  ell(LIPS, [0, 1.5385, 0.085], [0.021, 0.004, 0.0055], 0.004);         // lower lip
+  ell(LIPS, [0, 1.538, 0.086], [0.01, 0.004, 0.0058], 0.004);
+  carveCap([-0.022, 1.5425, 0.092], [0.022, 1.5425, 0.092], 0.0012, 0.002, 2, LIPS); // mouth line
+  // ---------- neck detail ----------
+  cap(SKIN, [-0.04, 1.52, -0.025], [-0.012, 1.40, 0.042], 0.008, 0.009, 0.04);    // sternocleidomastoids
+  cap(SKIN, [0.04, 1.52, -0.025], [0.012, 1.40, 0.042], 0.008, 0.009, 0.04);
+  ell(SKIN, [0, 1.47, 0.042], [0.01, 0.01, 0.005], 0.015);                         // larynx
 
   // ---------- neck, shoulders, torso: athletic build, weight on the left leg ----------
   cap(SKIN, [0, 1.395, -0.012], [0, 1.535, 0.0], 0.047, 0.043, 0.03);
@@ -402,13 +452,23 @@ roughnessFactor = clamp(roughnessFactor + uRough * (fbm(vObj * uScale * 0.6 + 3.
   function field(x, y, z) {
     for (let g = 0; g < NG; g++) gd[g] = 1e9;
     for (let i = 0; i < prims.length; i++) {
-      const p = prims[i], bb = p.bb;
+      const p = prims[i]; if (p.post) continue;
+      const bb = p.bb;
       if (x < bb[0] || x > bb[1] || y < bb[2] || y > bb[3] || z < bb[4] || z > bb[5]) continue;
       const d = distOf(p, x, y, z);
       gd[p.g] = smin(gd[p.g], d, p.k);
       if (p.core >= 0) gd[p.core] = smin(gd[p.core], d, p.k);
     }
-    for (let i = 0; i < subs.length; i++) gd[SKIN] = -smin(-gd[SKIN], distOf(subs[i], x, y, z), subs[i].k);
+    if (y > 1.38) { // all carves and post prims live on the head and neck
+      for (let i = 0; i < subs.length; i++) { const c = subs[i]; if (c.stage === 1 && inBox(c.bb, x, y, z)) gd[c.g] = -smin(-gd[c.g], distOf(c, x, y, z), c.k); }
+      for (let i = 0; i < prims.length; i++) {
+        const p = prims[i]; if (!p.post) continue;
+        const bb = p.bb;
+        if (x < bb[0] || x > bb[1] || y < bb[2] || y > bb[3] || z < bb[4] || z > bb[5]) continue;
+        gd[p.g] = smin(gd[p.g], distOf(p, x, y, z), p.k);
+      }
+      for (let i = 0; i < subs.length; i++) { const c = subs[i]; if (c.stage === 2 && inBox(c.bb, x, y, z)) gd[c.g] = -smin(-gd[c.g], distOf(c, x, y, z), c.k); }
+    }
     const skin = gd[SKIN];
     // Every worn layer is an offset of the skin surface, cut by clip curves (negative inside the garment) and
     // gated to the body part it belongs to. The offset fades to zero at each edge so fabric meets skin cleanly.
@@ -420,12 +480,10 @@ roughnessFactor = clamp(roughnessFactor + uRough * (fbm(vObj * uScale * 0.6 + 3.
     const gateT = Math.abs(skin - gd[CORE_TOP]) - 0.02;
     let top = Math.max(skin - 0.007 * sstep(0, 0.03, -clipTop), clipTop, gateT);
     let clipStrap = 1;
-    if (y > 1.28 && y < 1.50) {
-      for (const sg of [-1, 1]) {
-        const ax = sg * 0.075;
-        const d1 = capDist(x, y, z, ax, 1.32, 0.072, sg * 0.082, 1.445, -0.012, 0.0105);
-        const d2 = capDist(x, y, z, sg * 0.082, 1.445, -0.012, ax, 1.335, -0.10, 0.0105);
-        clipStrap = Math.min(clipStrap, d1, d2);
+    if (y > 1.28 && y < 1.50 && Math.abs(x) < 0.13 && z > -0.14 && z < 0.11 && strapPaths) {
+      for (const path of strapPaths) for (let i = 0; i + 1 < path.length; i++) {
+        const a = path[i], b = path[i + 1];
+        clipStrap = Math.min(clipStrap, capDist(x, y, z, a[0], a[1], a[2], b[0], b[1], b[2], 0.0105));
       }
       top = Math.min(top, Math.max(skin - 0.0035 * sstep(0, 0.006, -clipStrap), clipStrap));
     }
@@ -477,6 +535,27 @@ roughnessFactor = clamp(roughnessFactor + uRough * (fbm(vObj * uScale * 0.6 + 3.
     return best;
   }
   const lastClip = new Float32Array(6); let soleLine = 1;
+  // Strap paths: a nominal arc from the front anchor over the trapezius to the back anchor, each point
+  // projected onto the bare skin so the strap lies flat on the shoulder.
+  let strapPaths = null;
+  function skinProject(x, y, z) {
+    const E = 0.001;
+    for (let it = 0; it < 5; it++) {
+      field(x, y, z); const f = gd[SKIN];
+      field(x + E, y, z); const fx = gd[SKIN]; field(x, y + E, z); const fy = gd[SKIN]; field(x, y, z + E); const fz = gd[SKIN];
+      const gx = (fx - f) / E, gy = (fy - f) / E, gz = (fz - f) / E, g2 = gx * gx + gy * gy + gz * gz || 1;
+      x -= gx * f / g2; y -= gy * f / g2; z -= gz * f / g2;
+    }
+    return [x, y, z];
+  }
+  strapPaths = [-1, 1].map(sg => {
+    const pts = [];
+    for (let i = 0; i <= 12; i++) {
+      const t = i / 12, ang = Math.PI * t;                       // half-circle over the shoulder in the y-z plane
+      pts.push(skinProject(sg * (0.075 + 0.01 * Math.sin(ang)), 1.335 + 0.125 * Math.sin(ang), 0.072 - 0.172 * t));
+    }
+    return pts;
+  });
   // Which surface a point on the zero-set belongs to. Layers that sit on the skin take priority within a
   // small band so their boundaries follow the clip curves instead of aliasing against the grid.
   function materialAt(x, y, z) {
@@ -498,32 +577,72 @@ roughnessFactor = clamp(roughnessFactor + uRough * (fbm(vObj * uScale * 0.6 + 3.
     return Math.sqrt(dx * dx + dy * dy + dz * dz) - r;
   }
 
-  // ======================= rectilinear grid + surface nets =======================
+  // ======================= rectilinear grids + surface nets =======================
+  // The body is sampled on a 5 to 9 mm grid; the head on its own 2.4 mm grid so facial features resolve.
+  // The two meshes meet at the SEAM plane at the base of the neck: vertices near it snap onto it and each
+  // mesh keeps only its own side, so the join is a shared polyline with no overlap.
+  const SEAM = 1.44;
   function axis(segments) {
     const out = [segments[0][0]];
     for (const [a, b, h] of segments) { let v = out[out.length - 1]; while (v + h <= b + 1e-9) { v += h; out.push(v); } }
     return Float32Array.from(out);
   }
-  const xs = axis([[-0.37, -0.15, 0.0065], [-0.15, -0.10, 0.005], [-0.10, 0.10, 0.004], [0.10, 0.15, 0.005], [0.15, 0.36, 0.0065], [0.36, 0.48, 0.005]]);
-  const ys = axis([[-0.02, 0.16, 0.006], [0.16, 0.72, 0.009], [0.72, 0.99, 0.006], [0.99, 1.40, 0.009], [1.40, 1.49, 0.0045], [1.49, 1.72, 0.0035], [1.72, 1.80, 0.0045]]);
-  const zs = axis([[-0.25, 0.03, 0.005], [0.03, 0.13, 0.004], [0.13, 0.28, 0.005]]);
-  const nx = xs.length, ny = ys.length, nz = zs.length;
-  const F = new Float32Array(nx * ny * nz);
+  function grid(xs, ys, zs, tol) {
+    const n = xs.length * ys.length * zs.length;
+    return { xs, ys, zs, nx: xs.length, ny: ys.length, nz: zs.length, F: new Float32Array(n), done: new Uint8Array(n), tol };
+  }
+  const bodyGrid = grid(
+    axis([[-0.37, -0.15, 0.0065], [-0.15, 0.15, 0.005], [0.15, 0.36, 0.0065], [0.36, 0.48, 0.005]]),
+    axis([[-0.02, 0.16, 0.006], [0.16, 0.72, 0.009], [0.72, 0.99, 0.006], [0.99, 1.454, 0.0045]]),
+    axis([[-0.25, 0.28, 0.005]]), 0.0028);
+  const headGrid = grid(
+    axis([[-0.125, 0.125, 0.0024]]),
+    axis([[1.426, 1.76, 0.0024]]),
+    axis([[-0.24, 0.14, 0.0024]]), 0.0014);
+  const grids = [bodyGrid, headGrid];
+  const totalCols = grids.reduce((t, g) => t + g.nx, 0);
 
-  function sample(i, done) {
-    const CH = 6, end = Math.min(i + CH, nx);
-    for (; i < end; i++) {
-      const x = xs[i];
-      for (let j = 0; j < ny; j++) {
-        const y = ys[j], base = (i * ny + j) * nz;
-        for (let k = 0; k < nz; k++) F[base + k] = field(x, y, zs[k]);
+  // Coarse-to-fine sampling: the field is evaluated at the corners of 4x4x4 blocks first. A block whose
+  // corners all lie farther from the surface than the block diagonal (plus a margin for the smooth blends)
+  // cannot contain any surface, so its interior is filled with the corner sign and never evaluated.
+  const BLK = 4;
+  function sample(gi, bi, done) {
+    const g = grids[gi], { xs, ys, zs, nx, ny, nz, F, done: dn } = g;
+    const nbx = Math.ceil((nx - 1) / BLK), nby = Math.ceil((ny - 1) / BLK), nbz = Math.ceil((nz - 1) / BLK);
+    const CH = Math.max(1, Math.round(3.5e5 / (ny * nz * BLK))), end = Math.min(bi + CH, nbx);
+    const at = (i, j, k) => { const id = (i * ny + j) * nz + k; if (!dn[id]) { F[id] = field(xs[i], ys[j], zs[k]); dn[id] = 1; } return F[id]; };
+    for (; bi < end; bi++) {
+      const i0 = bi * BLK, i1 = Math.min(i0 + BLK, nx - 1);
+      for (let bj = 0; bj < nby; bj++) {
+        const j0 = bj * BLK, j1 = Math.min(j0 + BLK, ny - 1);
+        for (let bk = 0; bk < nbz; bk++) {
+          const k0 = bk * BLK, k1 = Math.min(k0 + BLK, nz - 1);
+          let minAbs = 1e9, pos = 0, neg = 0;
+          for (const i of [i0, i1]) for (const j of [j0, j1]) for (const k of [k0, k1]) {
+            const f = at(i, j, k); if (f < 0) neg++; else pos++; if (Math.abs(f) < minAbs) minAbs = Math.abs(f);
+          }
+          const diag = Math.hypot(xs[i1] - xs[i0], ys[j1] - ys[j0], zs[k1] - zs[k0]);
+          const empty = (pos === 0 || neg === 0) && minAbs > diag + 0.012;
+          for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) {
+            const base = (i * ny + j) * nz;
+            for (let k = k0; k <= k1; k++) {
+              const id = base + k; if (dn[id]) continue;
+              if (empty) F[id] = neg ? -(minAbs - diag) : (minAbs - diag); else F[id] = field(xs[i], ys[j], zs[k]);
+              dn[id] = 1;
+            }
+          }
+        }
       }
     }
-    statusEl.textContent = 'Sculpting… ' + Math.round(100 * i / nx) + '%';
-    if (i < nx) setTimeout(() => sample(i, done), 0); else done();
+    const doneCols = grids.slice(0, gi).reduce((t, g) => t + g.nx, 0) + Math.min(bi * BLK, nx);
+    statusEl.textContent = 'Sculpting… ' + Math.round(100 * doneCols / totalCols) + '%';
+    if (bi < nbx) setTimeout(() => sample(gi, bi, done), 0);
+    else if (gi + 1 < grids.length) setTimeout(() => sample(gi + 1, 0, done), 0);
+    else done();
   }
 
-  function surfaceNets() {
+  function surfaceNets(g) {
+    const { xs, ys, zs, nx, ny, nz, F } = g;
     const cx = nx - 1, cy = ny - 1, cz = nz - 1;
     const cell = new Int32Array(cx * cy * cz).fill(-1);
     const pos = [];
@@ -571,11 +690,11 @@ roughnessFactor = clamp(roughnessFactor + uRough * (fbm(vObj * uScale * 0.6 + 3.
     return { pos: Float32Array.from(pos), idx };
   }
 
-  function buildFigure() {
-    const { pos, idx } = surfaceNets();
+  const EPS = 0.0012;
+  function processGrid(g, headSide) {
+    const { pos, idx } = surfaceNets(g);
     const n = pos.length / 3;
     const nrm = new Float32Array(n * 3), col = new Float32Array(n * 3);
-    const EPS = 0.0012;
     for (let v = 0; v < n; v++) {
       let x = pos[v * 3], y = pos[v * 3 + 1], z = pos[v * 3 + 2];
       let gx = 0, gy = 0, gz = 0;
@@ -593,9 +712,11 @@ roughnessFactor = clamp(roughnessFactor + uRough * (fbm(vObj * uScale * 0.6 + 3.
       // snap vertices that lie within half a cell of a clothing edge or the hairline onto that curve, so the
       // material boundary becomes a clean polyline instead of a staircase
       field(x, y, z);
-      const gates = [gd[CORE_TOP] < 0.03, gd[CORE_BOT] < 0.03, y > 1.45, y < 0.2, y < 0.2, y < 0.2 && Math.abs(gd[SHOE]) < 0.002];
+      const gates = [gd[CORE_TOP] < 0.03 || Math.abs(gd[KIT]) < 0.006, gd[CORE_BOT] < 0.03, y > 1.45, y < 0.2, y < 0.2, y < 0.2 && Math.abs(gd[SHOE]) < 0.002];
+      const x0 = x, y0 = y, z0 = z, gx0 = gx, gy0 = gy, gz0 = gz;
+      const snapTol = 0.0055;
       for (let c = 0; c < 6; c++) {
-        if (!gates[c] || Math.abs(lastClip[c]) > 0.0055) continue;
+        if (!gates[c] || Math.abs(lastClip[c]) > snapTol) continue;
         for (let it = 0; it < 3; it++) {
           field(x, y, z); const cv = lastClip[c];
           field(x + EPS, y, z); const cx = (lastClip[c] - cv) / EPS;
@@ -610,23 +731,48 @@ roughnessFactor = clamp(roughnessFactor + uRough * (fbm(vObj * uScale * 0.6 + 3.
           const g2 = gx * gx + gy * gy + gz * gz || 1;
           x -= gx * f / g2; y -= gy * f / g2; z -= gz * f / g2;
         }
+        if ((x - x0) ** 2 + (y - y0) ** 2 + (z - z0) ** 2 > 0.009 ** 2 || (y0 - SEAM) * (y - SEAM) < 0) { x = x0; y = y0; z = z0; gx = gx0; gy = gy0; gz = gz0; }
         break;
+      }
+      // stitch: vertices within a fraction of a cell of the seam plane land exactly on it
+      if (Math.abs(y - SEAM) < g.tol) {
+        for (let it = 0; it < 2; it++) {
+          y = SEAM;
+          const f = field(x, y, z);
+          gx = (field(x + EPS, y, z) - field(x - EPS, y, z)) / (2 * EPS);
+          gz = (field(x, y, z + EPS) - field(x, y, z - EPS)) / (2 * EPS);
+          const g2 = gx * gx + gz * gz || 1;
+          x -= gx * f / g2; z -= gz * f / g2;
+        }
+        gy = (field(x, y + EPS, z) - field(x, y - EPS, z)) / (2 * EPS);
       }
       const gl = Math.hypot(gx, gy, gz) || 1;
       pos[v * 3] = x; pos[v * 3 + 1] = y; pos[v * 3 + 2] = z;
       nrm[v * 3] = gx / gl; nrm[v * 3 + 1] = gy / gl; nrm[v * 3 + 2] = gz / gl;
-      let blush = 0;
+      // skin tint: warmth on cheeks, nose, ears, knees, elbows and knuckles; a cooler shade in the eye sockets
+      let blush = 0, shade = 0;
       const warm = (cx, cy, cz, sig, w) => { const d2 = (x - cx) ** 2 + (y - cy) ** 2 + (z - cz) ** 2; blush += w * Math.exp(-d2 / (2 * sig * sig)); };
-      warm(-0.05, 1.57, 0.07, 0.03, 0.5); warm(0.05, 1.57, 0.07, 0.03, 0.5);
-      warm(-0.08, 0.50, 0.05, 0.05, 0.25); warm(0.10, 0.495, 0.12, 0.05, 0.25);
-      warm(-0.36, 1.13, -0.08, 0.04, 0.2); warm(0.37, 1.17, 0.14, 0.04, 0.2);
-      warm(-0.17, 0.90, 0.08, 0.03, 0.3); warm(gc[0] + 0.01, 1.46, gc[2] + 0.03, 0.03, 0.3);
-      blush = Math.min(blush, 0.6);
-      col[v * 3] = 1; col[v * 3 + 1] = 1 - 0.22 * blush; col[v * 3 + 2] = 1 - 0.25 * blush;
+      const cool = (cx, cy, cz, sig, w) => { const d2 = (x - cx) ** 2 + (y - cy) ** 2 + (z - cz) ** 2; shade += w * Math.exp(-d2 / (2 * sig * sig)); };
+      if (headSide) {
+        warm(-0.05, 1.575, 0.065, 0.028, 0.45); warm(0.05, 1.575, 0.065, 0.028, 0.45);
+        warm(0, 1.566, 0.104, 0.012, 0.35); warm(-0.078, 1.6, -0.008, 0.02, 0.4); warm(0.078, 1.6, -0.008, 0.02, 0.4);
+        warm(0, 1.542, 0.088, 0.016, 0.2);
+        cool(-0.031, 1.606, 0.092, 0.015, 0.7); cool(0.031, 1.606, 0.092, 0.015, 0.7);
+      } else {
+        warm(-0.08, 0.50, 0.05, 0.05, 0.25); warm(0.10, 0.495, 0.12, 0.05, 0.25);
+        warm(-0.36, 1.13, -0.08, 0.04, 0.2); warm(0.37, 1.17, 0.14, 0.04, 0.2);
+        warm(-0.17, 0.90, 0.08, 0.03, 0.3); warm(gc[0] + 0.01, 1.46, gc[2] + 0.03, 0.03, 0.3);
+      }
+      blush = Math.min(blush, 0.6); shade = Math.min(shade, 0.5);
+      col[v * 3] = 1 - 0.08 * shade; col[v * 3 + 1] = (1 - 0.22 * blush) * (1 - 0.12 * shade); col[v * 3 + 2] = (1 - 0.25 * blush) * (1 - 0.06 * shade);
     }
     const buckets = bodyMats.map(() => []);
     for (let t = 0; t < idx.length; t += 3) {
       const a = idx[t] * 3, b = idx[t + 1] * 3, c = idx[t + 2] * 3;
+      // each mesh keeps its own side of the seam: the body keeps any triangle with a vertex strictly below it,
+      // the head keeps triangles with no vertex below it
+      const below = pos[a + 1] < SEAM - 1e-6 || pos[b + 1] < SEAM - 1e-6 || pos[c + 1] < SEAM - 1e-6;
+      if (headSide === below) continue;
       let cx = (pos[a] + pos[b] + pos[c]) / 3, cy = (pos[a + 1] + pos[b + 1] + pos[c + 1]) / 3, cz = (pos[a + 2] + pos[b + 2] + pos[c + 2]) / 3;
       const nx_ = nrm[a] + nrm[b] + nrm[c], ny_ = nrm[a + 1] + nrm[b + 1] + nrm[c + 1], nz_ = nrm[a + 2] + nrm[b + 2] + nrm[c + 2];
       const nl = Math.hypot(nx_, ny_, nz_) || 1;
@@ -634,11 +780,26 @@ roughnessFactor = clamp(roughnessFactor + uRough * (fbm(vObj * uScale * 0.6 + 3.
       cx -= nx_ / nl * f; cy -= ny_ / nl * f; cz -= nz_ / nl * f;
       buckets[materialAt(cx, cy, cz)].push(idx[t], idx[t + 1], idx[t + 2]);
     }
+    return { pos, nrm, col, buckets };
+  }
+
+  function buildFigure() {
+    const parts = [processGrid(bodyGrid, false), processGrid(headGrid, true)];
+    const nAll = parts.reduce((t, p) => t + p.pos.length / 3, 0);
+    const pos = new Float32Array(nAll * 3), nrm = new Float32Array(nAll * 3), col = new Float32Array(nAll * 3);
+    const buckets = bodyMats.map(() => []);
+    let vOff = 0;
+    for (const p of parts) {
+      pos.set(p.pos, vOff * 3); nrm.set(p.nrm, vOff * 3); col.set(p.col, vOff * 3);
+      p.buckets.forEach((b, m) => { for (const i of b) buckets[m].push(i + vOff); });
+      vOff += p.pos.length / 3;
+    }
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     geo.setAttribute('normal', new THREE.BufferAttribute(nrm, 3));
     geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
-    const all = new Uint32Array(idx.length); let off = 0;
+    const total = buckets.reduce((t, b) => t + b.length, 0);
+    const all = new Uint32Array(total); let off = 0;
     buckets.forEach((b, m) => { all.set(b, off); geo.addGroup(off, b.length, m); off += b.length; });
     geo.setIndex(new THREE.BufferAttribute(all, 1));
     const mesh = new THREE.Mesh(geo, bodyMats);
@@ -661,23 +822,31 @@ roughnessFactor = clamp(roughnessFactor + uRough * (fbm(vObj * uScale * 0.6 + 3.
     // eyes: sclera, iris, pupil; brows and lash lines laid onto the skin
     [-1, 1].forEach(s => {
       const eye = new THREE.Group();
-      eye.position.set(s * 0.031, 1.612, 0.0735);
+      eye.position.set(s * 0.031, 1.612, 0.073);
       eye.add(new THREE.Mesh(new THREE.SphereGeometry(0.0125, 32, 24), scleraMat));
       const iris = new THREE.Mesh(new THREE.SphereGeometry(0.0066, 24, 16), irisMat);
       iris.position.z = 0.0106; iris.scale.z = 0.35; eye.add(iris);
+      const limbus = new THREE.Mesh(new THREE.TorusGeometry(0.0062, 0.0007, 8, 32), pupilMat);
+      limbus.position.z = 0.0107; eye.add(limbus);                                   // dark limbal ring
       const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.0027, 16, 12), pupilMat);
       pupil.position.z = 0.0123; pupil.scale.z = 0.3; eye.add(pupil);
       eye.rotation.y = s * -0.05;
       figure.add(eye);
-      const brow = new THREE.CatmullRomCurve3([
-        onSkin(s * 0.012, 1.633, 0.09, 0.0012), onSkin(s * 0.028, 1.638, 0.088, 0.0012),
-        onSkin(s * 0.044, 1.639, 0.082, 0.0012), onSkin(s * 0.058, 1.633, 0.07, 0.0012)]);
-      const bm = new THREE.Mesh(new THREE.TubeGeometry(brow, 24, 0.0014, 8, false), hairMat);
-      bm.scale.set(1, 1, 1); figure.add(bm);
+      const duct = new THREE.Mesh(new THREE.SphereGeometry(0.0016, 10, 8), lipMat);   // tear duct at the inner corner
+      duct.position.copy(onSkin(s * 0.017, 1.611, 0.093, -0.0009)); figure.add(duct);
+      const browIn = new THREE.CatmullRomCurve3([
+        onSkin(s * 0.012, 1.633, 0.09, 0.0012), onSkin(s * 0.022, 1.637, 0.089, 0.0012), onSkin(s * 0.034, 1.639, 0.086, 0.0012)]);
+      const browOut = new THREE.CatmullRomCurve3([
+        onSkin(s * 0.033, 1.639, 0.086, 0.001), onSkin(s * 0.046, 1.638, 0.08, 0.001), onSkin(s * 0.058, 1.632, 0.069, 0.001)]);
+      figure.add(new THREE.Mesh(new THREE.TubeGeometry(browIn, 16, 0.0018, 8, false), hairMat));
+      figure.add(new THREE.Mesh(new THREE.TubeGeometry(browOut, 16, 0.0011, 8, false), hairMat));
       const lash = new THREE.CatmullRomCurve3([
         onSkin(s * 0.016, 1.6135, 0.095, 0.0004), onSkin(s * 0.026, 1.6195, 0.096, 0.0004),
         onSkin(s * 0.037, 1.6195, 0.094, 0.0004), onSkin(s * 0.046, 1.614, 0.088, 0.0004)]);
       figure.add(new THREE.Mesh(new THREE.TubeGeometry(lash, 20, 0.0009, 6, false), pupilMat));
+      const lowerLash = new THREE.CatmullRomCurve3([
+        onSkin(s * 0.022, 1.6065, 0.093, 0.0005), onSkin(s * 0.032, 1.6055, 0.091, 0.0005), onSkin(s * 0.041, 1.6085, 0.086, 0.0005)]);
+      figure.add(new THREE.Mesh(new THREE.TubeGeometry(lowerLash, 16, 0.0005, 6, false), tapeMat));
     });
     // hair elastic at the base of the ponytail
     const tie = new THREE.Mesh(new THREE.TorusGeometry(0.0255, 0.005, 10, 40), tapeMat);
@@ -800,6 +969,6 @@ roughnessFactor = clamp(roughnessFactor + uRough * (fbm(vObj * uScale * 0.6 + 3.
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
-  setTimeout(() => sample(0, buildFigure), 50);
+  setTimeout(() => sample(0, 0, buildFigure), 50);
 })();
 </script>
