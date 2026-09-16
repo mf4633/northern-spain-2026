@@ -168,8 +168,8 @@
     envMapIntensity: 0.7, vertexColors: true
   });
   const kitMat = new THREE.MeshPhysicalMaterial({ color: 0x1b2a4a, roughness: 0.62, metalness: 0, sheen: new THREE.Color(0x2b3550), envMapIntensity: 0.8 });
-  const hairMat = new THREE.MeshPhysicalMaterial({ color: 0x6b3a1e, roughness: 0.42, metalness: 0.12, clearcoat: 0.3, clearcoatRoughness: 0.4, envMapIntensity: 1.1 });
-  const lipMat = new THREE.MeshPhysicalMaterial({ color: 0xb0606a, roughness: 0.4, clearcoat: 0.3, clearcoatRoughness: 0.4 });
+  const hairMat = new THREE.MeshPhysicalMaterial({ color: 0x6b3a1e, roughness: 0.5, metalness: 0.08, clearcoat: 0.15, clearcoatRoughness: 0.5, envMapIntensity: 0.9 });
+  const lipMat = new THREE.MeshPhysicalMaterial({ color: 0xb8767a, roughness: 0.45, clearcoat: 0.25, clearcoatRoughness: 0.4 });
   const shoeMat = new THREE.MeshPhysicalMaterial({ color: 0x1b2a4a, roughness: 0.5, metalness: 0.05, clearcoat: 0.2, clearcoatRoughness: 0.4 });
   const whiteMat = new THREE.MeshPhysicalMaterial({ color: 0xf2f0ec, roughness: 0.55, metalness: 0 });
   const scleraMat = new THREE.MeshPhysicalMaterial({ color: 0xf2eee9, roughness: 0.2, clearcoat: 1, clearcoatRoughness: 0.1 });
@@ -177,6 +177,43 @@
   const pupilMat = new THREE.MeshStandardMaterial({ color: 0x08080a, roughness: 0.3 });
   const poleMat = new THREE.MeshPhysicalMaterial({ color: 0x9fb4c7, roughness: 0.25, metalness: 0.1, clearcoat: 0.9, clearcoatRoughness: 0.15 });
   const tapeMat = new THREE.MeshStandardMaterial({ color: 0x2a2a2e, roughness: 0.85 });
+  // Procedural micro-surface: perturb the shading normal with object-space value noise so skin and fabric
+  // stop reading as smooth plastic. Object space keeps the pattern fixed to the mesh as the turntable spins.
+  function microSurface(mat, amp, scale, roughVar) {
+    mat.onBeforeCompile = shader => {
+      shader.uniforms.uAmp = { value: amp };
+      shader.uniforms.uScale = { value: scale };
+      shader.uniforms.uRough = { value: roughVar };
+      shader.vertexShader = shader.vertexShader
+        .replace('#include <common>', '#include <common>\nvarying vec3 vObj;')
+        .replace('#include <begin_vertex>', '#include <begin_vertex>\nvObj = transformed;');
+      shader.fragmentShader = shader.fragmentShader
+        .replace('#include <common>', `#include <common>
+varying vec3 vObj;
+uniform float uAmp, uScale, uRough;
+float hash3(vec3 p) { p = fract(p * 0.3183099 + vec3(0.1, 0.2, 0.3)); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+float vnoise(vec3 p) {
+  vec3 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(hash3(i), hash3(i + vec3(1,0,0)), f.x), mix(hash3(i + vec3(0,1,0)), hash3(i + vec3(1,1,0)), f.x), f.y),
+             mix(mix(hash3(i + vec3(0,0,1)), hash3(i + vec3(1,0,1)), f.x), mix(hash3(i + vec3(0,1,1)), hash3(i + vec3(1,1,1)), f.x), f.y), f.z);
+}
+float fbm(vec3 p) { return vnoise(p) * 0.55 + vnoise(p * 2.7 + 11.0) * 0.3 + vnoise(p * 7.1 + 5.0) * 0.15; }`)
+        .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+{
+  vec3 p = vObj * uScale; float e = 0.35;
+  vec3 g = vec3(fbm(p + vec3(e,0,0)) - fbm(p - vec3(e,0,0)), fbm(p + vec3(0,e,0)) - fbm(p - vec3(0,e,0)), fbm(p + vec3(0,0,e)) - fbm(p - vec3(0,0,e))) / (2.0 * e);
+  g -= dot(g, normal) * normal;
+  normal = normalize(normal + uAmp * g);
+}`)
+        .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
+roughnessFactor = clamp(roughnessFactor + uRough * (fbm(vObj * uScale * 0.6 + 3.0) - 0.5), 0.05, 1.0);`);
+    };
+  }
+  microSurface(skinMat, 0.05, 90.0, 0.25);
+  microSurface(kitMat, 0.35, 420.0, 0.15);
+  microSurface(hairMat, 0.22, 160.0, 0.15);
+  microSurface(shoeMat, 0.15, 300.0, 0.1);
+  microSurface(whiteMat, 0.3, 500.0, 0.2);
   const bodyMats = [skinMat, kitMat, hairMat, lipMat, shoeMat, whiteMat]; // index == material id from the field
   const allMats = bodyMats.concat([scleraMat, irisMat, pupilMat, poleMat, tapeMat]);
 
@@ -212,64 +249,75 @@
       cap(g, pts[i], pts[i + 1], ra, rb, k);
     }
   }
-  function carve(c, r, k) { subs.push({ c, r, k }); }
+  function carve(c, r, k, rot) { // ellipsoidal subtraction from the skin
+    subs.push({ t: 0, c, r: Array.isArray(r) ? r : [r, r, r], k, m: rotInv(rot) });
+  }
 
   // ---------- head ----------
-  ell(SKIN, [0, 1.605, 0.005], [0.074, 0.105, 0.092], 0.02);
-  ell(SKIN, [0, 1.625, -0.02], [0.082, 0.088, 0.086], 0.02);
-  ell(SKIN, [0, 1.535, 0.03], [0.056, 0.048, 0.062], 0.02);
-  ell(SKIN, [0, 1.512, 0.068], [0.026, 0.022, 0.026], 0.012);
-  ell(SKIN, [-0.05, 1.572, 0.048], [0.034, 0.03, 0.034], 0.02);
-  ell(SKIN, [0.05, 1.572, 0.048], [0.034, 0.03, 0.034], 0.02);
-  ell(SKIN, [0, 1.642, 0.08], [0.058, 0.011, 0.018], 0.012);
-  ell(SKIN, [0, 1.588, 0.093], [0.011, 0.03, 0.017], 0.01);
-  ell(SKIN, [0, 1.564, 0.104], [0.013, 0.012, 0.013], 0.01);
-  ell(SKIN, [-0.012, 1.559, 0.096], [0.009, 0.008, 0.009], 0.008);
-  ell(SKIN, [0.012, 1.559, 0.096], [0.009, 0.008, 0.009], 0.008);
-  ell(SKIN, [-0.077, 1.605, -0.005], [0.01, 0.028, 0.02], 0.01);
-  ell(SKIN, [0.077, 1.605, -0.005], [0.01, 0.028, 0.02], 0.01);
-  cap(SKIN, [-0.013, 1.624, 0.084], [-0.05, 1.62, 0.074], 0.0065, 0.005, 0.008);
-  cap(SKIN, [0.013, 1.624, 0.084], [0.05, 1.62, 0.074], 0.0065, 0.005, 0.008);
-  cap(SKIN, [-0.013, 1.603, 0.082], [-0.048, 1.605, 0.073], 0.0045, 0.004, 0.006);
-  cap(SKIN, [0.013, 1.603, 0.082], [0.048, 1.605, 0.073], 0.0045, 0.004, 0.006);
-  carve([-0.031, 1.612, 0.099], 0.022, 0.008);
-  carve([0.031, 1.612, 0.099], 0.022, 0.008);
-  ell(LIPS, [0, 1.5455, 0.093], [0.023, 0.0065, 0.011], 0.004);
-  ell(LIPS, [0, 1.5355, 0.092], [0.02, 0.0075, 0.011], 0.004);
+  ell(SKIN, [0, 1.622, 0.0], [0.076, 0.1, 0.088], 0.02);             // cranium
+  ell(SKIN, [0, 1.642, -0.022], [0.078, 0.084, 0.084], 0.02);         // back of skull
+  ell(SKIN, [0, 1.552, 0.02], [0.05, 0.04, 0.06], 0.02);             // jaw
+  ell(SKIN, [0, 1.518, 0.06], [0.027, 0.018, 0.02], 0.012);          // chin
+  ell(SKIN, [-0.05, 1.592, 0.048], [0.022, 0.018, 0.022], 0.035);    // cheekbones
+  ell(SKIN, [0.05, 1.592, 0.048], [0.022, 0.018, 0.022], 0.035);
+  ell(SKIN, [-0.044, 1.578, 0.056], [0.022, 0.02, 0.017], 0.03);     // cheeks
+  ell(SKIN, [0.044, 1.578, 0.056], [0.022, 0.02, 0.017], 0.03);
+  ell(SKIN, [0, 1.64, 0.078], [0.056, 0.01, 0.016], 0.014);          // brow ridge
+  cap(SKIN, [0, 1.628, 0.088], [0, 1.576, 0.1], 0.008, 0.011, 0.012); // nose bridge
+  ell(SKIN, [0, 1.567, 0.104], [0.011, 0.01, 0.011], 0.01);          // nose tip
+  ell(SKIN, [-0.011, 1.562, 0.095], [0.008, 0.007, 0.008], 0.008);   // nostrils
+  ell(SKIN, [0.011, 1.562, 0.095], [0.008, 0.007, 0.008], 0.008);
+  ell(SKIN, [-0.075, 1.605, -0.008], [0.01, 0.028, 0.02], 0.01);     // ears
+  ell(SKIN, [0.075, 1.605, -0.008], [0.01, 0.028, 0.02], 0.01);
+  ell(SKIN, [-0.031, 1.617, 0.08], [0.02, 0.011, 0.009], 0.012);     // eyelid mass over the eyeballs
+  ell(SKIN, [0.031, 1.617, 0.08], [0.02, 0.011, 0.009], 0.012);
+  carve([-0.031, 1.612, 0.088], [0.0148, 0.0058, 0.013], 0.004, [0, 0, 0.08]);  // almond eye openings
+  carve([0.031, 1.612, 0.088], [0.0148, 0.0058, 0.013], 0.004, [0, 0, -0.08]);
+  ell(LIPS, [0, 1.5465, 0.086], [0.024, 0.0035, 0.006], 0.004);      // lips
+  ell(LIPS, [0, 1.539, 0.085], [0.022, 0.004, 0.006], 0.004);
 
   // ---------- neck, shoulders, torso: athletic build, weight on the left leg ----------
-  cap(SKIN, [0, 1.395, -0.012], [0, 1.535, 0.0], 0.052, 0.047, 0.03);
-  cap(SKIN, [0, 1.44, -0.02], [-0.17, 1.39, -0.01], 0.032, 0.048, 0.03);   // trapezius
-  cap(SKIN, [0, 1.44, -0.02], [0.17, 1.405, -0.01], 0.032, 0.048, 0.03);
-  cap(SKIN, [0, 1.395, 0.045], [-0.15, 1.392, 0.02], 0.008, 0.007, 0.012); // collarbones
-  cap(SKIN, [0, 1.395, 0.045], [0.15, 1.405, 0.02], 0.008, 0.007, 0.012);
-  ell(SKIN, [-0.185, 1.375, 0], [0.06, 0.064, 0.06], 0.03);                // deltoids
-  ell(SKIN, [0.185, 1.392, 0], [0.06, 0.064, 0.06], 0.03);
+  cap(SKIN, [0, 1.395, -0.012], [0, 1.535, 0.0], 0.047, 0.043, 0.03);
+  cap(SKIN, [0, 1.44, -0.02], [-0.155, 1.39, -0.01], 0.03, 0.042, 0.03);   // trapezius
+  cap(SKIN, [0, 1.44, -0.02], [0.155, 1.405, -0.01], 0.03, 0.042, 0.03);
+  cap(SKIN, [0, 1.395, 0.045], [-0.14, 1.392, 0.02], 0.008, 0.007, 0.012); // collarbones
+  cap(SKIN, [0, 1.395, 0.045], [0.14, 1.405, 0.02], 0.008, 0.007, 0.012);
+  ell(SKIN, [-0.166, 1.375, 0], [0.05, 0.058, 0.05], 0.03);               // deltoids
+  ell(SKIN, [0.166, 1.392, 0], [0.05, 0.058, 0.05], 0.03);
   ell(SKIN, [0.005, 1.26, -0.005], [0.15, 0.15, 0.10], 0.035, [0, 0, 0.04], CORE_TOP); // ribcage
   ell(SKIN, [0, 1.30, -0.03], [0.165, 0.12, 0.08], 0.035, null, CORE_TOP);            // upper back
-  ell(SKIN, [-0.065, 1.23, 0.07], [0.058, 0.054, 0.06], 0.02, null, CORE_TOP);        // bust
-  ell(SKIN, [0.065, 1.23, 0.07], [0.058, 0.054, 0.06], 0.02, null, CORE_TOP);
-  ell(SKIN, [0.01, 1.08, 0.0], [0.11, 0.10, 0.082], 0.04);                            // waist
+  ell(SKIN, [-0.062, 1.235, 0.062], [0.05, 0.046, 0.05], 0.02, null, CORE_TOP);       // bust
+  ell(SKIN, [0.062, 1.235, 0.062], [0.05, 0.046, 0.05], 0.02, null, CORE_TOP);
+  ell(SKIN, [0.01, 1.08, 0.0], [0.11, 0.10, 0.082], 0.04, null, CORE_TOP);            // waist
+  ell(SKIN, [0.01, 1.08, 0.0], [0.11, 0.10, 0.082], 0.04, null, CORE_BOT);
   ell(SKIN, [0.008, 1.0, 0.008], [0.135, 0.09, 0.088], 0.04, null, CORE_BOT);         // lower abdomen
   ell(SKIN, [0, 0.925, 0], [0.165, 0.11, 0.10], 0.04, [0, 0, -0.06], CORE_BOT);        // pelvis
   ell(SKIN, [-0.075, 0.912, -0.072], [0.082, 0.082, 0.082], 0.03, null, CORE_BOT);    // glutes
   ell(SKIN, [0.075, 0.898, -0.072], [0.082, 0.082, 0.082], 0.03, null, CORE_BOT);
   // rectus abdominis, three pairs
   for (const y of [1.16, 1.10, 1.045]) {
-    ell(SKIN, [-0.028, y, 0.072], [0.028, 0.026, 0.018], 0.012);
-    ell(SKIN, [0.028, y, 0.072], [0.028, 0.026, 0.018], 0.012);
+    for (const core of [CORE_TOP, CORE_BOT]) {
+      ell(SKIN, [-0.028, y, 0.066], [0.028, 0.026, 0.015], 0.02, null, core);
+      ell(SKIN, [0.028, y, 0.066], [0.028, 0.026, 0.015], 0.02, null, core);
+    }
   }
-  ell(SKIN, [-0.085, 1.10, 0.045], [0.03, 0.06, 0.03], 0.03);                         // obliques
-  ell(SKIN, [0.085, 1.10, 0.045], [0.03, 0.06, 0.03], 0.03);
+  for (const core of [CORE_TOP, CORE_BOT]) {                                          // obliques
+    ell(SKIN, [-0.085, 1.10, 0.045], [0.03, 0.06, 0.03], 0.03, null, core);
+    ell(SKIN, [0.085, 1.10, 0.045], [0.03, 0.06, 0.03], 0.03, null, core);
+  }
 
-  // ---------- left arm: hand on hip ----------
-  cap(SKIN, [-0.185, 1.375, 0], [-0.30, 1.14, -0.03], 0.048, 0.037, 0.02);
-  ell(SKIN, [-0.235, 1.27, 0.012], [0.036, 0.062, 0.03], 0.02);                     // biceps
-  ell(SKIN, [-0.30, 1.14, -0.03], [0.036, 0.04, 0.036], 0.015);
-  cap(SKIN, [-0.30, 1.14, -0.03], [-0.215, 0.965, 0.045], 0.038, 0.028, 0.02);
-  ell(SKIN, [-0.20, 0.93, 0.045], [0.017, 0.045, 0.034], 0.012, [0, 0.35, 0.2]);
-  for (let i = 0; i < 4; i++) cap(SKIN, [-0.196, 0.92 - 0.013 * i, 0.065], [-0.14, 0.90 - 0.013 * i, 0.09], 0.0078, 0.0065, 0.006);
-  cap(SKIN, [-0.20, 0.95, 0.03], [-0.187, 0.965, -0.02], 0.0085, 0.007, 0.008);
+  // ---------- left arm: hand on hip, fingers forward and down along the hip ----------
+  cap(SKIN, [-0.166, 1.375, 0], [-0.32, 1.16, -0.04], 0.042, 0.034, 0.02);
+  ell(SKIN, [-0.25, 1.275, 0.005], [0.03, 0.055, 0.026], 0.02);                      // biceps
+  ell(SKIN, [-0.32, 1.16, -0.04], [0.034, 0.038, 0.034], 0.015);
+  cap(SKIN, [-0.32, 1.16, -0.04], [-0.19, 0.985, 0.04], 0.036, 0.027, 0.02);
+  const handStart = prims.length;
+  ell(SKIN, [-0.178, 0.94, 0.03], [0.014, 0.045, 0.03], 0.004, [0, 0.3, 0]);          // palm flat on the hip
+  [[-0.165, 0.035], [-0.152, 0.05], [-0.137, 0.063], [-0.118, 0.075]].forEach(([bx, bz], i) => {
+    cap(SKIN, [bx, 0.905 - 0.002 * i, bz], [bx + 0.02, 0.85 - 0.002 * i, bz + 0.02], 0.0078, 0.0064, 0.004);
+  });
+  cap(SKIN, [-0.178, 0.955, 0.01], [-0.168, 0.968, -0.04], 0.0085, 0.007, 0.008);   // thumb behind
+  const handPrims = prims.slice(handStart);
 
   // ---------- pole: planted beside her, leaning slightly out ----------
   const poleA = [0.40, 0.0, 0.06], poleB = [0.46, 4.29, 0.0];
@@ -278,10 +326,10 @@
 
   // ---------- right arm: raised, gripping the pole at shoulder height ----------
   const gripY = 1.45, gc = poleAt(gripY);
-  cap(SKIN, [0.185, 1.392, 0], [0.37, 1.17, 0.11], 0.048, 0.037, 0.02);
-  ell(SKIN, [0.27, 1.29, 0.075], [0.036, 0.062, 0.032], 0.02);                      // biceps (flexed)
+  cap(SKIN, [0.166, 1.392, 0], [0.37, 1.17, 0.11], 0.042, 0.034, 0.02);
+  ell(SKIN, [0.27, 1.29, 0.07], [0.03, 0.055, 0.028], 0.02);                        // biceps (flexed)
   ell(SKIN, [0.37, 1.17, 0.11], [0.036, 0.04, 0.036], 0.015);
-  cap(SKIN, [0.37, 1.17, 0.11], [0.385, 1.415, 0.045], 0.038, 0.028, 0.02);
+  cap(SKIN, [0.37, 1.17, 0.11], [0.385, 1.415, 0.045], 0.036, 0.027, 0.02);
   ell(SKIN, [gc[0] - poleR - 0.013, gripY + 0.002, gc[2]], [0.013, 0.045, 0.03], 0.012); // palm against the pole
   const R = poleR + 0.0078;
   const ring = (deg, y) => [gc[0] + R * Math.cos(deg * Math.PI / 180), y, gc[2] + R * Math.sin(deg * Math.PI / 180)];
@@ -308,88 +356,139 @@
   ell(SKIN, [0.105, 0.355, 0.03], [0.05, 0.10, 0.05], 0.03);
   ell(SKIN, [0.11, 0.09, 0.045], [0.034, 0.03, 0.034], 0.015);
 
-  // ---------- feet: ankle socks and low spikes ----------
+  // ---------- feet (the socks and spikes are offsets of the skin, see field) ----------
+  const feet = [];
   function foot(ax, az, yaw) {
     const c = Math.cos(yaw), s = Math.sin(yaw);
     const P = (dx, y, dz) => [ax + dx * c + dz * s, y, az - dx * s + dz * c];
-    cap(SKIN, P(0, 0.065, -0.03), P(0, 0.04, 0.16), 0.036, 0.026, 0.012);           // foot
-    cap(WHITE, P(0, 0.075, -0.012), P(0, 0.14, -0.008), 0.039, 0.036, 0.008);        // sock
-    ell(SHOE, P(0, 0.045, 0.13), [0.046, 0.036, 0.062], 0.01, [0, yaw, 0]);           // toe box
-    cap(SHOE, P(0, 0.06, -0.03), P(0, 0.048, 0.12), 0.042, 0.037, 0.01);             // upper
-    ell(SHOE, P(0, 0.065, -0.03), [0.042, 0.045, 0.042], 0.01, [0, yaw, 0]);          // heel counter
-    ell(WHITE, P(0, 0.016, 0.06), [0.05, 0.014, 0.14], 0.006, [0, yaw, 0]);           // sole
+    cap(SKIN, P(0, 0.065, -0.03), P(0, 0.04, 0.16), 0.036, 0.026, 0.012);          // foot
+    ell(SKIN, P(0, 0.038, 0.14), [0.04, 0.024, 0.045], 0.012, [0, yaw, 0]);         // toes
+    ell(WHITE, P(0, 0.014, 0.065), [0.05, 0.013, 0.14], 0.006, [0, yaw, 0]);        // sole
+    feet.push({ ax, az, c, s });
   }
   foot(-0.078, -0.02, 0.06);
   foot(0.11, 0.045, -0.22);
 
   // ---------- hair: slicked back into a high ponytail ----------
-  ell(HAIR, [0, 1.63, -0.015], [0.082, 0.113, 0.102], 0.02);
-  ell(HAIR, [0, 1.655, -0.095], [0.036, 0.036, 0.036], 0.02);                        // gathered base
+  ell(HAIR, [0, 1.655, -0.095], [0.03, 0.03, 0.03], 0.02);                           // gathered base
   chain(HAIR, [[0, 1.655, -0.10], [0.012, 1.56, -0.19], [0.0, 1.42, -0.215], [-0.012, 1.30, -0.19]], 0.03, 0.008, 0.02);
 
   // ---------- field evaluation ----------
   const gd = new Float32Array(NG);
-  let lastMat = 0;
   function smin(a, b, k) { const h = Math.max(k - Math.abs(a - b), 0) / k; return Math.min(a, b) - h * h * k * 0.25; }
   const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+
+  function distOf(p, x, y, z) {
+    if (p.t === 0) {
+      let px = x - p.c[0], py = y - p.c[1], pz = z - p.c[2];
+      if (p.m) { const m = p.m; const qx = m[0] * px + m[3] * py + m[6] * pz, qy = m[1] * px + m[4] * py + m[7] * pz, qz = m[2] * px + m[5] * py + m[8] * pz; px = qx; py = qy; pz = qz; }
+      const r = p.r;
+      const ax = px / r[0], ay = py / r[1], az = pz / r[2];
+      const k0 = Math.sqrt(ax * ax + ay * ay + az * az);
+      if (k0 < 1e-6) return -Math.min(r[0], r[1], r[2]);
+      const bx = ax / r[0], by = ay / r[1], bz = az / r[2];
+      return k0 * (k0 - 1) / Math.sqrt(bx * bx + by * by + bz * bz);
+    }
+    const a = p.a, b = p.b;
+    const pax = x - a[0], pay = y - a[1], paz = z - a[2];
+    const bax = b[0] - a[0], bay = b[1] - a[1], baz = b[2] - a[2];
+    let h = (pax * bax + pay * bay + paz * baz) / (bax * bax + bay * bay + baz * baz);
+    h = h < 0 ? 0 : h > 1 ? 1 : h;
+    const dx = pax - bax * h, dy = pay - bay * h, dz = paz - baz * h;
+    return Math.sqrt(dx * dx + dy * dy + dz * dz) - (p.ra + (p.rb - p.ra) * h);
+  }
+  const sstep = (e0, e1, v) => { const t = clamp01((v - e0) / (e1 - e0)); return t * t * (3 - 2 * t); };
 
   function field(x, y, z) {
     for (let g = 0; g < NG; g++) gd[g] = 1e9;
     for (let i = 0; i < prims.length; i++) {
       const p = prims[i], bb = p.bb;
       if (x < bb[0] || x > bb[1] || y < bb[2] || y > bb[3] || z < bb[4] || z > bb[5]) continue;
-      let d;
-      if (p.t === 0) {
-        let px = x - p.c[0], py = y - p.c[1], pz = z - p.c[2];
-        if (p.m) { const m = p.m; const qx = m[0] * px + m[3] * py + m[6] * pz, qy = m[1] * px + m[4] * py + m[7] * pz, qz = m[2] * px + m[5] * py + m[8] * pz; px = qx; py = qy; pz = qz; }
-        const r = p.r;
-        const ax = px / r[0], ay = py / r[1], az = pz / r[2];
-        const k0 = Math.sqrt(ax * ax + ay * ay + az * az);
-        if (k0 < 1e-6) d = -Math.min(r[0], r[1], r[2]);
-        else { const bx = ax / r[0], by = ay / r[1], bz = az / r[2]; d = k0 * (k0 - 1) / Math.sqrt(bx * bx + by * by + bz * bz); }
-      } else {
-        const a = p.a, b = p.b;
-        const pax = x - a[0], pay = y - a[1], paz = z - a[2];
-        const bax = b[0] - a[0], bay = b[1] - a[1], baz = b[2] - a[2];
-        let h = (pax * bax + pay * bay + paz * baz) / (bax * bax + bay * bay + baz * baz);
-        h = h < 0 ? 0 : h > 1 ? 1 : h;
-        const dx = pax - bax * h, dy = pay - bay * h, dz = paz - baz * h;
-        d = Math.sqrt(dx * dx + dy * dy + dz * dz) - (p.ra + (p.rb - p.ra) * h);
-      }
+      const d = distOf(p, x, y, z);
       gd[p.g] = smin(gd[p.g], d, p.k);
       if (p.core >= 0) gd[p.core] = smin(gd[p.core], d, p.k);
     }
-    for (let i = 0; i < subs.length; i++) {
-      const s = subs[i];
-      const dx = x - s.c[0], dy = y - s.c[1], dz = z - s.c[2];
-      gd[SKIN] = -smin(-gd[SKIN], Math.sqrt(dx * dx + dy * dy + dz * dz) - s.r, s.k);
-    }
-    // crop top: offset from the upper core, scoop neckline, hem under the bust, shoulder straps
+    for (let i = 0; i < subs.length; i++) gd[SKIN] = -smin(-gd[SKIN], distOf(subs[i], x, y, z), subs[i].k);
+    const skin = gd[SKIN];
+    // Every worn layer is an offset of the skin surface, cut by clip curves (negative inside the garment) and
+    // gated to the body part it belongs to. The offset fades to zero at each edge so fabric meets skin cleanly.
+    // --- crop top: scoop neckline, hem under the bust, armholes; flat straps over the shoulders ---
     const neck = 1.32 + 0.06 * clamp01((0.0 - z) / 0.06);
-    let top = Math.max(gd[CORE_TOP] - 0.006, y - neck, 1.135 - y) - 0.002;
+    const armL = 0.064 - capDist(x, y, z, -0.166, 1.375, 0, -0.32, 1.16, -0.04, 0);
+    const armR = 0.064 - capDist(x, y, z, 0.166, 1.392, 0, 0.37, 1.17, 0.11, 0);
+    const clipTop = Math.max(y - neck, 1.135 - y, armL, armR);
+    const gateT = Math.abs(skin - gd[CORE_TOP]) - 0.02;
+    let top = Math.max(skin - 0.007 * sstep(0, 0.03, -clipTop), clipTop, gateT);
+    let clipStrap = 1;
     if (y > 1.28 && y < 1.50) {
-      for (const s of [-1, 1]) {
-        // strap: front anchor → over the trapezius → back anchor
-        const ax = s * 0.075;
-        const d1 = capDist(x, y, z, ax, 1.32, 0.072, s * 0.085, 1.457, -0.012, 0.011);
-        const d2 = capDist(x, y, z, s * 0.085, 1.457, -0.012, ax, 1.335, -0.10, 0.011);
-        top = smin(top, Math.min(d1, d2), 0.01);
+      for (const sg of [-1, 1]) {
+        const ax = sg * 0.075;
+        const d1 = capDist(x, y, z, ax, 1.32, 0.072, sg * 0.082, 1.445, -0.012, 0.0105);
+        const d2 = capDist(x, y, z, sg * 0.082, 1.445, -0.012, ax, 1.335, -0.10, 0.0105);
+        clipStrap = Math.min(clipStrap, d1, d2);
       }
+      top = Math.min(top, Math.max(skin - 0.0035 * sstep(0, 0.006, -clipStrap), clipStrap));
     }
-    // briefs: offset from the lower core, waistband below the navel, high-cut leg line
+    const clipT = Math.min(clipTop, clipStrap);
+    // --- briefs: waistband below the navel, high-cut leg line, cut around the hand resting on the hip ---
     const hem = 0.85 + 0.06 * clamp01(Math.abs(x) / 0.17);
-    const briefs = Math.max(gd[CORE_BOT] - 0.005, y - 1.03, hem - y) - 0.002;
-    gd[KIT] = Math.min(top, briefs);
-    // hair: clip the cap away from the face at the hairline; fine strand ripple
-    if (gd[HAIR] < 0.1) {
-      const hairline = (z - 0.052 - 2.2 * Math.max(0, y - 1.655)) * 0.45;
-      if (y > 1.50) gd[HAIR] = Math.max(gd[HAIR], hairline);
-      gd[HAIR] += 0.0022 * Math.sin(y * 140 + Math.atan2(x, z + 0.06) * 9) + 0.0012 * Math.sin(x * 260 + y * 40);
+    let clipB = Math.max(y - 1.03, hem - y);
+    if (x < -0.08 && y > 0.8 && y < 1.0) {
+      let hd = 1e9;
+      for (const hp of handPrims) hd = Math.min(hd, distOf(hp, x, y, z));
+      clipB = Math.max(clipB, 0.011 - hd);
     }
+    const briefs = Math.max(skin - 0.006 * sstep(0, 0.025, -clipB), clipB, Math.abs(skin - gd[CORE_BOT]) - 0.02);
+    gd[KIT] = Math.min(top, briefs);
+    // --- shoes and socks, in each foot's own frame; the lower band of the shoe is the white sole ---
+    let clipS = 1, clipK = 1, clipSole = 1, shoe = 1e9, sock = 1e9;
+    if (y < 0.2) for (const f of feet) {
+      const dx = (x - f.ax) * f.c - (z - f.az) * f.s, dz = (x - f.ax) * f.s + (z - f.az) * f.c;
+      const near = Math.sqrt(dx * dx) + Math.max(0, -dz - 0.06, dz - 0.2); if (near > 0.09) continue;
+      const along = clamp01((dz + 0.02) / 0.16);
+      const collar = 0.082 - 0.035 * along;                                  // shoe opening, lower toward the toes
+      const cs = y - collar;
+      shoe = Math.min(shoe, Math.max(skin - 0.0065 * sstep(0, 0.02, -cs), cs));
+      const ck = Math.max(y - 0.15, collar - 0.008 - y);
+      sock = Math.min(sock, Math.max(skin - 0.003 * sstep(0, 0.012, -ck), ck));
+      clipS = cs; clipK = ck; clipSole = y - (0.038 - 0.02 * along);
+    }
+    gd[SHOE] = shoe;
+    gd[WHITE] = Math.min(gd[WHITE], sock);
+    soleLine = clipSole;
+    // --- hair: slicked back over the skull, thicker toward the crown, hairline higher at the temples,
+    //     down to the nape behind, cut clear of the ears ---
+    let clipH = 1;
+    if (y > 1.45) {
+      const front = clamp01((z + 0.01) / 0.05), back = clamp01((-0.05 - z) / 0.05);
+      const yh = 1.585 + (1.652 + 0.02 * Math.pow(x / 0.07, 2) - 1.585) * front - 0.04 * back;
+      const dh = Math.sqrt(x * x + (y - 1.61) * (y - 1.61) + z * z);
+      const earL = Math.sqrt((x + 0.075) ** 2 + (y - 1.605) ** 2 + (z + 0.008) ** 2);
+      const earR = Math.sqrt((x - 0.075) ** 2 + (y - 1.605) ** 2 + (z + 0.008) ** 2);
+      clipH = Math.max((yh - y) * 0.8, dh - 0.145, 0.034 - earL, 0.034 - earR);
+      const thick = 0.006 + 0.005 * clamp01((0.02 - z) / 0.1);
+      const ripple = 0.0018 * Math.sin(y * 140 + Math.atan2(x, z + 0.06) * 9) + 0.0008 * Math.sin(x * 260 + y * 40);
+      const fade = sstep(0, 0.02, -clipH);
+      gd[HAIR] = Math.min(gd[HAIR], Math.max(skin - (thick - ripple) * fade, clipH));
+    }
+    lastClip[0] = clipT; lastClip[1] = clipB; lastClip[2] = clipH; lastClip[3] = clipS; lastClip[4] = clipK; lastClip[5] = clipSole;
+    let best = gd[0];
+    for (let g = 1; g <= WHITE; g++) if (gd[g] < best) best = gd[g];
+    return best;
+  }
+  const lastClip = new Float32Array(6); let soleLine = 1;
+  // Which surface a point on the zero-set belongs to. Layers that sit on the skin take priority within a
+  // small band so their boundaries follow the clip curves instead of aliasing against the grid.
+  function materialAt(x, y, z) {
+    field(x, y, z);
+    if (Math.abs(gd[LIPS]) < 0.0012) return LIPS;
+    if (Math.abs(gd[KIT]) < 0.0012) return KIT;
+    if (Math.abs(gd[SHOE]) < 0.0012) return soleLine < 0 ? WHITE : SHOE;
+    if (Math.abs(gd[WHITE]) < 0.0012) return WHITE;
+    if (Math.abs(gd[HAIR]) < 0.0012) return HAIR;
     let m = 0, best = gd[0];
     for (let g = 1; g <= WHITE; g++) if (gd[g] < best) { best = gd[g]; m = g; }
-    lastMat = m;
-    return best;
+    return m;
   }
   function capDist(x, y, z, ax, ay, az, bx, by, bz, r) {
     const pax = x - ax, pay = y - ay, paz = z - az, bax = bx - ax, bay = by - ay, baz = bz - az;
@@ -405,9 +504,9 @@
     for (const [a, b, h] of segments) { let v = out[out.length - 1]; while (v + h <= b + 1e-9) { v += h; out.push(v); } }
     return Float32Array.from(out);
   }
-  const xs = axis([[-0.37, -0.15, 0.0065], [-0.15, 0.15, 0.005], [0.15, 0.36, 0.0065], [0.36, 0.48, 0.005]]);
-  const ys = axis([[-0.02, 0.16, 0.006], [0.16, 0.72, 0.009], [0.72, 0.99, 0.006], [0.99, 1.40, 0.009], [1.40, 1.80, 0.0045]]);
-  const zs = axis([[-0.25, 0.28, 0.005]]);
+  const xs = axis([[-0.37, -0.15, 0.0065], [-0.15, -0.10, 0.005], [-0.10, 0.10, 0.004], [0.10, 0.15, 0.005], [0.15, 0.36, 0.0065], [0.36, 0.48, 0.005]]);
+  const ys = axis([[-0.02, 0.16, 0.006], [0.16, 0.72, 0.009], [0.72, 0.99, 0.006], [0.99, 1.40, 0.009], [1.40, 1.49, 0.0045], [1.49, 1.72, 0.0035], [1.72, 1.80, 0.0045]]);
+  const zs = axis([[-0.25, 0.03, 0.005], [0.03, 0.13, 0.004], [0.13, 0.28, 0.005]]);
   const nx = xs.length, ny = ys.length, nz = zs.length;
   const F = new Float32Array(nx * ny * nz);
 
@@ -475,7 +574,7 @@
   function buildFigure() {
     const { pos, idx } = surfaceNets();
     const n = pos.length / 3;
-    const nrm = new Float32Array(n * 3), col = new Float32Array(n * 3), mat = new Uint8Array(n);
+    const nrm = new Float32Array(n * 3), col = new Float32Array(n * 3);
     const EPS = 0.0012;
     for (let v = 0; v < n; v++) {
       let x = pos[v * 3], y = pos[v * 3 + 1], z = pos[v * 3 + 2];
@@ -491,7 +590,28 @@
         s = Math.max(-lim, Math.min(lim, s));
         x -= gx * s; y -= gy * s; z -= gz * s;
       }
-      field(x, y, z); mat[v] = lastMat;
+      // snap vertices that lie within half a cell of a clothing edge or the hairline onto that curve, so the
+      // material boundary becomes a clean polyline instead of a staircase
+      field(x, y, z);
+      const gates = [gd[CORE_TOP] < 0.03, gd[CORE_BOT] < 0.03, y > 1.45, y < 0.2, y < 0.2, y < 0.2 && Math.abs(gd[SHOE]) < 0.002];
+      for (let c = 0; c < 6; c++) {
+        if (!gates[c] || Math.abs(lastClip[c]) > 0.0055) continue;
+        for (let it = 0; it < 3; it++) {
+          field(x, y, z); const cv = lastClip[c];
+          field(x + EPS, y, z); const cx = (lastClip[c] - cv) / EPS;
+          field(x, y + EPS, z); const cy = (lastClip[c] - cv) / EPS;
+          field(x, y, z + EPS); const cz = (lastClip[c] - cv) / EPS;
+          const c2 = cx * cx + cy * cy + cz * cz; if (c2 < 1e-6) break;
+          x -= cx * cv / c2; y -= cy * cv / c2; z -= cz * cv / c2;
+          const f = field(x, y, z);
+          gx = (field(x + EPS, y, z) - field(x - EPS, y, z)) / (2 * EPS);
+          gy = (field(x, y + EPS, z) - field(x, y - EPS, z)) / (2 * EPS);
+          gz = (field(x, y, z + EPS) - field(x, y, z - EPS)) / (2 * EPS);
+          const g2 = gx * gx + gy * gy + gz * gz || 1;
+          x -= gx * f / g2; y -= gy * f / g2; z -= gz * f / g2;
+        }
+        break;
+      }
       const gl = Math.hypot(gx, gy, gz) || 1;
       pos[v * 3] = x; pos[v * 3 + 1] = y; pos[v * 3 + 2] = z;
       nrm[v * 3] = gx / gl; nrm[v * 3 + 1] = gy / gl; nrm[v * 3 + 2] = gz / gl;
@@ -506,9 +626,13 @@
     }
     const buckets = bodyMats.map(() => []);
     for (let t = 0; t < idx.length; t += 3) {
-      const a = mat[idx[t]], b = mat[idx[t + 1]], c = mat[idx[t + 2]];
-      const m = (a === b || a === c) ? a : (b === c ? b : a);
-      buckets[m].push(idx[t], idx[t + 1], idx[t + 2]);
+      const a = idx[t] * 3, b = idx[t + 1] * 3, c = idx[t + 2] * 3;
+      let cx = (pos[a] + pos[b] + pos[c]) / 3, cy = (pos[a + 1] + pos[b + 1] + pos[c + 1]) / 3, cz = (pos[a + 2] + pos[b + 2] + pos[c + 2]) / 3;
+      const nx_ = nrm[a] + nrm[b] + nrm[c], ny_ = nrm[a + 1] + nrm[b + 1] + nrm[c + 1], nz_ = nrm[a + 2] + nrm[b + 2] + nrm[c + 2];
+      const nl = Math.hypot(nx_, ny_, nz_) || 1;
+      const f = field(cx, cy, cz);                       // pull the centroid onto the surface along the normal
+      cx -= nx_ / nl * f; cy -= ny_ / nl * f; cz -= nz_ / nl * f;
+      buckets[materialAt(cx, cy, cz)].push(idx[t], idx[t + 1], idx[t + 2]);
     }
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
@@ -521,26 +645,43 @@
     mesh.castShadow = true; mesh.receiveShadow = true;
     figure.add(mesh);
 
-    // eyes and brows
+    // project a point onto the skin surface and push it out along the normal
+    function onSkin(px, py, pz, lift) {
+      for (let it = 0; it < 4; it++) {
+        const f = field(px, py, pz);
+        const gx = (field(px + EPS, py, pz) - field(px - EPS, py, pz)) / (2 * EPS);
+        const gy = (field(px, py + EPS, pz) - field(px, py - EPS, pz)) / (2 * EPS);
+        const gz = (field(px, py, pz + EPS) - field(px, py, pz - EPS)) / (2 * EPS);
+        const g2 = gx * gx + gy * gy + gz * gz || 1;
+        px -= gx * f / g2; py -= gy * f / g2; pz -= gz * f / g2;
+        if (it === 3) { const gl = Math.sqrt(g2); px += gx / gl * lift; py += gy / gl * lift; pz += gz / gl * lift; }
+      }
+      return new THREE.Vector3(px, py, pz);
+    }
+    // eyes: sclera, iris, pupil; brows and lash lines laid onto the skin
     [-1, 1].forEach(s => {
       const eye = new THREE.Group();
-      eye.position.set(s * 0.031, 1.612, 0.0705);
+      eye.position.set(s * 0.031, 1.612, 0.0735);
       eye.add(new THREE.Mesh(new THREE.SphereGeometry(0.0125, 32, 24), scleraMat));
-      const iris = new THREE.Mesh(new THREE.SphereGeometry(0.0058, 24, 16), irisMat);
-      iris.position.z = 0.0108; iris.scale.z = 0.35; eye.add(iris);
-      const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.0026, 16, 12), pupilMat);
-      pupil.position.z = 0.0124; pupil.scale.z = 0.3; eye.add(pupil);
-      eye.rotation.y = s * -0.06;
+      const iris = new THREE.Mesh(new THREE.SphereGeometry(0.0066, 24, 16), irisMat);
+      iris.position.z = 0.0106; iris.scale.z = 0.35; eye.add(iris);
+      const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.0027, 16, 12), pupilMat);
+      pupil.position.z = 0.0123; pupil.scale.z = 0.3; eye.add(pupil);
+      eye.rotation.y = s * -0.05;
       figure.add(eye);
-      const brow = new THREE.QuadraticBezierCurve3(
-        new THREE.Vector3(s * 0.013, 1.641, 0.088),
-        new THREE.Vector3(s * 0.036, 1.652, 0.085),
-        new THREE.Vector3(s * 0.058, 1.640, 0.070));
-      figure.add(new THREE.Mesh(new THREE.TubeGeometry(brow, 16, 0.0028, 8, false), hairMat));
+      const brow = new THREE.CatmullRomCurve3([
+        onSkin(s * 0.012, 1.633, 0.09, 0.0012), onSkin(s * 0.028, 1.638, 0.088, 0.0012),
+        onSkin(s * 0.044, 1.639, 0.082, 0.0012), onSkin(s * 0.058, 1.633, 0.07, 0.0012)]);
+      const bm = new THREE.Mesh(new THREE.TubeGeometry(brow, 24, 0.0014, 8, false), hairMat);
+      bm.scale.set(1, 1, 1); figure.add(bm);
+      const lash = new THREE.CatmullRomCurve3([
+        onSkin(s * 0.016, 1.6135, 0.095, 0.0004), onSkin(s * 0.026, 1.6195, 0.096, 0.0004),
+        onSkin(s * 0.037, 1.6195, 0.094, 0.0004), onSkin(s * 0.046, 1.614, 0.088, 0.0004)]);
+      figure.add(new THREE.Mesh(new THREE.TubeGeometry(lash, 20, 0.0009, 6, false), pupilMat));
     });
     // hair elastic at the base of the ponytail
-    const tie = new THREE.Mesh(new THREE.TorusGeometry(0.031, 0.0045, 10, 40), tapeMat);
-    tie.position.set(0.004, 1.628, -0.125);
+    const tie = new THREE.Mesh(new THREE.TorusGeometry(0.0255, 0.005, 10, 40), tapeMat);
+    tie.position.set(0.0084, 1.5885, -0.163);
     tie.lookAt(new THREE.Vector3(0.012, 1.56, -0.19));
     figure.add(tie);
     statusEl.hidden = true;
@@ -579,6 +720,7 @@
   const target = new THREE.Vector3(0.05, 0.92, 0);
   let theta = 0.45, phi = 1.3, radius = 4.6;
   let spinning = true;
+  window.__setView = (th, ph, r, ty) => { spinning = false; figure.rotation.y = 0; theta = th; phi = ph; radius = r; target.y = ty; }; // used by the screenshot harness
   function placeCamera() {
     phi = Math.min(Math.max(phi, 0.3), 1.56);
     radius = Math.min(Math.max(radius, 0.6), 14);
